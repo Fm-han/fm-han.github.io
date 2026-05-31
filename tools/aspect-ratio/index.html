@@ -1,0 +1,127 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>纵横比计算器 - 屏幕比例换算</title>
+  <meta name="description" content="免费在线纵横比计算器，计算16:9、4:3、21:9等常见屏幕比例的尺寸换算和等比例缩放。">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://fm-han.github.io/aspect-ratio/">
+  <style>
+                /* 顶部横幅广告 - 透明样式 */ .ad-banner-top { border-bottom: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; } .ad-banner-bottom { border-top: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; margin-top: 40px; } .ad-container { max-width: 728px; margin: 0 auto; min-height: 38px; display: flex; align-items: center; justify-content: center; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; max-width: 700px; margin: 0 auto; padding: 20px; color: #333; line-height: 1.6; background: #fafafa; }
+    h1 { text-align: center; font-size: 1.8rem; color: #1a1a1a; }
+    h1 small { display: block; font-size: 0.85rem; color: #666; margin-top: 4px; font-weight: normal; }
+    .card { margin: 20px 0; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px; background: #fff; }
+    .input-row { display: flex; gap: 16px; margin-bottom: 16px; }
+    .input-group { flex: 1; }
+    .input-group label { display: block; font-weight: 600; margin-bottom: 6px; }
+    .input-group input, .input-group select { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 1rem; box-sizing: border-box; }
+    .ratio-presets { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+    .ratio-btn { padding: 8px 16px; border: 1px solid #ccc; border-radius: 20px; background: #fff; cursor: pointer; }
+    .ratio-btn:hover { background: #f0f0f0; }
+    .ratio-btn.active { background: #007bff; color: #fff; border-color: #007bff; }
+    .result-display { background: linear-gradient(135deg, #007bff, #0056b3); border-radius: 12px; padding: 24px; color: #fff; text-align: center; margin: 20px 0; }
+    .result-display .dimensions { font-size: 2rem; font-weight: 700; }
+    .result-display .ratio { font-size: 1rem; opacity: 0.9; margin-top: 8px; }
+    .result-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+    .result-item { background: #f5f5f5; padding: 16px; border-radius: 8px; text-align: center; }
+    .result-item .label { font-size: 0.85rem; color: #666; }
+    .result-item .value { font-size: 1.5rem; font-weight: 700; color: #007bff; }
+    .preview-box { background: #333; border-radius: 8px; margin: 16px 0; overflow: hidden; position: relative; height: 150px; }
+    .preview-box .aspect-preview { position: absolute; background: #007bff; }
+    button { padding: 12px 28px; border: none; border-radius: 6px; cursor: pointer; font-size: 1rem; }
+    .btn-primary { background: #007bff; color: #fff; }
+    button:hover { opacity: 0.9; }
+    .buttons { display: flex; gap: 12px; justify-content: center; }
+    .footer { text-align: center; margin: 24px 0; padding: 12px; font-size: 0.85rem; color: #28a745; font-weight: 500; }
+  </style>
+</head>
+<body>
+    <div class="ad-banner-top"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+  <h1>纵横比计算器 <small>16:9 · 4:3 · 21:9 · 等比例缩放</small></h1>
+
+  <div class="card">
+    <h3>选择常用比例</h3>
+    <div class="ratio-presets">
+      <button class="ratio-btn" onclick="setRatio(16, 9, this)">16:9</button>
+      <button class="ratio-btn" onclick="setRatio(4, 3, this)">4:3</button>
+      <button class="ratio-btn" onclick="setRatio(21, 9, this)">21:9</button>
+      <button class="ratio-btn" onclick="setRatio(1, 1, this)">1:1</button>
+      <button class="ratio-btn" onclick="setRatio(9, 16, this)">9:16</button>
+      <button class="ratio-btn" onclick="setRatio(3, 2, this)">3:2</button>
+      <button class="ratio-btn" onclick="setRatio(2, 3, this)">2:3</button>
+    </div>
+    <div class="input-row">
+      <div class="input-group"><label>宽度</label><input type="number" id="width" placeholder="宽度" value="1920"></div>
+      <div class="input-group"><label>高度</label><input type="number" id="height" placeholder="高度" value="1080"></div>
+    </div>
+    <div class="buttons">
+      <button class="btn-primary" onclick="calculate()">计算</button>
+    </div>
+  </div>
+
+  <div class="card" id="resultCard" style="display:none;">
+    <div class="result-display">
+      <div class="dimensions" id="dimensions">1920 x 1080</div>
+      <div class="ratio" id="ratioDisplay">16:9</div>
+    </div>
+    <div class="result-grid">
+      <div class="result-item"><div class="label">比例值</div><div class="value" id="ratioValue">1.78</div></div>
+      <div class="result-item"><div class="label">像素数</div><div class="value" id="pixels">207万</div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>常见屏幕分辨率</h3>
+    <table style="width:100%;border-collapse:collapse;">
+      <tr style="background:#f0f0f0;"><th style="padding:8px;border:1px solid #ddd;">分辨率</th><th style="padding:8px;border:1px solid #ddd;">比例</th><th style="padding:8px;border:1px solid #ddd;">用途</th></tr>
+      <tr><td style="padding:8px;border:1px solid #ddd;">1920x1080</td><td style="padding:8px;border:1px solid #ddd;">16:9</td><td style="padding:8px;border:1px solid #ddd;">全高清 FHD</td></tr>
+      <tr><td style="padding:8px;border:1px solid #ddd;">2560x1440</td><td style="padding:8px;border:1px solid #ddd;">16:9</td><td style="padding:8px;border:1px solid #ddd;">2K QHD</td></tr>
+      <tr><td style="padding:8px;border:1px solid #ddd;">3840x2160</td><td style="padding:8px;border:1px solid #ddd;">16:9</td><td style="padding:8px;border:1px solid #ddd;">4K UHD</td></tr>
+      <tr><td style="padding:8px;border:1px solid #ddd;">3440x1440</td><td style="padding:8px;border:1px solid #ddd;">21:9</td><td style="padding:8px;border:1px solid #ddd;">超宽显示器</td></tr>
+      <tr><td style="padding:8px;border:1px solid #ddd;">1080x1920</td><td style="padding:8px;border:1px solid #ddd;">9:16</td><td style="padding:8px;border:1px solid #ddd;">手机竖屏</td></tr>
+    </table>
+  </div>
+
+  <div class="footer">100% 免费 · 数据不上传服务器 · 仅浏览器本地处理</div>
+
+  <script>
+    let currentRatio = { w: 16, h: 9 };
+    function setRatio(w, h, btn) {
+      currentRatio = { w, h };
+      document.querySelectorAll('.ratio-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const gcd = (a, b) => b === 0 ? a : gcd(b, a % b);
+      const g = gcd(w, h);
+      document.getElementById('width').value = w / g * 100;
+      document.getElementById('height').value = h / g * 100;
+      calculate();
+    }
+    function calculate() {
+      const w = parseInt(document.getElementById('width').value) || 0;
+      const h = parseInt(document.getElementById('height').value) || 0;
+      if (w <= 0 || h <= 0) return;
+      const gcd = (a, b) => b === 0 ? a : gcd(b, a % b);
+      const g = gcd(w, h);
+      const ratioW = w / g;
+      const ratioH = h / g;
+      const ratioValue = (w / h).toFixed(2);
+      const pixels = ((w * h) / 10000).toFixed(0) + '万';
+      document.getElementById('resultCard').style.display = 'block';
+      document.getElementById('dimensions').textContent = w + ' x ' + h;
+      document.getElementById('ratioDisplay').textContent = ratioW + ':' + ratioH;
+      document.getElementById('ratioValue').textContent = ratioValue;
+      document.getElementById('pixels').textContent = pixels;
+    }
+    document.getElementById('width').addEventListener('input', () => {
+      document.querySelectorAll('.ratio-btn').forEach(b => b.classList.remove('active'));
+    });
+    document.getElementById('height').addEventListener('input', () => {
+      document.querySelectorAll('.ratio-btn').forEach(b => b.classList.remove('active'));
+    });
+    calculate();
+  </script>
+    <div class="ad-banner-bottom"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+</body>
+</html>

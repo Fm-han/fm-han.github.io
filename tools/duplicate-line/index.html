@@ -1,0 +1,153 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>重复行检测 - 文本重复行标记删除</title>
+  <meta name="description" content="免费在线重复行检测工具，检测并标记重复行，支持删除重复行、保留首次出现或保留末次出现。">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://fm-han.github.io/duplicate-line/">
+  <style>
+                /* 顶部横幅广告 - 透明样式 */ .ad-banner-top { border-bottom: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; } .ad-banner-bottom { border-top: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; margin-top: 40px; } .ad-container { max-width: 728px; margin: 0 auto; min-height: 38px; display: flex; align-items: center; justify-content: center; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; color: #333; line-height: 1.6; background: #fafafa; }
+    h1 { text-align: center; font-size: 1.8rem; color: #1a1a1a; }
+    h1 small { display: block; font-size: 0.85rem; color: #666; margin-top: 4px; font-weight: normal; }
+    .card { margin: 20px 0; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px; background: #fff; }
+    .editor-row { display: flex; gap: 16px; height: 300px; }
+    .editor-panel { flex: 1; display: flex; flex-direction: column; }
+    .editor-panel label { font-weight: 600; margin-bottom: 8px; }
+    textarea { flex: 1; width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; font-family: monospace; font-size: 0.9rem; resize: none; box-sizing: border-box; }
+    .options { display: flex; gap: 16px; margin-bottom: 16px; flex-wrap: wrap; }
+    .option { display: flex; align-items: center; gap: 6px; }
+    button { padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-size: 1rem; }
+    .btn-primary { background: #007bff; color: #fff; }
+    .btn-success { background: #28a745; color: #fff; }
+    .btn-warning { background: #ffc107; color: #333; }
+    .btn-danger { background: #dc3545; color: #fff; }
+    button:hover { opacity: 0.9; }
+    .buttons { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+    .stats { display: flex; gap: 16px; justify-content: center; margin: 16px 0; }
+    .stat-item { padding: 12px 20px; background: #f5f5f5; border-radius: 8px; text-align: center; }
+    .stat-item .num { font-size: 1.5rem; font-weight: 700; color: #007bff; }
+    .stat-item .label { font-size: 0.85rem; color: #666; }
+    .stat-item.danger .num { color: #dc3545; }
+    .line-num { color: #999; font-size: 0.8rem; margin-right: 8px; }
+    .duplicate { background: #fff3cd !important; }
+    .footer { text-align: center; margin: 24px 0; padding: 12px; font-size: 0.85rem; color: #28a745; font-weight: 500; }
+  </style>
+</head>
+<body>
+    <div class="ad-banner-top"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+  <h1>重复行检测 <small>检测重复 · 标记高亮 · 一键去重</small></h1>
+
+  <div class="card">
+    <div class="options">
+      <div class="option">
+        <input type="checkbox" id="caseSensitive">
+        <label for="caseSensitive">区分大小写</label>
+      </div>
+      <div class="option">
+        <label>保留策略：</label>
+        <select id="keepMode">
+          <option value="first">保留首次出现</option>
+          <option value="last">保留末次出现</option>
+        </select>
+      </div>
+    </div>
+    <div class="editor-row">
+      <div class="editor-panel">
+        <label>输入文本（每行一条）</label>
+        <textarea id="inputText" placeholder="输入或粘贴文本，每行一条...">苹果
+香蕉
+橙子
+苹果
+葡萄
+香蕉
+西瓜
+草莓
+葡萄
+芒果</textarea>
+      </div>
+      <div class="editor-panel">
+        <label>处理结果</label>
+        <textarea id="outputText" readonly placeholder="处理后的结果..."></textarea>
+      </div>
+    </div>
+    <div class="buttons" style="margin-top:16px;">
+      <button class="btn-primary" onclick="findDuplicates()">检测重复</button>
+      <button class="btn-success" onclick="removeDuplicates()">删除重复</button>
+      <button class="btn-warning" onclick="highlightDuplicates()">高亮重复</button>
+      <button class="btn-danger" onclick="clearAll()">清空</button>
+    </div>
+  </div>
+
+  <div class="card" id="statsCard" style="display:none;">
+    <div class="stats">
+      <div class="stat-item"><div class="num" id="totalLines">0</div><div class="label">总行数</div></div>
+      <div class="stat-item"><div class="num" id="uniqueLines">0</div><div class="label">唯一行数</div></div>
+      <div class="stat-item danger"><div class="num" id="dupLines">0</div><div class="label">重复行数</div></div>
+    </div>
+  </div>
+
+  <div class="footer">100% 免费 · 数据不上传服务器 · 仅浏览器本地处理</div>
+
+  <script>
+    let processedLines = [];
+    function findDuplicates() {
+      const text = document.getElementById('inputText').value;
+      const lines = text.split('\n');
+      const seen = new Map();
+      const dupIndices = new Set();
+      lines.forEach((line, i) => {
+        const key = document.getElementById('caseSensitive').checked ? line : line.toLowerCase();
+        if (seen.has(key)) {
+          dupIndices.add(i);
+          dupIndices.add(seen.get(key));
+        } else {
+          seen.set(key, i);
+        }
+      });
+      processedLines = lines.map((line, i) => ({ text: line, isDup: dupIndices.has(i) }));
+      document.getElementById('statsCard').style.display = 'block';
+      document.getElementById('totalLines').textContent = lines.length;
+      document.getElementById('uniqueLines').textContent = lines.length - dupIndices.size;
+      document.getElementById('dupLines').textContent = dupIndices.size;
+      const output = document.getElementById('outputText');
+      output.value = lines.map((line, i) => (dupIndices.has(i) ? '[重复] ' : '') + line).join('\n');
+    }
+    function removeDuplicates() {
+      const text = document.getElementById('inputText').value;
+      const lines = text.split('\n');
+      const seen = new Set();
+      const keepMode = document.getElementById('keepMode').value;
+      let result;
+      if (keepMode === 'first') {
+        result = [];
+        lines.forEach(line => {
+          const key = document.getElementById('caseSensitive').checked ? line : line.toLowerCase();
+          if (!seen.has(key)) { seen.add(key); result.push(line); }
+        });
+      } else {
+        const reversed = [...lines].reverse();
+        const seen2 = new Set();
+        result = reversed.filter(line => {
+          const key = document.getElementById('caseSensitive').checked ? line : line.toLowerCase();
+          if (!seen2.has(key)) { seen2.add(key); return true; }
+          return false;
+        }).reverse();
+      }
+      document.getElementById('outputText').value = result.join('\n');
+      alert(`已删除重复行，保留 ${result.length} 行`);
+    }
+    function highlightDuplicates() {
+      findDuplicates();
+    }
+    function clearAll() {
+      document.getElementById('inputText').value = '';
+      document.getElementById('outputText').value = '';
+      document.getElementById('statsCard').style.display = 'none';
+    }
+  </script>
+    <div class="ad-banner-bottom"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+</body>
+</html>

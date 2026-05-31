@@ -1,0 +1,99 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>二维码生成器 - 在线QR Code创建</title>
+  <meta name="description" content="免费在线二维码生成器，输入文字或链接生成可扫描的二维码图片，支持自定义尺寸和纠错级别。">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://fm-han.github.io/qr-reader/">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <style>
+                /* 顶部横幅广告 - 透明样式 */ .ad-banner-top { border-bottom: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; } .ad-banner-bottom { border-top: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; margin-top: 40px; } .ad-container { max-width: 728px; margin: 0 auto; min-height: 38px; display: flex; align-items: center; justify-content: center; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; max-width: 700px; margin: 0 auto; padding: 20px; color: #333; line-height: 1.6; background: #fafafa; }
+    h1 { text-align: center; font-size: 1.8rem; color: #1a1a1a; }
+    h1 small { display: block; font-size: 0.85rem; color: #666; margin-top: 4px; font-weight: normal; }
+    .card { margin: 20px 0; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px; background: #fff; }
+    .input-group { margin-bottom: 16px; }
+    .input-group label { display: block; font-weight: 600; margin-bottom: 6px; }
+    .input-group textarea, .input-group input, .input-group select { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 1rem; box-sizing: border-box; }
+    .input-group textarea { min-height: 80px; resize: vertical; }
+    .qr-display { text-align: center; padding: 24px; background: #fff; border: 1px solid #eee; border-radius: 12px; margin: 20px 0; min-height: 250px; display: flex; align-items: center; justify-content: center; }
+    .qr-display #qrcode { display: inline-block; }
+    button { padding: 12px 28px; border: none; border-radius: 6px; cursor: pointer; font-size: 1rem; }
+    .btn-primary { background: #007bff; color: #fff; }
+    .btn-success { background: #28a745; color: #fff; }
+    button:hover { opacity: 0.9; }
+    .buttons { display: flex; gap: 12px; justify-content: center; }
+    .footer { text-align: center; margin: 24px 0; padding: 12px; font-size: 0.85rem; color: #28a745; font-weight: 500; }
+  </style>
+</head>
+<body>
+    <div class="ad-banner-top"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+  <h1>二维码生成器 <small>文字链接 · 扫描二维码 · 自定义尺寸</small></h1>
+
+  <div class="card">
+    <div class="input-group">
+      <label>输入内容（文字或网址）</label>
+      <textarea id="content" placeholder="输入要生成二维码的内容，如网址、文本、电话号码等...">https://fm-han.github.io</textarea>
+    </div>
+    <div class="input-group">
+      <label>二维码尺寸</label>
+      <select id="size">
+        <option value="150">小 (150x150)</option>
+        <option value="200" selected>中 (200x200)</option>
+        <option value="300">大 (300x300)</option>
+        <option value="400">特大 (400x400)</option>
+      </select>
+    </div>
+    <div class="input-group">
+      <label>纠错级别</label>
+      <select id="correctLevel">
+        <option value="L">L - 低（7%）</option>
+        <option value="M">M - 中（15%）</option>
+        <option value="Q">Q - 高（25%）</option>
+        <option value="H">H - 最高（30%）</option>
+      </select>
+    </div>
+    <div class="buttons">
+      <button class="btn-primary" onclick="generateQR()">生成二维码</button>
+      <button class="btn-success" onclick="downloadQR()">下载图片</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="qr-display" id="qrcode"></div>
+  </div>
+
+  <div class="footer">100% 免费 · 数据不上传服务器 · 仅浏览器本地处理</div>
+
+  <script>
+    let qrInstance = null;
+    function generateQR() {
+      const content = document.getElementById('content').value.trim();
+      if (!content) { alert('请输入内容'); return; }
+      const size = parseInt(document.getElementById('size').value);
+      const correctLevel = document.getElementById('correctLevel').value;
+      document.getElementById('qrcode').innerHTML = '';
+      qrInstance = new QRCode(document.getElementById('qrcode'), {
+        text: content,
+        width: size,
+        height: size,
+        colorDark: '#000000',
+        colorLight: '#ffffff',
+        correctLevel: QRCode.CorrectLevel[correctLevel]
+      });
+    }
+    function downloadQR() {
+      const img = document.querySelector('#qrcode img');
+      if (!img) { alert('请先生成二维码'); return; }
+      const a = document.createElement('a');
+      a.href = img.src;
+      a.download = 'qrcode.png';
+      a.click();
+    }
+    generateQR();
+  </script>
+    <div class="ad-banner-bottom"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+</body>
+</html>

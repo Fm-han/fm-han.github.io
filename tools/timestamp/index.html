@@ -1,0 +1,127 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>时间戳转换工具 - Unix时间戳与日期互转</title>
+  <meta name="description" content="免费在线时间戳转换工具，Unix时间戳与日期格式互相转换，支持毫秒/秒级，浏览器本地处理。">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://fm-han.github.io/timestamp/">
+  <style>
+                /* 顶部横幅广告 - 透明样式 */ .ad-banner-top { border-bottom: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; } .ad-banner-bottom { border-top: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; margin-top: 40px; } .ad-container { max-width: 728px; margin: 0 auto; min-height: 38px; display: flex; align-items: center; justify-content: center; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; max-width: 700px; margin: 0 auto; padding: 20px; color: #333; line-height: 1.6; background: #fafafa; }
+    h1 { text-align: center; font-size: 1.8rem; color: #1a1a1a; }
+    h1 small { display: block; font-size: 0.85rem; color: #666; margin-top: 4px; font-weight: normal; }
+    .section { margin: 20px 0; padding: 16px; border: 1px solid #e0e0e0; border-radius: 8px; background: #fff; }
+    .section label { display: block; font-weight: 600; margin-bottom: 8px; }
+    input[type="text"], input[type="number"], input[type="datetime-local"] { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 1rem; box-sizing: border-box; font-family: monospace; }
+    .input-row { display: flex; gap: 12px; margin-bottom: 12px; align-items: center; }
+    .input-row label { white-space: nowrap; min-width: 80px; }
+    .toggle { display: flex; gap: 8px; margin-bottom: 12px; }
+    .toggle button { padding: 8px 16px; border: 1px solid #ccc; border-radius: 6px; background: #fff; cursor: pointer; font-size: 0.9rem; }
+    .toggle button.active { background: #007bff; color: #fff; border-color: #007bff; }
+    .result-box { padding: 16px; background: #f8f9fa; border-radius: 6px; font-family: monospace; font-size: 1.1rem; margin-top: 12px; word-break: break-all; }
+    .quick-links { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+    .quick-links a { padding: 6px 12px; background: #e8f0fe; color: #007bff; border-radius: 4px; text-decoration: none; font-size: 0.85rem; }
+    .buttons { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+    button { padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-size: 0.95rem; }
+    .btn-primary { background: #007bff; color: #fff; }
+    .btn-copy { background: #28a745; color: #fff; }
+    button:hover { opacity: 0.9; }
+    .footer { text-align: center; margin: 24px 0; padding: 12px; font-size: 0.85rem; color: #28a745; font-weight: 500; }
+  </style>
+</head>
+<body>
+    <div class="ad-banner-top"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+
+  <h1>时间戳转换工具 <small>Unix时间戳 ↔ 日期格式 · 毫秒/秒级</small></h1>
+
+  <div class="section">
+    <label>时间戳 → 日期</label>
+    <div class="input-row">
+      <label>时间戳:</label>
+      <input type="text" id="tsInput" placeholder="输入时间戳，如: 1747579200 或 1747579200000" oninput="tsToDate()">
+    </div>
+    <div id="tsResult" class="result-box">等待输入...</div>
+    <div class="buttons">
+      <button class="btn-primary" onclick="tsToDate()">转换</button>
+      <button class="btn-copy" onclick="copy('tsResult')">复制</button>
+    </div>
+
+    <div class="quick-links">
+      <a href="javascript:void(0)" onclick="setNow()">当前时间 →</a>
+      <a href="javascript:void(0)" onclick="setNowMs()">当前时间(毫秒) →</a>
+    </div>
+  </div>
+
+  <div class="section">
+    <label>日期 → 时间戳</label>
+    <div class="input-row">
+      <label>日期时间:</label>
+      <input type="datetime-local" id="dateInput" onchange="dateToTs()">
+    </div>
+    <div id="dateResult" class="result-box">等待输入...</div>
+    <div class="buttons">
+      <button class="btn-primary" onclick="dateToTs()">转换</button>
+      <button class="btn-copy" onclick="copy('dateResult')">复制</button>
+    </div>
+  </div>
+
+  <div class="section">
+    <label>当前时间（实时）</label>
+    <div class="result-box" id="nowDisplay">-</div>
+  </div>
+
+  <div class="footer">100% 免费 · 数据不上传服务器 · 仅浏览器本地处理</div>
+
+  <script>
+    function tsToDate() {
+      const input = document.getElementById('tsInput').value.trim();
+      if (!input) { document.getElementById('tsResult').textContent = '等待输入...'; return; }
+      const ts = input.length <= 10 ? parseInt(input) * 1000 : parseInt(input);
+      if (isNaN(ts)) { document.getElementById('tsResult').textContent = '无效的时间戳'; return; }
+      const d = new Date(ts);
+      document.getElementById('tsResult').innerHTML =
+        `📅 ${d.toLocaleString('zh-CN')}\n` +
+        `📋 ${d.toISOString()}\n` +
+        `🔢 秒: ${Math.floor(ts / 1000)} | 毫秒: ${ts}`;
+    }
+
+    function dateToTs() {
+      const val = document.getElementById('dateInput').value;
+      if (!val) { document.getElementById('dateResult').textContent = '请选择日期时间'; return; }
+      const d = new Date(val);
+      document.getElementById('dateResult').innerHTML =
+        `秒: ${Math.floor(d.getTime() / 1000)}\n毫秒: ${d.getTime()}`;
+    }
+
+    function setNow() {
+      const d = new Date();
+      document.getElementById('tsInput').value = Math.floor(d.getTime() / 1000);
+      tsToDate();
+    }
+
+    function setNowMs() {
+      const d = new Date();
+      document.getElementById('tsInput').value = d.getTime();
+      tsToDate();
+    }
+
+    function copy(id) {
+      navigator.clipboard.writeText(document.getElementById(id).textContent).then(() => alert('已复制!'));
+    }
+
+    function updateNow() {
+      const d = new Date();
+      document.getElementById('nowDisplay').innerHTML =
+        `🕐 ${d.toLocaleString('zh-CN')}\n` +
+        `📋 ${d.toISOString()}\n` +
+        `🔢 ${Math.floor(d.getTime() / 1000)} (秒) / ${d.getTime()} (毫秒)`;
+    }
+
+    updateNow();
+    setInterval(updateNow, 1000);
+  </script>
+    <div class="ad-banner-bottom"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+</body>
+</html>

@@ -1,0 +1,138 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PDF 预览器 - 免费在线工具</title>
+<style>
+                /* 顶部横幅广告 - 透明样式 */ .ad-banner-top { border-bottom: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; } .ad-banner-bottom { border-top: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; margin-top: 40px; } .ad-container { max-width: 728px; margin: 0 auto; min-height: 38px; display: flex; align-items: center; justify-content: center; }
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; background:#fafafa; color:#333; min-height:100vh; }
+.header { background:#fff; border-bottom:1px solid #e0e0e0; padding:12px 24px; display:flex; align-items:center; justify-content:space-between; }
+.header h1 { font-size:1.25rem; font-weight:600; }
+.back-link { color:#007bff; text-decoration:none; font-size:0.9rem; }
+.back-link:hover { text-decoration:underline; }
+.toolbar { display:flex; gap:8px; align-items:center; }
+.btn-primary { background:#007bff; color:#fff; border:none; padding:8px 20px; border-radius:4px; cursor:pointer; font-size:0.95rem; }
+.btn-primary:hover { background:#0056b3; }
+.btn-secondary { background:#28a745; color:#fff; border:none; padding:8px 20px; border-radius:4px; cursor:pointer; font-size:0.95rem; }
+.btn-secondary:hover { background:#1e7e34; }
+.btn-danger { background:#dc3545; color:#fff; border:none; padding:8px 20px; border-radius:4px; cursor:pointer; font-size:0.95rem; }
+.btn-danger:hover { background:#c82333; }
+.card { background:#fff; border:1px solid #e0e0e0; border-radius:8px; padding:24px; margin:32px auto; max-width:900px; }
+.card h2 { font-size:1.25rem; font-weight:600; margin-bottom:16px; color:#333; }
+.card p { color:#666; font-size:0.95rem; margin-bottom:16px; line-height:1.6; }
+label { display:block; font-size:0.9rem; color:#555; margin-bottom:6px; font-weight:500; }
+input[type="file"] { border:1px solid #ddd; border-radius:4px; padding:6px 12px; width:100%; box-sizing:border-box; font-size:0.95rem; }
+.drop-zone { border:2px dashed #ddd; border-radius:8px; padding:48px 32px; text-align:center; color:#888; cursor:pointer; margin-top:12px; transition:all 0.2s; }
+.drop-zone:hover { border-color:#007bff; color:#007bff; background:#f0f7ff; }
+.viewer-area { max-width:100%; margin:0 auto; }
+.pdf-toolbar { background:#fff; border-bottom:1px solid #e0e0e0; padding:10px 16px; display:flex; gap:12px; align-items:center; justify-content:center; flex-wrap:wrap; }
+.pdf-toolbar button { background:#fff; border:1px solid #ddd; border-radius:4px; padding:6px 14px; cursor:pointer; font-size:0.9rem; color:#333; }
+.pdf-toolbar button:hover { background:#f0f0f0; }
+.pdf-toolbar button:disabled { opacity:0.5; cursor:default; }
+.pdf-toolbar .page-info { font-size:0.9rem; color:#555; }
+.pdf-container { background:#525659; min-height:80vh; padding:20px; display:flex; flex-direction:column; align-items:center; gap:16px; overflow-y:auto; }
+.page-canvas { box-shadow:0 2px 8px rgba(0,0,0,0.3); background:#fff; max-width:100%; height:auto; }
+.info { font-size:0.85rem; color:#888; margin-top:8px; }
+.loading { text-align:center; padding:60px; color:#888; font-size:1rem; }
+.error { text-align:center; padding:60px; color:#dc3545; font-size:1rem; }
+</style>
+</head>
+<body>
+    <div class="ad-banner-top"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+<div class="header">
+  <h1>PDF 预览器</h1>
+  <a href="https://fm-han.github.io" class="back-link">← 返回工具站</a>
+</div>
+<div class="card" id="uploadCard">
+  <h2>PDF 预览器</h2>
+  <p>上传 PDF 文件，在线预览每一页内容。支持缩放、翻页，无需安装任何软件。</p>
+  <div class="drop-zone" id="dropZone">
+    <div style="font-size:2rem; margin-bottom:8px;">📄</div>
+    <div>点击或拖拽 PDF 文件到此处</div>
+    <div style="font-size:0.85rem; margin-top:4px;">支持 .pdf 格式</div>
+    <input type="file" id="fileInput" accept=".pdf" style="display:none;">
+  </div>
+  <div class="info" id="fileInfo"></div>
+</div>
+<div class="viewer-area" id="viewerArea" style="display:none;">
+  <div class="pdf-toolbar">
+    <button onclick="prevPage()" id="prevBtn">上一页</button>
+    <span class="page-info" id="pageInfo">第 1 页 / 共 ? 页</span>
+    <button onclick="nextPage()" id="nextBtn">下一页</button>
+    <button onclick="zoomOut()">缩小</button>
+    <span class="page-info" id="zoomInfo">100%</span>
+    <button onclick="zoomIn()">放大</button>
+    <button onclick="downloadPdf()" style="background:#28a745;color:#fff;border-color:#28a745;">下载PDF</button>
+    <button onclick="resetAll()" style="background:#dc3545;color:#fff;border-color:#dc3545;">重新选择</button>
+  </div>
+  <div class="pdf-container" id="pdfContainer">
+    <div class="loading" id="loadingMsg">正在加载 PDF...</div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script>
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+let pdfDoc = null, currentPage = 1, scale = 1.0, pdfUrl = null;
+const dropZone = document.getElementById('dropZone');
+const fileInput = document.getElementById('fileInput');
+
+dropZone.addEventListener('click', () => fileInput.click());
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.style.borderColor='#007bff'; dropZone.style.color='#007bff'; });
+dropZone.addEventListener('dragleave', () => { dropZone.style.borderColor='#ddd'; dropZone.style.color='#888'; });
+dropZone.addEventListener('drop', e => { e.preventDefault(); dropZone.style.borderColor='#ddd'; dropZone.style.color='#888'; if(e.dataTransfer.files[0]) loadPdf(e.dataTransfer.files[0]); });
+fileInput.addEventListener('change', () => { if(fileInput.files[0]) loadPdf(fileInput.files[0]); });
+
+async function loadPdf(file) {
+  if (pdfUrl) URL.revokeObjectURL(pdfUrl);
+  document.getElementById('uploadCard').style.display = 'none';
+  document.getElementById('viewerArea').style.display = 'block';
+  document.getElementById('loadingMsg').style.display = 'block';
+  document.getElementById('loadingMsg').textContent = '正在加载 PDF...';
+  document.getElementById('fileInfo').textContent = '文件：' + file.name + ' | ' + (file.size/1024/1024).toFixed(2) + 'MB';
+  try {
+    pdfUrl = URL.createObjectURL(file);
+    const loadingTask = pdfjsLib.getDocument(pdfUrl);
+    pdfDoc = await loadingTask.promise;
+    currentPage = 1; scale = 1.0;
+    document.getElementById('loadingMsg').style.display = 'none';
+    renderPage();
+  } catch(e) {
+    document.getElementById('loadingMsg').className = 'error';
+    document.getElementById('loadingMsg').textContent = 'PDF 加载失败：' + e.message;
+  }
+}
+
+async function renderPage() {
+  if (!pdfDoc) return;
+  const page = await pdfDoc.getPage(currentPage);
+  const container = document.getElementById('pdfContainer');
+  container.innerHTML = '';
+  const viewport = page.getViewport({ scale });
+  const canvas = document.createElement('canvas');
+  canvas.className = 'page-canvas';
+  canvas.width = viewport.width;
+  canvas.height = viewport.height;
+  canvas.style.width = Math.min(viewport.width, container.clientWidth - 40) + 'px';
+  canvas.style.height = 'auto';
+  const ctx = canvas.getContext('2d');
+  await page.render({ canvasContext: ctx, viewport }).promise;
+  container.appendChild(canvas);
+  document.getElementById('pageInfo').textContent = '第 ' + currentPage + ' 页 / 共 ' + pdfDoc.numPages + ' 页';
+  document.getElementById('zoomInfo').textContent = Math.round(scale*100) + '%';
+  document.getElementById('prevBtn').disabled = currentPage <= 1;
+  document.getElementById('nextBtn').disabled = currentPage >= pdfDoc.numPages;
+}
+
+function prevPage() { if (currentPage > 1) { currentPage--; renderPage(); } }
+function nextPage() { if (pdfDoc && currentPage < pdfDoc.numPages) { currentPage++; renderPage(); } }
+function zoomIn() { scale = Math.min(scale+0.25, 3); renderPage(); }
+function zoomOut() { scale = Math.max(scale-0.25, 0.25); renderPage(); }
+function downloadPdf() { if (pdfUrl) { const a=document.createElement('a'); a.href=pdfUrl; a.download='document.pdf'; a.click(); } }
+function resetAll() { if(pdfUrl) URL.revokeObjectURL(pdfUrl); pdfDoc=null; document.getElementById('uploadCard').style.display='block'; document.getElementById('viewerArea').style.display='none'; fileInput.value=''; }
+</script>
+    <div class="ad-banner-bottom"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+</body>
+</html>

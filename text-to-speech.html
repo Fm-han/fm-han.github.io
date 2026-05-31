@@ -1,0 +1,135 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>文字转语音 - 免费在线工具</title>
+<style>
+                /* 顶部横幅广告 - 透明样式 */ .ad-banner-top { border-bottom: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; } .ad-banner-bottom { border-top: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; margin-top: 40px; } .ad-container { max-width: 728px; margin: 0 auto; min-height: 38px; display: flex; align-items: center; justify-content: center; }
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #fafafa; color: #333; padding: 20px; }
+.container { max-width: 800px; margin: 0 auto; }
+h1 { font-size: 1.25rem; font-weight: 600; margin-bottom: 16px; color: #333; }
+.desc { color: #666; margin-bottom: 20px; line-height: 1.6; }
+.card { background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; padding: 24px; margin-bottom: 16px; }
+label { display: block; margin-bottom: 8px; font-weight: 500; }
+textarea { border: 1px solid #ddd; border-radius: 4px; padding: 12px; width: 100%; min-height: 150px; box-sizing: border-box; font-size: 14px; resize: vertical; }
+textarea:focus { outline: none; border-color: #007bff; }
+select { border: 1px solid #ddd; border-radius: 4px; padding: 8px 12px; font-size: 14px; }
+input[type="range"] { width: 200px; vertical-align: middle; }
+.btn-primary { background: #007bff; color: #fff; border: none; padding: 8px 20px; border-radius: 4px; cursor: pointer; font-size: 14px; }
+.btn-primary:hover { background: #0056b3; }
+.btn-primary:disabled { background: #ccc; cursor: not-allowed; }
+.btn-secondary { background: #28a745; color: #fff; border: none; padding: 8px 20px; border-radius: 4px; cursor: pointer; font-size: 14px; margin-left: 8px; }
+.btn-secondary:hover { background: #1e7e34; }
+.btn-danger { background: #dc3545; color: #fff; border: none; padding: 8px 20px; border-radius: 4px; cursor: pointer; font-size: 14px; margin-left: 8px; }
+.btn-danger:hover { background: #c82333; }
+.status { margin-top: 12px; padding: 12px; border-radius: 4px; font-size: 14px; display: none; }
+.status.success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+.status.error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+.row { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; flex-wrap: wrap; }
+.row label { margin-bottom: 0; min-width: 60px; }
+.info { font-size: 14px; color: #666; margin-top: 8px; }
+</style>
+</head>
+<body>
+    <div class="ad-banner-top"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+<div class="container">
+  <div class="card">
+    <h1>文字转语音</h1>
+    <p class="desc">输入文字，转换为语音播放或下载，支持调节语速。</p>
+    <label for="textInput">输入要转换的文字</label>
+    <textarea id="textInput" placeholder="请输入要转换为语音的文字..."></textarea>
+    <div class="row">
+      <label>语速</label>
+      <input type="range" id="rate" min="0.5" max="2" step="0.1" value="1" oninput="updateRate()">
+      <span id="rateVal">1.0</span>
+    </div>
+    <div class="row">
+      <label>音量</label>
+      <input type="range" id="volume" min="0" max="1" step="0.1" value="1" oninput="updateVolume()">
+      <span id="volumeVal">1.0</span>
+    </div>
+    <div class="row">
+      <label>语音</label>
+      <select id="voiceSelect"></select>
+    </div>
+    <div>
+      <button class="btn-primary" id="speakBtn" onclick="speak()">播放语音</button>
+      <button class="btn-danger" id="stopBtn" onclick="stop()" style="display:none">停止</button>
+      <button class="btn-secondary" id="downloadBtn" onclick="downloadAudio()" style="display:none">下载音频</button>
+    </div>
+    <div class="status" id="status"></div>
+    <div class="info" id="info"></div>
+  </div>
+</div>
+<script>
+let voices = [];
+let currentUtterance = null;
+let audioBlob = null;
+function loadVoices() {
+  voices = speechSynthesis.getVoices();
+  const select = document.getElementById('voiceSelect');
+  select.innerHTML = '';
+  voices.forEach((v, i) => {
+    const opt = document.createElement('option');
+    opt.value = i;
+    opt.textContent = v.name + ' (' + v.lang + ')';
+    select.appendChild(opt);
+  });
+}
+speechSynthesis.onvoiceschanged = loadVoices;
+loadVoices();
+function updateRate() {
+  document.getElementById('rateVal').textContent = document.getElementById('rate').value;
+}
+function updateVolume() {
+  document.getElementById('volumeVal').textContent = document.getElementById('volume').value;
+}
+function speak() {
+  const text = document.getElementById('textInput').value.trim();
+  if (!text) { showStatus('请输入要转换的文字', 'error'); return; }
+  stop();
+  const u = new SpeechSynthesisUtterance(text);
+  const voiceIdx = document.getElementById('voiceSelect').value;
+  if (voices[voiceIdx]) u.voice = voices[voiceIdx];
+  u.rate = parseFloat(document.getElementById('rate').value);
+  u.volume = parseFloat(document.getElementById('volume').value);
+  u.onstart = function() {
+    document.getElementById('speakBtn').disabled = true;
+    document.getElementById('stopBtn').style.display = 'inline-block';
+    document.getElementById('info').textContent = '正在播放...';
+  };
+  u.onend = function() {
+    document.getElementById('speakBtn').disabled = false;
+    document.getElementById('stopBtn').style.display = 'none';
+    document.getElementById('info').textContent = '播放完成';
+  };
+  u.onerror = function() {
+    document.getElementById('speakBtn').disabled = false;
+    document.getElementById('stopBtn').style.display = 'none';
+    showStatus('播放出错', 'error');
+  };
+  currentUtterance = u;
+  speechSynthesis.speak(u);
+  showStatus('开始转换并播放语音', 'success');
+}
+function stop() {
+  speechSynthesis.cancel();
+  currentUtterance = null;
+  document.getElementById('speakBtn').disabled = false;
+  document.getElementById('stopBtn').style.display = 'none';
+}
+function downloadAudio() {
+  showStatus('提示：浏览器API不支持直接下载语音文件，建议使用录音软件录制系统声音', 'error');
+}
+function showStatus(msg, type) {
+  const el = document.getElementById('status');
+  el.textContent = msg;
+  el.className = 'status ' + type;
+  el.style.display = 'block';
+}
+</script>
+    <div class="ad-banner-bottom"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+</body>
+</html>

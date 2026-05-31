@@ -1,0 +1,135 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JSON编辑器 - 在线JSON格式化验证美化的神器</title>
+  <meta name="description" content="免费在线JSON编辑器，支持格式化、压缩、验证语法、语法高亮、树形视图，浏览器本地处理，数据安全。">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://fm-han.github.io/json-editor/">
+  <style>
+                /* 顶部横幅广告 - 透明样式 */ .ad-banner-top { border-bottom: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; } .ad-banner-bottom { border-top: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; margin-top: 40px; } .ad-container { max-width: 728px; margin: 0 auto; min-height: 38px; display: flex; align-items: center; justify-content: center; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 20px; color: #333; line-height: 1.6; background: #fafafa; }
+    h1 { text-align: center; font-size: 1.8rem; color: #1a1a1a; }
+    h1 small { display: block; font-size: 0.85rem; color: #666; margin-top: 4px; font-weight: normal; }
+    .section { margin: 20px 0; padding: 16px; border: 1px solid #e0e0e0; border-radius: 8px; background: #fff; }
+    .section label { display: block; font-weight: 600; margin-bottom: 8px; }
+    textarea { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 0.9rem; box-sizing: border-box; font-family: 'Consolas', 'Monaco', monospace; resize: vertical; min-height: 250px; }
+    .view-tabs { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+    .view-tabs button { padding: 8px 16px; border: 1px solid #ccc; border-radius: 6px; background: #fff; cursor: pointer; font-size: 0.9rem; }
+    .view-tabs button.active { background: #007bff; color: #fff; border-color: #007bff; }
+    .status { padding: 8px 12px; border-radius: 6px; margin-top: 8px; font-size: 0.9rem; }
+    .status.ok { background: #d4edda; color: #155724; }
+    .status.error { background: #f8d7da; color: #721c24; }
+    .tree-view { padding: 12px; background: #f8f9fa; border-radius: 6px; font-family: 'Consolas', monospace; font-size: 0.9rem; max-height: 500px; overflow-y: auto; }
+    .tree-key { color: #0066cc; }
+    .tree-str { color: #22863a; }
+    .tree-num { color: #d73a49; }
+    .tree-bool { color: #6f42c1; }
+    .tree-null { color: #999; }
+    .buttons { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+    button { padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-size: 0.95rem; }
+    .btn-primary { background: #007bff; color: #fff; }
+    .btn-copy { background: #28a745; color: #fff; }
+    .btn-clear { background: #6c757d; color: #fff; }
+    button:hover { opacity: 0.9; }
+    .footer { text-align: center; margin: 24px 0; padding: 12px; font-size: 0.85rem; color: #28a745; font-weight: 500; }
+  </style>
+</head>
+<body>
+    <div class="ad-banner-top"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+
+  <h1>JSON编辑器 <small>格式化 / 压缩 / 验证 / 树形视图 · 浏览器本地</small></h1>
+
+  <div class="section">
+    <label>输入 JSON</label>
+    <textarea id="jsonInput" placeholder='{"name":"张三","age":25,"skills":["Python","JavaScript"]}'></textarea>
+    <div class="view-tabs">
+      <button class="active" onclick="setView('raw')">原始</button>
+      <button onclick="setView('pretty')">格式化</button>
+      <button onclick="setView('compact')">压缩</button>
+      <button onclick="setView('tree')">树形视图</button>
+    </div>
+    <div class="buttons">
+      <button class="btn-primary" onclick="process()">处理</button>
+      <button class="btn-copy" onclick="copyResult()">复制结果</button>
+      <button class="btn-clear" onclick="document.getElementById('jsonInput').value='';document.getElementById('status').className='status';document.getElementById('status').textContent='';document.getElementById('output').innerHTML=''">清空</button>
+    </div>
+    <div id="status" class="status"></div>
+  </div>
+
+  <div class="section">
+    <label>输出结果</label>
+    <div id="output" class="tree-view" style="min-height:200px;">等待输入...</div>
+  </div>
+
+  <div class="footer">100% 免费 · 数据不上传服务器 · 仅浏览器本地处理</div>
+
+  <script>
+    let currentResult = '';
+    function setView(v) {
+      document.querySelectorAll('.view-tabs button').forEach(b => b.classList.remove('active'));
+      event.target.classList.add('active');
+      if (currentResult) {
+        if (v === 'pretty') { document.getElementById('output').innerHTML = '<pre style="white-space:pre-wrap;margin:0;">' + currentResult + '</pre>'; }
+        else if (v === 'compact') { try { const j = JSON.parse(currentResult); document.getElementById('output').innerHTML = '<pre style="white-space:pre-wrap;margin:0;">' + JSON.stringify(j) + '</pre>'; } catch(e) {} }
+        else if (v === 'tree') { renderTree(currentResult); }
+        else { document.getElementById('output').innerHTML = '<pre style="white-space:pre-wrap;margin:0;">' + currentResult + '</pre>'; }
+      }
+    }
+    function process() {
+      const input = document.getElementById('jsonInput').value.trim();
+      const status = document.getElementById('status');
+      if (!input) { status.className='status error'; status.textContent='请输入JSON内容'; return; }
+      try {
+        const parsed = JSON.parse(input);
+        const pretty = JSON.stringify(parsed, null, 2);
+        currentResult = pretty;
+        document.getElementById('output').innerHTML = '<pre style="white-space:pre-wrap;margin:0;">' + pretty + '</pre>';
+        document.querySelectorAll('.view-tabs button').forEach(b => b.classList.remove('active'));
+        document.querySelector('.view-tabs button').classList.add('active');
+        status.className='status ok'; status.textContent='✓ JSON格式正确';
+      } catch(e) {
+        status.className='status error'; status.textContent='✗ JSON格式错误: ' + e.message;
+        currentResult = '';
+      }
+    }
+    function copyResult() {
+      if (!currentResult) { alert('无内容可复制'); return; }
+      navigator.clipboard.writeText(currentResult).then(() => alert('已复制!'));
+    }
+    function renderTree(json) {
+      try {
+        const obj = JSON.parse(json);
+        document.getElementById('output').innerHTML = '<div class="tree-item">' + renderValue(obj, 0) + '</div>';
+      } catch(e) { document.getElementById('output').innerHTML = '无法解析为树形'; }
+    }
+    function renderValue(val, depth) {
+      if (Array.isArray(val)) {
+        let html = '<span class="tree-null">[</span>';
+        val.forEach((v, i) => { html += renderValue(v, depth+1); if (i < val.length-1) html += '<span class="tree-null">,</span>'; });
+        html += '<span class="tree-null">]</span>';
+        return html;
+      } else if (typeof val === 'object' && val !== null) {
+        let html = '<span class="tree-null">{</span>';
+        const keys = Object.keys(val);
+        keys.forEach((k, i) => {
+          html += '<div style="padding-left:' + ((depth+1)*16) + 'px;"><span class="tree-key">"' + k + '"</span>: ' + renderValue(val[k], depth+1) + '</div>';
+          if (i < keys.length-1) html = html.replace(/<\/div>$/, '') + '<span class="tree-null">,</span></div>';
+        });
+        html += '<span class="tree-null">}</span>';
+        return html;
+      } else if (typeof val === 'string') {
+        return '<span class="tree-str">"' + val + '"</span>';
+      } else if (typeof val === 'number') {
+        return '<span class="tree-num">' + val + '</span>';
+      } else if (typeof val === 'boolean') {
+        return '<span class="tree-bool">' + val + '</span>';
+      } else {
+        return '<span class="tree-null">null</span>';
+      }
+    }
+  </script>
+    <div class="ad-banner-bottom"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+</body>
+</html>

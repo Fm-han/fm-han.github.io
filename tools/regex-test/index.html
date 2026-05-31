@@ -1,0 +1,118 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>正则表达式测试工具 - 在线实时正则匹配</title>
+  <meta name="description" content="免费在线正则表达式测试工具，实时高亮匹配结果，支持g/i/m/s/u标志切换，浏览器本地处理。">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://fm-han.github.io/regex-test/">
+  <style>
+                /* 顶部横幅广告 - 透明样式 */ .ad-banner-top { border-bottom: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; } .ad-banner-bottom { border-top: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; margin-top: 40px; } .ad-container { max-width: 728px; margin: 0 auto; min-height: 38px; display: flex; align-items: center; justify-content: center; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 20px; color: #333; line-height: 1.6; background: #fafafa; }
+    h1 { text-align: center; font-size: 1.8rem; color: #1a1a1a; }
+    h1 small { display: block; font-size: 0.85rem; color: #666; margin-top: 4px; font-weight: normal; }
+    .section { margin: 20px 0; padding: 16px; border: 1px solid #e0e0e0; border-radius: 8px; background: #fff; }
+    .section label { display: block; font-weight: 600; margin-bottom: 8px; }
+    textarea, input[type="text"] { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 1rem; box-sizing: border-box; font-family: monospace; }
+    textarea { resize: vertical; min-height: 150px; }
+    .flags { display: flex; gap: 12px; margin: 12px 0; flex-wrap: wrap; }
+    .flag-label { display: flex; align-items: center; gap: 6px; cursor: pointer; }
+    .match-info { padding: 12px; background: #e8f5e9; border-radius: 6px; margin-top: 12px; font-size: 0.9rem; }
+    .match-list { margin-top: 12px; max-height: 200px; overflow-y: auto; }
+    .match-item { padding: 8px 12px; background: #f5f5f5; border-radius: 4px; margin-bottom: 6px; font-family: monospace; font-size: 0.9rem; }
+    .highlight { background: #ffeb3b; padding: 0 2px; border-radius: 2px; }
+    .error { color: #dc3545; font-size: 0.9rem; margin-top: 8px; }
+    .footer { text-align: center; margin: 24px 0; padding: 12px; font-size: 0.85rem; color: #28a745; font-weight: 500; }
+  </style>
+</head>
+<body>
+    <div class="ad-banner-top"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+
+  <h1>正则表达式测试工具 <small>实时匹配 / 标志切换 / 浏览器本地处理</small></h1>
+
+  <div class="section">
+    <label>正则表达式</label>
+    <input type="text" id="pattern" placeholder="输入正则表达式，如: \d+" oninput="testRegex()">
+    <div class="flags">
+      <label class="flag-label"><input type="checkbox" id="flagG" checked onchange="testRegex()"> <b>g</b> 全局匹配</label>
+      <label class="flag-label"><input type="checkbox" id="flagI" onchange="testRegex()"> <b>i</b> 忽略大小写</label>
+      <label class="flag-label"><input type="checkbox" id="flagM" onchange="testRegex()"> <b>m</b> 多行模式</label>
+      <label class="flag-label"><input type="checkbox" id="flagS" onchange="testRegex()"> <b>s</b> 点号匹配换行</label>
+    </div>
+    <div id="error" class="error" style="display:none;"></div>
+  </div>
+
+  <div class="section">
+    <label>测试文本</label>
+    <textarea id="text" placeholder="输入测试文本..." oninput="testRegex()"></textarea>
+  </div>
+
+  <div class="section">
+    <label>匹配结果</label>
+    <div id="preview" style="padding:12px;background:#f8f9fa;border-radius:6px;white-space:pre-wrap;word-break:break-all;font-family:monospace;min-height:60px;"></div>
+    <div id="matchInfo" class="match-info" style="display:none;"></div>
+    <div id="matchList" class="match-list" style="display:none;"></div>
+  </div>
+
+  <div class="footer">100% 免费 · 数据不上传服务器 · 仅浏览器本地处理</div>
+
+  <script>
+    function testRegex() {
+      const pattern = document.getElementById('pattern').value;
+      const text = document.getElementById('text').value;
+      const errorEl = document.getElementById('error');
+      const preview = document.getElementById('preview');
+      const matchInfo = document.getElementById('matchInfo');
+      const matchList = document.getElementById('matchList');
+
+      if (!pattern) {
+        preview.textContent = text || '等待输入...';
+        errorEl.style.display = 'none';
+        matchInfo.style.display = 'none';
+        matchList.style.display = 'none';
+        return;
+      }
+
+      let flags = '';
+      if (document.getElementById('flagG').checked) flags += 'g';
+      if (document.getElementById('flagI').checked) flags += 'i';
+      if (document.getElementById('flagM').checked) flags += 'm';
+      if (document.getElementById('flagS').checked) flags += 's';
+
+      try {
+        const regex = new RegExp(pattern, flags);
+        errorEl.style.display = 'none';
+
+        if (!text) {
+          preview.textContent = '等待输入文本...';
+          matchInfo.style.display = 'none';
+          matchList.style.display = 'none';
+          return;
+        }
+
+        const matches = text.match(regex) || [];
+        matchInfo.style.display = 'block';
+        matchInfo.innerHTML = `<b>匹配 ${matches.length} 个结果</b>`;
+
+        if (matches.length === 0) {
+          preview.textContent = text;
+          matchList.style.display = 'none';
+        } else {
+          const highlighted = text.replace(regex, '<span class="highlight">$&</span>');
+          preview.innerHTML = highlighted;
+          matchList.style.display = 'block';
+          matchList.innerHTML = matches.map((m, i) => `<div class="match-item">#${i + 1}: ${m}</div>`).join('');
+        }
+      } catch (e) {
+        errorEl.textContent = '正则错误: ' + e.message;
+        errorEl.style.display = 'block';
+        preview.textContent = text;
+        matchInfo.style.display = 'none';
+        matchList.style.display = 'none';
+      }
+    }
+  </script>
+    <div class="ad-banner-bottom"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+</body>
+</html>

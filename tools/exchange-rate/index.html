@@ -1,0 +1,115 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>汇率转换器 - 货币兑换计算工具</title>
+  <meta name="description" content="免费在线汇率转换器，支持人民币、美元、欧元、日元、英镑等主要货币之间的实时汇率换算。">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://fm-han.github.io/exchange-rate/">
+  <style>
+                /* 顶部横幅广告 - 透明样式 */ .ad-banner-top { border-bottom: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; } .ad-banner-bottom { border-top: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; margin-top: 40px; } .ad-container { max-width: 728px; margin: 0 auto; min-height: 38px; display: flex; align-items: center; justify-content: center; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; max-width: 700px; margin: 0 auto; padding: 20px; color: #333; line-height: 1.6; background: #fafafa; }
+    h1 { text-align: center; font-size: 1.8rem; color: #1a1a1a; }
+    h1 small { display: block; font-size: 0.85rem; color: #666; margin-top: 4px; font-weight: normal; }
+    .card { margin: 20px 0; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px; background: #fff; }
+    .converter-box { background: linear-gradient(135deg, #007bff, #0056b3); border-radius: 12px; padding: 24px; color: #fff; margin: 20px 0; }
+    .currency-row { display: flex; gap: 12px; margin-bottom: 16px; align-items: center; }
+    .currency-row select, .currency-row input { padding: 12px; border: none; border-radius: 6px; font-size: 1.1rem; }
+    .currency-row select { width: 100px; }
+    .currency-row input { flex: 1; }
+    .swap-btn { text-align: center; margin: -10px 0; }
+    .swap-btn button { width: 44px; height: 44px; border-radius: 50%; background: #fff; border: 2px solid #007bff; color: #007bff; font-size: 1.2rem; cursor: pointer; }
+    .result-display { text-align: center; padding: 20px; background: rgba(255,255,255,0.2); border-radius: 8px; margin-top: 16px; }
+    .result-display .amount { font-size: 2.5rem; font-weight: 700; }
+    .result-display .rate { font-size: 0.9rem; opacity: 0.8; margin-top: 8px; }
+    .rate-input { margin-top: 12px; }
+    .rate-input label { font-size: 0.85rem; color: rgba(255,255,255,0.9); }
+    .rate-input input { width: 100%; padding: 8px; border: 1px solid rgba(255,255,255,0.5); border-radius: 4px; background: rgba(255,255,255,0.9); margin-top: 4px; }
+    .quick-rates { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 16px; }
+    .rate-item { background: #f5f5f5; padding: 10px; border-radius: 6px; text-align: center; font-size: 0.85rem; }
+    .rate-item .pair { color: #007bff; font-weight: 600; }
+    button { padding: 12px 28px; border: none; border-radius: 6px; cursor: pointer; font-size: 1rem; }
+    .btn-primary { background: #007bff; color: #fff; }
+    button:hover { opacity: 0.9; }
+    .footer { text-align: center; margin: 24px 0; padding: 12px; font-size: 0.85rem; color: #28a745; font-weight: 500; }
+  </style>
+</head>
+<body>
+    <div class="ad-banner-top"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+  <h1>汇率转换器 <small>多币种 · 实时汇率 · 货币兑换</small></h1>
+
+  <div class="card">
+    <div class="converter-box">
+      <div class="currency-row">
+        <select id="fromCurrency"><option value="CNY">🇨🇳 人民币 CNY</option><option value="USD">🇺🇸 美元 USD</option><option value="EUR">🇪🇺 欧元 EUR</option><option value="JPY">🇯🇵 日元 JPY</option><option value="GBP">🇬🇧 英镑 GBP</option><option value="HKD">🇭🇰 港币 HKD</option><option value="KRW">🇰🇷 韩元 KRW</option><option value="AUD">🇦🇺 澳元 AUD</option><option value="CAD">🇨🇦 加元 CAD</option><option value="SGD">🇸🇬 新加坡 SGD</option></select>
+        <input type="number" id="fromAmount" placeholder="输入金额" value="100" oninput="convert()">
+      </div>
+      <div class="swap-btn"><button onclick="swap()">⇅</button></div>
+      <div class="currency-row">
+        <select id="toCurrency"><option value="USD" selected>🇺🇸 美元 USD</option><option value="CNY">🇨🇳 人民币 CNY</option><option value="EUR">🇪🇺 欧元 EUR</option><option value="JPY">🇯🇵 日元 JPY</option><option value="GBP">🇬🇧 英镑 GBP</option><option value="HKD">🇭🇰 港币 HKD</option><option value="KRW">🇰🇷 韩元 KRW</option><option value="AUD">🇦🇺 澳元 AUD</option><option value="CAD">🇨🇦 加元 CAD</option><option value="SGD">🇸🇬 新加坡 SGD</option></select>
+        <div class="result-display">
+          <div class="amount" id="resultAmount">--</div>
+          <div class="rate" id="rateInfo">汇率：1 USD = 7.25 CNY</div>
+        </div>
+      </div>
+      <div class="rate-input">
+        <label>自定义汇率（如需手动设置）</label>
+        <input type="number" id="customRate" placeholder="留空使用默认汇率" step="0.0001" oninput="convert()">
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>主要货币参考汇率</h3>
+    <div class="quick-rates" id="quickRates"></div>
+    <p style="font-size:0.8rem;color:#999;margin-top:12px;">注：汇率为近似值，实际交易以银行汇率为准。</p>
+  </div>
+
+  <div class="footer">100% 免费 · 数据不上传服务器 · 仅浏览器本地处理</div>
+
+  <script>
+    const defaultRates = { CNY: 1, USD: 7.25, EUR: 7.85, JPY: 0.048, GBP: 9.15, HKD: 0.93, KRW: 0.0054, AUD: 4.75, CAD: 5.35, SGD: 5.38 };
+    const flags = { CNY: '🇨🇳', USD: '🇺🇸', EUR: '🇪🇺', JPY: '🇯🇵', GBP: '🇬🇧', HKD: '🇭🇰', KRW: '🇰🇷', AUD: '🇦🇺', CAD: '🇨🇦', SGD: '🇸🇬' };
+    function convert() {
+      const from = document.getElementById('fromCurrency').value;
+      const to = document.getElementById('toCurrency').value;
+      let amount = parseFloat(document.getElementById('fromAmount').value) || 0;
+      let rate = parseFloat(document.getElementById('customRate').value);
+      if (!rate) {
+        const fromToUSD = 1 / defaultRates[from];
+        const usdToTo = defaultRates[to];
+        rate = fromToUSD * usdToTo;
+      }
+      const result = amount * rate;
+      document.getElementById('resultAmount').textContent = result.toFixed(2) + ' ' + to;
+      document.getElementById('rateInfo').textContent = `1 ${from} = ${rate.toFixed(4)} ${to}`;
+      renderQuickRates();
+    }
+    function swap() {
+      const from = document.getElementById('fromCurrency');
+      const to = document.getElementById('toCurrency');
+      const tmp = from.value;
+      from.value = to.value;
+      to.value = tmp;
+      convert();
+    }
+    function renderQuickRates() {
+      const from = document.getElementById('fromCurrency').value;
+      const toCurrencies = ['USD', 'EUR', 'JPY', 'GBP', 'HKD', 'KRW'];
+      let html = '';
+      toCurrencies.forEach(to => {
+        if (to !== from) {
+          const fromToUSD = 1 / defaultRates[from];
+          const usdToTo = defaultRates[to];
+          const rate = fromToUSD * usdToTo;
+          html += `<div class="rate-item"><div class="pair">${flags[from]}/${flags[to]}</div><div>${rate.toFixed(4)}</div></div>`;
+        }
+      });
+      document.getElementById('quickRates').innerHTML = html;
+    }
+    convert();
+  </script>
+    <div class="ad-banner-bottom"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+</body>
+</html>

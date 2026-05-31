@@ -1,0 +1,126 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>质数判断工具 - 质数检测与筛选</title>
+  <meta name="description" content="免费在线质数判断工具，判断一个数是否为质数，找出指定范围内的所有质数。">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://fm-han.github.io/prime-checker/">
+  <style>
+                /* 顶部横幅广告 - 透明样式 */ .ad-banner-top { border-bottom: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; } .ad-banner-bottom { border-top: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; margin-top: 40px; } .ad-container { max-width: 728px; margin: 0 auto; min-height: 38px; display: flex; align-items: center; justify-content: center; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; max-width: 700px; margin: 0 auto; padding: 20px; color: #333; line-height: 1.6; background: #fafafa; }
+    h1 { text-align: center; font-size: 1.8rem; color: #1a1a1a; }
+    h1 small { display: block; font-size: 0.85rem; color: #666; margin-top: 4px; font-weight: normal; }
+    .card { margin: 20px 0; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px; background: #fff; }
+    .input-row { display: flex; gap: 16px; margin-bottom: 16px; }
+    .input-group { flex: 1; }
+    .input-group label { display: block; font-weight: 600; margin-bottom: 6px; }
+    .input-group input { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 1rem; box-sizing: border-box; }
+    .result-display { background: linear-gradient(135deg, #007bff, #0056b3); border-radius: 12px; padding: 24px; color: #fff; text-align: center; margin: 20px 0; }
+    .result-display .number { font-size: 4rem; font-weight: 700; }
+    .result-display .status { font-size: 1.5rem; margin-top: 8px; }
+    .result-display.prime { background: linear-gradient(135deg, #28a745, #218838); }
+    .result-display.not-prime { background: linear-gradient(135deg, #dc3545, #c82333); }
+    button { padding: 12px 28px; border: none; border-radius: 6px; cursor: pointer; font-size: 1rem; }
+    .btn-primary { background: #007bff; color: #fff; }
+    .btn-success { background: #28a745; color: #fff; }
+    .btn-secondary { background: #6c757d; color: #fff; }
+    button:hover { opacity: 0.9; }
+    .buttons { display: flex; gap: 12px; justify-content: center; }
+    .prime-list { background: #f5f5f5; border-radius: 8px; padding: 16px; max-height: 300px; overflow-y: auto; margin-top: 16px; }
+    .prime-list .item { display: inline-block; padding: 6px 12px; margin: 4px; background: #fff; border: 1px solid #28a745; border-radius: 20px; color: #28a745; font-weight: 600; }
+    .stats { display: flex; gap: 16px; justify-content: center; margin-top: 16px; }
+    .stat-item { padding: 12px 20px; background: #f5f5f5; border-radius: 8px; text-align: center; }
+    .stat-item .num { font-size: 1.5rem; font-weight: 700; color: #007bff; }
+    .footer { text-align: center; margin: 24px 0; padding: 12px; font-size: 0.85rem; color: #28a745; font-weight: 500; }
+  </style>
+</head>
+<body>
+    <div class="ad-banner-top"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+  <h1>质数判断工具 <small>质数检测 · 范围筛选</small></h1>
+
+  <div class="card">
+    <div class="input-group"><label>输入数字判断是否为质数</label><input type="number" id="checkNum" placeholder="例如：17" value="17"></div>
+    <div class="buttons"><button class="btn-primary" onclick="checkPrime()">判断</button></div>
+  </div>
+
+  <div class="card" id="singleResult" style="display:none;">
+    <div class="result-display" id="resultDisplay">
+      <div class="number" id="checkNumber">--</div>
+      <div class="status" id="resultStatus">--</div>
+    </div>
+    <div id="factorInfo"></div>
+  </div>
+
+  <div class="card">
+    <h3>质数筛选</h3>
+    <div class="input-row">
+      <div class="input-group"><label>起始值</label><input type="number" id="rangeStart" placeholder="起始" value="1" min="1"></div>
+      <div class="input-group"><label>结束值</label><input type="number" id="rangeEnd" placeholder="结束" value="100" min="1"></div>
+    </div>
+    <div class="buttons">
+      <button class="btn-success" onclick="findPrimes()">找出质数</button>
+      <button class="btn-secondary" onclick="clearPrimes()">清空</button>
+    </div>
+    <div class="stats" id="primeStats" style="display:none;">
+      <div class="stat-item"><div class="num" id="totalCount">0</div><div class="label">质数个数</div></div>
+      <div class="stat-item"><div class="num" id="primePercent">0%</div><div class="label">质数占比</div></div>
+    </div>
+    <div class="prime-list" id="primeList"></div>
+  </div>
+
+  <div class="footer">100% 免费 · 数据不上传服务器 · 仅浏览器本地处理</div>
+
+  <script>
+    function isPrime(n) {
+      if (n < 2) return false;
+      if (n === 2) return true;
+      if (n % 2 === 0) return false;
+      for (let i = 3; i <= Math.sqrt(n); i += 2) {
+        if (n % i === 0) return false;
+      }
+      return true;
+    }
+    function checkPrime() {
+      const n = parseInt(document.getElementById('checkNum').value);
+      if (isNaN(n)) { alert('请输入有效数字'); return; }
+      const prime = isPrime(n);
+      document.getElementById('singleResult').style.display = 'block';
+      document.getElementById('checkNumber').textContent = n;
+      document.getElementById('resultStatus').textContent = prime ? '是质数 ✓' : '不是质数 ✗';
+      const display = document.getElementById('resultDisplay');
+      display.className = 'result-display ' + (prime ? 'prime' : 'not-prime');
+      if (!prime && n >= 2) {
+        let factors = [];
+        for (let i = 2; i <= n / 2; i++) {
+          if (n % i === 0) factors.push(i);
+        }
+        if (factors.length > 0) {
+          document.getElementById('factorInfo').innerHTML = `<p style="text-align:center;color:#666;">因数：${factors.join(', ')}</p>`;
+        }
+      } else {
+        document.getElementById('factorInfo').innerHTML = '';
+      }
+    }
+    function findPrimes() {
+      const start = parseInt(document.getElementById('rangeStart').value) || 1;
+      const end = parseInt(document.getElementById('rangeEnd').value) || 100;
+      if (end - start > 10000) { alert('范围太大，请控制在10000以内'); return; }
+      const primes = [];
+      for (let i = Math.max(2, start); i <= end; i++) {
+        if (isPrime(i)) primes.push(i);
+      }
+      document.getElementById('primeStats').style.display = 'flex';
+      document.getElementById('totalCount').textContent = primes.length;
+      document.getElementById('primePercent').textContent = ((primes.length / (end - Math.max(2, start) + 1)) * 100).toFixed(1) + '%';
+      document.getElementById('primeList').innerHTML = primes.map(p => `<span class="item">${p}</span>`).join('');
+    }
+    function clearPrimes() {
+      document.getElementById('primeList').innerHTML = '';
+      document.getElementById('primeStats').style.display = 'none';
+    }
+  </script>
+    <div class="ad-banner-bottom"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+</body>
+</html>

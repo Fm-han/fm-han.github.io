@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>摩斯电码转换器</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#fafafa;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;padding:20px;min-height:100vh}
+.container{max-width:700px;margin:0 auto}
+h1{text-align:center;color:#333;margin-bottom:24px;font-size:22px}
+.card{background:#fff;border:1px solid #e0e0e0;border-radius:8px;padding:24px;margin-bottom:16px}
+label{display:block;font-weight:600;margin-bottom:6px;color:#555;font-size:14px}
+textarea{width:100%;padding:10px;border:1px solid #ddd;border-radius:4px;font-size:14px;box-sizing:border-box;resize:vertical;font-family:monospace}
+.btn{background:#007bff;color:#fff;border:none;padding:8px 20px;border-radius:4px;cursor:pointer;font-size:14px;margin-top:8px}
+.btn:hover{background:#0056b3}
+.btn-green{background:#28a745}
+.btn-green:hover{background:#218838}
+.result{background:#f5f5f5;padding:12px;border-radius:4px;font-family:monospace;font-size:14px;margin-top:12px;min-height:60px;word-break:break-all;white-space:pre-wrap}
+.actions{display:flex;gap:8px;margin-top:12px}
+.mode-row{display:flex;gap:8px;margin-bottom:16px}
+.mode-btn{padding:8px 16px;border:1px solid #ddd;background:#f9f9f9;border-radius:4px;cursor:pointer;font-size:14px}
+.mode-btn.active{background:#007bff;color:#fff;border-color:#007bff}
+.ref{font-size:12px;color:#888;margin-top:16px;line-height:1.6;max-height:200px;overflow-y:auto}
+.ref span{font-family:monospace;background:#f0f0f0;padding:1px 4px;border-radius:2px}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>摩斯电码转换器</h1>
+<div class="card">
+<div class="mode-row">
+<div class="mode-btn active" onclick="setMode('text')">文字 → 摩斯电码</div>
+<div class="mode-btn" onclick="setMode('morse')">摩斯电码 → 文字</div>
+</div>
+<label id="inputLabel">输入文字</label>
+<textarea id="input" rows="4" placeholder="输入要转换的文字..."></textarea>
+<button class="btn" onclick="convert()">转换</button>
+<div class="result" id="output"></div>
+<div class="actions">
+<button class="btn btn-green" onclick="copyResult()">复制结果</button>
+<button class="btn" onclick="playMorse()" id="playBtn" style="display:none">播放摩斯电码</button>
+</div>
+</div>
+<div class="card">
+<label>参考表</label>
+<div class="ref" id="ref"></div>
+</div>
+</div>
+<script>
+const morseMap={
+'A':'.-','B':'-...','C':'-.-.','D':'-..','E':'.','F':'..-.','G':'--.','H':'....','I':'..',
+'J':'.---','K':'-.-','L':'.-..','M':'--','N':'-.','O':'---','P':'.--.','Q':'--.-','R':'.-.',
+'S':'...','T':'-','U':'..-','V':'...-','W':'.--','X':'-..-','Y':'-.--','Z':'--..',
+'0':'-----','1':'.----','2':'..---','3':'...--','4':'....-','5':'.....','6':'-....',
+'7':'--...','8':'---..','9':'----.',  '.':'.-.-.-',',':'--..--','?':'..--..','!':'-.-.--',
+'/':'-..-.','(':'-.--.',')':'-.--.-','&':'.-...',':':'---...', ';':'-.-.-.','=':'-...-',
+'+':'.-.-.','-':'-....-','_':'..--.-','"':'.-..-.','@':'.--.-.','\'':'.----.'};
+const reverseMorse={};Object.entries(morseMap).forEach(([k,v])=>reverseMorse[v]=k);
+let mode='text';
+function setMode(m){
+mode=m;
+document.querySelectorAll('.mode-btn').forEach((b,i)=>b.classList.toggle('active',i===(m==='text'?0:1)));
+document.getElementById('inputLabel').textContent=m==='text'?'输入文字':'输入摩斯电码（用空格分隔）';
+document.getElementById('input').placeholder=m==='text'?'输入要转换的文字...':'例如: .... . .-.. .-.. ---';
+document.getElementById('playBtn').style.display=m==='text'?'none':'inline-block';
+}
+function convert(){
+const input=document.getElementById('input').value;
+if(mode==='text'){
+const result=input.toUpperCase().split('').map(c=>morseMap[c]||c).join(' ');
+document.getElementById('output').textContent=result;
+document.getElementById('playBtn').style.display=input.trim()?'inline-block':'none';
+}else{
+const words=input.trim().split(' / ');
+const result=words.map(w=>w.trim().split(' ').map(c=>reverseMorse[c]||c).join('')).join(' ');
+document.getElementById('output').textContent=result;
+}
+}
+function copyResult(){
+navigator.clipboard.writeText(document.getElementById('output').textContent);
+alert('已复制到剪贴板!');
+}
+let audioCtx;
+function playMorse(){
+const morse=document.getElementById('output').textContent;
+if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();
+const symbols=[...morse];
+let time=audioCtx.currentTime+0.05;
+const dotDur=0.08;
+symbols.forEach(s=>{
+if(s==='.'){
+const o=audioCtx.createOscillator();const g=audioCtx.createGain();
+o.connect(g);g.connect(audioCtx.destination);o.frequency.value=700;
+g.gain.setValueAtTime(0.3,time);g.gain.setValueAtTime(0,time+dotDur);
+o.start(time);o.stop(time+dotDur);time+=dotDur+dotDur;
+}else if(s==='-'){
+const o=audioCtx.createOscillator();const g=audioCtx.createGain();
+o.connect(g);g.connect(audioCtx.destination);o.frequency.value=700;
+g.gain.setValueAtTime(0.3,time);g.gain.setValueAtTime(0,time+dotDur*3);
+o.start(time);o.stop(time+dotDur*3);time+=dotDur*3+dotDur;
+}else if(s===' '){time+=dotDur*2}
+});
+}
+const ref=document.getElementById('ref');
+const entries=Object.entries(morseMap);
+let html='<table style="width:100%;border-collapse:collapse">';
+for(let i=0;i<entries.length;i+=6){
+html+='<tr>';
+for(let j=i;j<Math.min(i+6,entries.length);j++){
+html+=`<td style="padding:2px 6px"><span>${entries[j][0]}</span> <span>${entries[j][1]}</span></td>`;
+}
+html+='</tr>';
+}
+html+='</table>';
+ref.innerHTML=html;
+</script>
+</body>
+</html>

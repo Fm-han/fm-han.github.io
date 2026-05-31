@@ -1,0 +1,109 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>随机文本生成器 - 在线Lorem Ipsum占位文本生成工具</title>
+  <meta name="description" content="免费在线随机文本生成器，生成Lorem Ipsum拉丁文占位文本或中文随机段落，用于设计预览和排版测试，支持自定义段落数和句子数。">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://fm-han.github.io/lorem-ipsum/">
+  <style>
+                /* 顶部横幅广告 - 透明样式 */ .ad-banner-top { border-bottom: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; } .ad-banner-bottom { border-top: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; margin-top: 40px; } .ad-container { max-width: 728px; margin: 0 auto; min-height: 38px; display: flex; align-items: center; justify-content: center; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; color: #333; line-height: 1.6; background: #fafafa; }
+    h1 { text-align: center; font-size: 1.8rem; color: #1a1a1a; }
+    h1 small { display: block; font-size: 0.85rem; color: #666; margin-top: 4px; font-weight: normal; }
+    .section { margin: 20px 0; padding: 16px; border: 1px solid #e0e0e0; border-radius: 8px; background: #fff; }
+    .section label { display: block; font-weight: 600; margin-bottom: 8px; }
+    textarea { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 1rem; box-sizing: border-box; resize: vertical; min-height: 200px; }
+    input[type="number"], select { padding: 8px 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 1rem; }
+    .options { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 12px; }
+    .options label { display: flex; align-items: center; gap: 6px; font-size: 0.9rem; }
+    .buttons { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+    button { padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-size: 0.95rem; }
+    .btn-primary { background: #007bff; color: #fff; }
+    .btn-copy { background: #28a745; color: #fff; }
+    .btn-clear { background: #6c757d; color: #fff; }
+    button:hover { opacity: 0.9; }
+    .footer { text-align: center; margin: 24px 0; padding: 12px; font-size: 0.85rem; color: #28a745; font-weight: 500; }
+  </style>
+</head>
+<body>
+    <div class="ad-banner-top"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+
+  <h1>随机文本生成器 <small>Lorem Ipsum / 随机段落 / 设计预览 · 浏览器本地</small></h1>
+
+  <div class="section">
+    <label>配置</label>
+    <div class="options">
+      <label>段落数: <input type="number" id="paraCount" value="3" min="1" max="50" style="width:70px;"></label>
+      <label>句子数: <input type="number" id="sentCount" value="5" min="1" max="30" style="width:70px;"></label>
+      <label>
+        类型:
+        <select id="textType">
+          <option value="lorem">Lorem Ipsum (拉丁文)</option>
+          <option value="chinese">中文随机文本</option>
+          <option value="english">英文随机单词</option>
+        </select>
+      </label>
+    </div>
+    <div class="buttons">
+      <button class="btn-primary" onclick="generate()">生成文本</button>
+      <button class="btn-copy" onclick="copyText()">复制文本</button>
+      <button class="btn-clear" onclick="document.getElementById('output').value=''">清空</button>
+    </div>
+  </div>
+
+  <div class="section">
+    <label>生成结果</label>
+    <textarea id="output" readonly style="background:#f8f9fa;"></textarea>
+  </div>
+
+  <div class="footer">100% 免费 · 数据不上传服务器 · 仅浏览器本地处理</div>
+
+  <script>
+    const loremWords = 'lorem ipsum dolor sit amet consectetur adipiscing elit sed do eiusmod tempor incididunt ut labore et dolore magna aliqua ut enim ad minim veniam quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur excepteur sint occaecat cupidatat non proident sunt in culpa qui officia deserunt mollit anim id est laborum'.split(' ');
+    const chineseWords = ['的', '是', '在', '有', '和', '了', '我', '你', '他', '她', '它', '们', '这', '那', '个', '人', '来', '上', '下', '大', '小', '多', '少', '好', '看', '说', '想', '做', '用', '要', '会', '能', '可以', '这个', '那个', '什么', '怎么', '为什么', '如果', '因为', '所以', '但是', '虽然', '然后', '而且', '或者', '不过', '其实', '当然', '确实', '终于', '居然', '竟然', '仿佛', '似乎', '好像', '关于', '对于', '由于', '根据', '通过', '经过', '按照', '依据', '为了', '达到', '得到', '获得', '进行', '实现', '完成', '开始', '结束', '继续', '停止', '改变', '保持', '提高', '降低', '增加', '减少', '解决', '处理', '管理', '发展', '进步', '成功', '失败', '重要', '必要', '需要', '要求', '希望', '认为', '觉得', '知道', '了解', '认识', '理解', '掌握', '学习', '研究', '分析', '讨论', '解决', '发现', '发明', '创造', '设计', '开发', '应用', '使用', '操作', '控制', '调节', '平衡', '协调', '合作', '支持', '帮助', '服务', '提供', '满足', '适合', '符合', '达到', '超过', '优于', '劣于', '比较', '对比', '区别', '差异', '关系', '联系', '影响', '作用', '效果', '结果', '原因', '理由', '目的', '意义', '价值', '价格', '费用', '成本', '收益', '利润', '质量', '品质', '标准', '水平', '程度', '范围', '领域', '方面', '情况', '状态', '条件', '环境', '资源', '材料', '工具', '方法', '技术', '经验', '知识', '信息', '数据', '资料', '文档', '报告', '总结', '计划', '安排', '准备', '组织', '实施', '执行', '检查', '评估', '反馈', '改进', '优化', '完善', '维护', '保养', '修理', '更新', '升级', '扩展', '收缩', '合并', '分离', '分配', '调整', '配置', '设置', '安装', '卸载', '删除', '添加', '插入', '删除', '修改', '编辑', '保存', '加载', '上传', '下载', '发送', '接收', '提交', '审批', '批准', '拒绝', '同意', '确认', '取消', '终止', '暂停', '继续', '恢复', '启动', '关闭', '退出', '登录', '注册', '注销', '绑定', '解绑', '关联', '断开', '连接', '同步', '刷新', '更新', '刷新'];
+
+    function generate() {
+      const paraCount = parseInt(document.getElementById('paraCount').value) || 3;
+      const sentCount = parseInt(document.getElementById('sentCount').value) || 5;
+      const type = document.getElementById('textType').value;
+      let result = '';
+      for (let p = 0; p < paraCount; p++) {
+        let sentences = [];
+        for (let s = 0; s < sentCount; s++) {
+          if (type === 'lorem') {
+            let words = [];
+            let count = 8 + Math.floor(Math.random() * 10);
+            for (let i = 0; i < count; i++) words.push(loremWords[Math.floor(Math.random() * loremWords.length)]);
+            sentences.push(words.join(' ').charAt(0).toUpperCase() + words.join(' ').slice(1) + '.');
+          } else if (type === 'chinese') {
+            let chars = [];
+            let count = 20 + Math.floor(Math.random() * 30);
+            for (let i = 0; i < count; i++) chars.push(chineseWords[Math.floor(Math.random() * chineseWords.length)]);
+            result += chars.join('').substring(0, 1).toUpperCase() + chars.join('').substring(1);
+            let ending = ['。', '！', '？', '。', '。', '。'];
+            sentences.push(chars.join('').substring(0, 1).toUpperCase() + chars.join('').substring(1) + ending[Math.floor(Math.random() * ending.length)]);
+          } else {
+            let words = [];
+            let count = 10 + Math.floor(Math.random() * 15);
+            for (let i = 0; i < count; i++) {
+              words.push(loremWords[Math.floor(Math.random() * loremWords.length)]);
+            }
+            sentences.push(words.join(' ').charAt(0).toUpperCase() + words.join(' ').slice(1) + '.');
+          }
+        }
+        result += sentences.join(' ') + '\n\n';
+      }
+      document.getElementById('output').value = result.trim();
+    }
+
+    function copyText() {
+      const t = document.getElementById('output').value;
+      if (!t) { alert('先生成文本'); return; }
+      navigator.clipboard.writeText(t).then(() => alert('已复制!'));
+    }
+  </script>
+    <div class="ad-banner-bottom"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+</body>
+</html>

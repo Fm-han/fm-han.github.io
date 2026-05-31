@@ -1,0 +1,119 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>拼音转换器 - 在线汉字转拼音/首字母工具</title>
+  <meta name="description" content="免费在线拼音转换器，将中文汉字转换为带声调的拼音或拼音首字母，支持批量转换，浏览器本地处理。">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://fm-han.github.io/pinyin-converter/">
+  <style>
+                /* 顶部横幅广告 - 透明样式 */ .ad-banner-top { border-bottom: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; } .ad-banner-bottom { border-top: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; margin-top: 40px; } .ad-container { max-width: 728px; margin: 0 auto; min-height: 38px; display: flex; align-items: center; justify-content: center; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; max-width: 700px; margin: 0 auto; padding: 20px; color: #333; line-height: 1.6; background: #fafafa; }
+    h1 { text-align: center; font-size: 1.8rem; color: #1a1a1a; }
+    h1 small { display: block; font-size: 0.85rem; color: #666; margin-top: 4px; font-weight: normal; }
+    .section { margin: 20px 0; padding: 16px; border: 1px solid #e0e0e0; border-radius: 8px; background: #fff; }
+    .section label { display: block; font-weight: 600; margin-bottom: 8px; }
+    textarea { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 1rem; box-sizing: border-box; resize: vertical; min-height: 100px; }
+    .result-display { padding: 16px; background: #f0f7ff; border-radius: 8px; margin-top: 12px; font-size: 1.2rem; line-height: 2; min-height: 60px; }
+    .mode-tabs { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+    .mode-tabs button { padding: 8px 16px; border: 1px solid #ccc; border-radius: 6px; background: #fff; cursor: pointer; font-size: 0.9rem; }
+    .mode-tabs button.active { background: #007bff; color: #fff; border-color: #007bff; }
+    .buttons { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+    button { padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-size: 0.95rem; }
+    .btn-primary { background: #007bff; color: #fff; }
+    .btn-copy { background: #28a745; color: #fff; }
+    .btn-clear { background: #6c757d; color: #fff; }
+    button:hover { opacity: 0.9; }
+    .footer { text-align: center; margin: 24px 0; padding: 12px; font-size: 0.85rem; color: #28a745; font-weight: 500; }
+  </style>
+</head>
+<body>
+    <div class="ad-banner-top"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+
+  <h1>拼音转换器 <small>汉字转拼音 / 首字母 / 带声调 · 浏览器本地</small></h1>
+
+  <div class="section">
+    <label>输入中文</label>
+    <textarea id="inputText" placeholder="输入需要转换的中文，如: 北京欢迎你" oninput="convert()"></textarea>
+    <div class="mode-tabs">
+      <button class="active" onclick="setMode('pinyin')">带声调拼音</button>
+      <button onclick="setMode('tone')">无声调拼音</button>
+      <button onclick="setMode('initial')">首字母</button>
+    </div>
+    <div class="result-display" id="resultDisplay">等待输入...</div>
+    <div class="buttons">
+      <button class="btn-copy" onclick="copyResult()">复制结果</button>
+      <button class="btn-clear" onclick="document.getElementById('inputText').value='';document.getElementById('resultDisplay').textContent='等待输入...'">清空</button>
+    </div>
+  </div>
+
+  <div class="footer">100% 免费 · 数据不上传服务器 · 仅浏览器本地处理</div>
+
+  <script>
+    let mode = 'pinyin';
+    // Common pinyin mapping (simplified - most common characters)
+    const pinyinMap = {
+      '北':[['běi','bei','B']],'京':[['jīng','jing','J']],'欢':[['huān','huan','H']],'迎':[['yíng','ying','Y']],'你':[['nǐ','ni','N']],
+      '我':[['wǒ','wo','W']],'他':[['tā','ta','T']],'她':[['tā','ta','T']],'它':[['tā','ta','T']],'们':[['men','men','M']],
+      '中':[['zhōng','zhong','Z']],'国':[['guó','guo','G']],'人':[['rén','ren','R']],'的':[['de','de','D']],'是':[['shì','shi','S']],
+      '在':[['zài','zai','Z']],'有':[['yǒu','you','Y']],'和':[['hé','he','H']],'了':[['le','le','L']],'我':[['wǒ','wo','W']],
+      '你':[['nǐ','ni','N']],'他':[['tā','ta','T']],'她':[['tā','ta','T']],'它':[['tā','ta','T']],'们':[['men','men','M']],
+      '这':[['zhè','zhe','Z']],'那':[['nà','na','N']],'个':[['gè','ge','G']],'来':[['lái','lai','L']],'上':[['shàng','shang','S']],
+      '下':[['xià','xia','X']],'大':[['dà','da','D']],'小':[['xiǎo','xiao','X']],'多':[['duō','duo','D']],'少':[['shǎo','shao','S']],
+      '好':[['hǎo','hao','H']],'看':[['kàn','kan','K']],'说':[['shuō','shuo','S']],'想':[['xiǎng','xiang','X']],'做':[['zuò','zuo','Z']],
+      '用':[['yòng','yong','Y']],'会':[['huì','hui','H']],'能':[['néng','neng','N']],'可':[['kě','ke','K']],'以':[['yǐ','yi','Y']],
+      '爱':[['ài','ai','A']],'的':[['de','de','D']],'日':[['rì','ri','R']],'月':[['yuè','yue','Y']],'年':[['nián','nian','N']],
+      '时':[['shí','shi','S']],'分':[['fēn','fen','F']],'秒':[['miǎo','miao','M']],'天':[['tiān','tian','T']],'地':[['dì','di','D']],
+      '水':[['shuǐ','shui','S']],'火':[['huǒ','huo','H']],'山':[['shān','shan','S']],'川':[['chuān','chuan','C']],'海':[['hǎi','hai','H']],
+      '风':[['fēng','feng','F']],'雨':[['yǔ','yu','Y']],'雪':[['xuě','xue','X']],'云':[['yún','yun','Y']],'雷':[['léi','lei','L']],
+      '花':[['huā','hua','H']],'草':[['cǎo','cao','C']],'树':[['shù','shu','S']],'木':[['mù','mu','M']],'林':[['lín','lin','L']],
+      '森':[['sēn','sen','S']],'鸟':[['niǎo','niao','N']],'鱼':[['yú','yu','Y']],'虫':[['chóng','chong','C']],'龙':[['lóng','long','L']],
+      '马':[['mǎ','ma','M']],'牛':[['niú','niu','N']],'羊':[['yáng','yang','Y']],'猪':[['zhū','zhu','Z']],'狗':[['gǒu','gou','G']],
+      '猫':[['māo','mao','M']],'鸡':[['jī','ji','J']],'鸭':[['yā','ya','Y']],'学':[['xué','xue','X']],'习':[['xí','xi','X']],
+      '工':[['gōng','gong','G']],'作':[['zuò','zuo','Z']],'生':[['shēng','sheng','S']],'活':[['huó','huo','H']],'东':[['dōng','dong','D']],
+      '西':[['xī','xi','X']],'南':[['nán','nan','N']],'开':[['kāi','kai','K']],'心':[['xīn','xin','X']],'情':[['qíng','qing','Q']],
+      '快':[['kuài','kuai','K']],'乐':[['lè','le','L']],'美':[['měi','mei','M']],'丽':[['lì','li','L']],'世':[['shì','shi','S']],
+      '界':[['jiè','jie','J']],'文':[['wén','wen','W']],'明':[['míng','ming','M']],'科':[['kē','ke','K']],'技':[['jì','ji','J']],
+      '互':[['hù','hu','H']],'联':[['lián','lian','L']],'网':[['wǎng','wang','W']],'电':[['diàn','dian','D']],'脑':[['nǎo','nao','N']],
+      '手':[['shǒu','shou','S']],'机':[['jī','ji','J']],'房':[['fáng','fang','F']],'子':[['zǐ','zi','Z']],'车':[['chē','che','C']],
+      '路':[['lù','lu','L']],'桥':[['qiáo','qiao','Q']],'船':[['chuán','chuan','C']],'飞':[['fēi','fei','F']],'机':[['jī','ji','J']],
+      '旅':[['lǚ','lv','L']],'游':[['yóu','you','Y']],'饭':[['fàn','fan','F']],'吃':[['chī','chi','C']],'喝':[['hē','he','H']],
+      '穿':[['chuān','chuan','C']],'衣':[['yī','yi','Y']],'住':[['zhù','zhu','Z']],'行':[['xíng','xing','X']],'走':[['zǒu','zou','Z']],
+      '跑':[['pǎo','pao','P']],'跳':[['tiào','tiao','T']],'唱':[['chàng','chang','C']],'歌':[['gē','ge','G']],'舞':[['wǔ','wu','W']],
+      '画':[['huà','hua','H']],'写':[['xiě','xie','X']],'字':[['zì','zi','Z']],'书':[['shū','shu','S']],'读':[['dú','du','D']],
+      '友':[['yǒu','you','Y']],'情':[['qíng','qing','Q']],'亲':[['qīn','qin','Q']],'爱':[['ài','ai','A']],'家':[['jiā','jia','J']],
+      '园':[['yuán','yuan','Y']],'城':[['chéng','cheng','C']],'市':[['shì','shi','S']],'省':[['shěng','sheng','S']],'县':[['xiàn','xian','X']],
+      '村':[['cūn','cun','C']],'镇':[['zhèn','zhen','Z']],'街':[['jiē','jie','J']],'道':[['dào','dao','D']],'路':[['lù','lu','L']],
+    };
+    const toneMap = {'ā':'a','á':'a','ǎ':'a','à':'a','ō':'o','ó':'o','ǒ':'o','ò':'o','ē':'e','é':'e','ě':'e','è':'e','ī':'i','í':'i','ǐ':'i','ì':'i','ū':'u','ú':'u','ǔ':'u','ù':'u','ǖ':'u','ǘ':'u','ǚ':'u','ǜ':'u','ń':'n','ň':'n'};
+    function setMode(m) { mode = m; document.querySelectorAll('.mode-tabs button').forEach(b => b.classList.remove('active')); event.target.classList.add('active'); convert(); }
+    function convert() {
+      const text = document.getElementById('inputText').value;
+      if (!text) { document.getElementById('resultDisplay').textContent = '等待输入...'; return; }
+      let result = '';
+      for (const char of text) {
+        if (/\s/.test(char)) { result += ' '; continue; }
+        if (/[a-zA-Z0-9]/.test(char)) { result += char; continue; }
+        const entry = pinyinMap[char];
+        if (entry) {
+          const py = entry[0];
+          if (mode === 'tone') result += py[0].replace(/[āáǎàōóǒòēéěèīíǐìūúǔùǖǘǚǜńň]/g, c => toneMap[c] || c);
+          else if (mode === 'initial') result += py[2];
+          else result += py[0];
+        } else {
+          result += char;
+        }
+      }
+      if (mode === 'initial') result = result.toUpperCase();
+      document.getElementById('resultDisplay').textContent = result;
+    }
+    function copyResult() {
+      const t = document.getElementById('resultDisplay').textContent;
+      if (t.includes('等待')) { alert('无内容'); return; }
+      navigator.clipboard.writeText(t).then(() => alert('已复制: ' + t));
+    }
+  </script>
+    <div class="ad-banner-bottom"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+</body>
+</html>

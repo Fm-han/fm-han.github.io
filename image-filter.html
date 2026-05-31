@@ -1,0 +1,209 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>图片滤镜 - 免费在线工具</title>
+<style>
+                /* 顶部横幅广告 - 透明样式 */ .ad-banner-top { border-bottom: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; } .ad-banner-bottom { border-top: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; margin-top: 40px; } .ad-container { max-width: 728px; margin: 0 auto; min-height: 38px; display: flex; align-items: center; justify-content: center; }
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #fafafa; color: #333; padding: 20px; }
+.container { max-width: 900px; margin: 0 auto; }
+h1 { font-size: 1.25rem; font-weight: 600; margin-bottom: 16px; color: #333; }
+.desc { color: #666; margin-bottom: 20px; line-height: 1.6; }
+.card { background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; padding: 24px; margin-bottom: 16px; }
+label { display: block; margin-bottom: 8px; font-weight: 500; }
+input[type="file"] { margin-bottom: 12px; font-size: 14px; }
+.btn-primary { background: #007bff; color: #fff; border: none; padding: 8px 20px; border-radius: 4px; cursor: pointer; font-size: 14px; }
+.btn-primary:hover { background: #0056b3; }
+.btn-secondary { background: #28a745; color: #fff; border: none; padding: 8px 20px; border-radius: 4px; cursor: pointer; font-size: 14px; margin-left: 8px; }
+.btn-secondary:hover { background: #1e7e34; }
+.btn-danger { background: #dc3545; color: #fff; border: none; padding: 8px 20px; border-radius: 4px; cursor: pointer; font-size: 14px; margin-left: 8px; }
+.btn-danger:hover { background: #c82333; }
+.status { margin-top: 12px; padding: 12px; border-radius: 4px; font-size: 14px; display: none; }
+.status.success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+.status.error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+.preview { margin-top: 16px; text-align: center; display: none; }
+canvas { max-width: 100%; border: 1px solid #e0e0e0; border-radius: 4px; }
+.controls { margin-top: 16px; display: none; }
+.filter-row { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; flex-wrap: wrap; }
+.filter-row label { margin-bottom: 0; min-width: 80px; }
+input[type="range"] { width: 200px; }
+.filter-value { font-size: 14px; color: #666; min-width: 40px; }
+.presets { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+.preset-btn { background: #f8f9fa; border: 1px solid #ddd; border-radius: 4px; padding: 6px 12px; cursor: pointer; font-size: 13px; }
+.preset-btn:hover { background: #e9ecef; }
+</style>
+</head>
+<body>
+    <div class="ad-banner-top"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+<div class="container">
+  <div class="card">
+    <h1>图片滤镜</h1>
+    <p class="desc">上传图片，应用各种滤镜效果（灰度、复古、反色、模糊等）。</p>
+    <label for="fileInput">选择图片文件</label>
+    <input type="file" id="fileInput" accept="image/*" onchange="loadImage(event)">
+    <div class="presets" id="presets" style="display:none">
+      <button class="preset-btn" onclick="applyPreset('none')">原图</button>
+      <button class="preset-btn" onclick="applyPreset('grayscale')">灰度</button>
+      <button class="preset-btn" onclick="applyPreset('sepia')">复古</button>
+      <button class="preset-btn" onclick="applyPreset('invert')">反色</button>
+      <button class="preset-btn" onclick="applyPreset('blur')">模糊</button>
+      <button class="preset-btn" onclick="applyPreset('brightness')">变亮</button>
+      <button class="preset-btn" onclick="applyPreset('contrast')">高对比</button>
+      <button class="preset-btn" onclick="applyPreset('saturate')">高饱和</button>
+      <button class="preset-btn" onclick="applyPreset('hue')">色相旋转</button>
+    </div>
+    <div class="controls" id="controls">
+      <div class="filter-row">
+        <label>亮度</label>
+        <input type="range" id="brightness" min="0" max="200" value="100" oninput="applyFilters()">
+        <span class="filter-value" id="brightnessVal">100%</span>
+      </div>
+      <div class="filter-row">
+        <label>对比度</label>
+        <input type="range" id="contrast" min="0" max="200" value="100" oninput="applyFilters()">
+        <span class="filter-value" id="contrastVal">100%</span>
+      </div>
+      <div class="filter-row">
+        <label>饱和度</label>
+        <input type="range" id="saturate" min="0" max="200" value="100" oninput="applyFilters()">
+        <span class="filter-value" id="saturateVal">100%</span>
+      </div>
+      <div class="filter-row">
+        <label>灰度</label>
+        <input type="range" id="grayscale" min="0" max="100" value="0" oninput="applyFilters()">
+        <span class="filter-value" id="grayscaleVal">0%</span>
+      </div>
+      <div class="filter-row">
+        <label>模糊</label>
+        <input type="range" id="blur" min="0" max="10" value="0" step="0.1" oninput="applyFilters()">
+        <span class="filter-value" id="blurVal">0px</span>
+      </div>
+      <div style="margin-top:12px">
+        <button class="btn-primary" onclick="downloadImage()">下载图片</button>
+        <button class="btn-danger" onclick="resetFilters()">重置</button>
+      </div>
+    </div>
+    <div class="preview" id="preview">
+      <canvas id="canvas"></canvas>
+    </div>
+    <div class="status" id="status"></div>
+  </div>
+</div>
+<script>
+let img = null;
+let canvas, ctx, origImageData;
+function loadImage(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    img = new Image();
+    img.onload = function() {
+      canvas = document.getElementById('canvas');
+      canvas.width = img.width;
+      canvas.height = img.height;
+      ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0);
+      origImageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      document.getElementById('preview').style.display = 'block';
+      document.getElementById('controls').style.display = 'block';
+      document.getElementById('presets').style.display = 'flex';
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+function applyFilters() {
+  if (!canvas) return;
+  const brightness = document.getElementById('brightness').value;
+  const contrast = document.getElementById('contrast').value;
+  const saturate = document.getElementById('saturate').value;
+  const grayscale = document.getElementById('grayscale').value;
+  const blur = document.getElementById('blur').value;
+  document.getElementById('brightnessVal').textContent = brightness + '%';
+  document.getElementById('contrastVal').textContent = contrast + '%';
+  document.getElementById('saturateVal').textContent = saturate + '%';
+  document.getElementById('grayscaleVal').textContent = grayscale + '%';
+  document.getElementById('blurVal').textContent = blur + 'px';
+  ctx.filter = `brightness(${brightness}%) contrast(${contrast}%) saturate(${saturate}%) grayscale(${grayscale}%) blur(${blur}px)`;
+  ctx.drawImage(img, 0, 0);
+}
+function applyPreset(type) {
+  if (!canvas) return;
+  const b = document.getElementById('brightness');
+  const c = document.getElementById('contrast');
+  const s = document.getElementById('saturate');
+  const g = document.getElementById('grayscale');
+  const bl = document.getElementById('blur');
+  switch(type) {
+    case 'none': b.value=100; c.value=100; s.value=100; g.value=0; bl.value=0; break;
+    case 'grayscale': b.value=100; c.value=100; s.value=100; g.value=100; bl.value=0; break;
+    case 'sepia': applySepia(); return;
+    case 'invert': applyInvert(); return;
+    case 'blur': b.value=100; c.value=100; s.value=100; g.value=0; bl.value=5; break;
+    case 'brightness': b.value=150; c.value=100; s.value=100; g.value=0; bl.value=0; break;
+    case 'contrast': b.value=100; c.value=150; s.value=100; g.value=0; bl.value=0; break;
+    case 'saturate': b.value=100; c.value=100; s.value=200; g.value=0; bl.value=0; break;
+    case 'hue': applyHueRotate(); return;
+  }
+  applyFilters();
+}
+function applySepia() {
+  ctx.drawImage(img, 0, 0);
+  const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  const d = imageData.data;
+  for (let i = 0; i < d.length; i += 4) {
+    const r = d[i], g = d[i+1], b = d[i+2];
+    d[i] = r*0.393 + g*0.769 + b*0.189;
+    d[i+1] = r*0.349 + g*0.686 + b*0.168;
+    d[i+2] = r*0.272 + g*0.534 + b*0.131;
+  }
+  ctx.putImageData(imageData, 0, 0);
+}
+function applyInvert() {
+  ctx.drawImage(img, 0, 0);
+  const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  const d = imageData.data;
+  for (let i = 0; i < d.length; i += 4) {
+    d[i] = 255 - d[i];
+    d[i+1] = 255 - d[i+1];
+    d[i+2] = 255 - d[i+2];
+  }
+  ctx.putImageData(imageData, 0, 0);
+}
+function applyHueRotate() {
+  ctx.drawImage(img, 0, 0);
+  const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  const d = imageData.data;
+  for (let i = 0; i < d.length; i += 4) {
+    const r = d[i], g = d[i+1], b = d[i+2];
+    d[i] = g; d[i+1] = b; d[i+2] = r;
+  }
+  ctx.putImageData(imageData, 0, 0);
+}
+function resetFilters() {
+  document.getElementById('brightness').value = 100;
+  document.getElementById('contrast').value = 100;
+  document.getElementById('saturate').value = 100;
+  document.getElementById('grayscale').value = 0;
+  document.getElementById('blur').value = 0;
+  applyFilters();
+}
+function downloadImage() {
+  const a = document.createElement('a');
+  a.href = canvas.toDataURL('image/png');
+  a.download = 'filtered-image.png';
+  a.click();
+}
+function showStatus(msg, type) {
+  const el = document.getElementById('status');
+  el.textContent = msg;
+  el.className = 'status ' + type;
+  el.style.display = 'block';
+}
+</script>
+    <div class="ad-banner-bottom"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+</body>
+</html>

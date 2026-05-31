@@ -1,0 +1,127 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DPI/PPI计算器 - 像素密度换算</title>
+  <meta name="description" content="免费在线DPI/PPI计算器，计算屏幕像素密度、物理尺寸与像素尺寸的换算。">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://fm-han.github.io/dpi-calculator/">
+  <style>
+                /* 顶部横幅广告 - 透明样式 */ .ad-banner-top { border-bottom: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; } .ad-banner-bottom { border-top: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; margin-top: 40px; } .ad-container { max-width: 728px; margin: 0 auto; min-height: 38px; display: flex; align-items: center; justify-content: center; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; max-width: 700px; margin: 0 auto; padding: 20px; color: #333; line-height: 1.6; background: #fafafa; }
+    h1 { text-align: center; font-size: 1.8rem; color: #1a1a1a; }
+    h1 small { display: block; font-size: 0.85rem; color: #666; margin-top: 4px; font-weight: normal; }
+    .card { margin: 20px 0; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px; background: #fff; }
+    .input-group { margin-bottom: 16px; }
+    .input-group label { display: block; font-weight: 600; margin-bottom: 6px; }
+    .input-group input { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 1rem; box-sizing: border-box; }
+    .input-row { display: flex; gap: 16px; }
+    .input-row .input-group { flex: 1; }
+    .result-display { background: linear-gradient(135deg, #007bff, #0056b3); border-radius: 12px; padding: 24px; color: #fff; text-align: center; margin: 20px 0; }
+    .result-display .ppi { font-size: 4rem; font-weight: 700; }
+    .result-display .label { font-size: 1rem; opacity: 0.9; }
+    .result-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+    .result-item { background: #f5f5f5; padding: 16px; border-radius: 8px; text-align: center; }
+    .result-item .label { font-size: 0.85rem; color: #666; }
+    .result-item .value { font-size: 1.5rem; font-weight: 700; color: #007bff; }
+    .preset-btns { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+    .preset-btn { padding: 8px 14px; border: 1px solid #ccc; border-radius: 20px; background: #fff; cursor: pointer; font-size: 0.85rem; }
+    .preset-btn:hover { background: #f0f0f0; }
+    button { padding: 12px 28px; border: none; border-radius: 6px; cursor: pointer; font-size: 1rem; }
+    .btn-primary { background: #007bff; color: #fff; }
+    button:hover { opacity: 0.9; }
+    .buttons { display: flex; gap: 12px; justify-content: center; }
+    .footer { text-align: center; margin: 24px 0; padding: 12px; font-size: 0.85rem; color: #28a745; font-weight: 500; }
+  </style>
+</head>
+<body>
+    <div class="ad-banner-top"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+  <h1>DPI/PPI计算器 <small>像素密度 · 屏幕尺寸 · 物理换算</small></h1>
+
+  <div class="card">
+    <h3>选择屏幕类型快速填充</h3>
+    <div class="preset-btns">
+      <button class="preset-btn" onclick="loadPreset('iphone14')">iPhone 14 (6.1")</button>
+      <button class="preset-btn" onclick="loadPreset('iphone14pm')">iPhone 14 Pro Max (6.7")</button>
+      <button class="preset-btn" onclick="loadPreset('macbook')">MacBook 13" (2560x1600)</button>
+      <button class="preset-btn" onclick="loadPreset('dell4k')">Dell 27" 4K</button>
+    </div>
+    <div class="input-row">
+      <div class="input-group"><label>水平像素</label><input type="number" id="pixelsX" placeholder="宽度像素" value="1170" oninput="calculate()"></div>
+      <div class="input-group"><label>垂直像素</label><input type="number" id="pixelsY" placeholder="高度像素" value="2532" oninput="calculate()"></div>
+    </div>
+    <div class="input-row">
+      <div class="input-group"><label>水平尺寸 (英寸)</label><input type="number" id="sizeX" placeholder="物理宽度" value="5.78" step="0.01" oninput="calculate()"></div>
+      <div class="input-group"><label>垂直尺寸 (英寸)</label><input type="number" id="sizeY" placeholder="物理高度" value="7.06" step="0.01" oninput="calculate()"></div>
+    </div>
+    <div class="buttons">
+      <button class="btn-primary" onclick="calculate()">计算PPI</button>
+    </div>
+  </div>
+
+  <div class="card" id="resultCard" style="display:none;">
+    <div class="result-display">
+      <div class="ppi" id="ppiValue">460</div>
+      <div class="label">PPI (每英寸像素数)</div>
+    </div>
+    <div class="result-grid">
+      <div class="result-item"><div class="label">对角线像素</div><div class="value" id="diagonalPx">--</div></div>
+      <div class="result-item"><div class="label">对角线尺寸</div><div class="value" id="diagonalSize">--"</div></div>
+      <div class="result-item"><div class="label">水平PPI</div><div class="value" id="ppiX">--</div></div>
+      <div class="result-item"><div class="label">垂直PPI</div><div class="value" id="ppiY">--</div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>PPI标准参考</h3>
+    <table style="width:100%;border-collapse:collapse;">
+      <tr style="background:#f0f0f0;"><th style="padding:8px;border:1px solid #ddd;">PPI范围</th><th style="padding:8px;border:1px solid #ddd;">描述</th></tr>
+      <tr><td style="padding:8px;border:1px solid #ddd;"><160 PPI</td><td style="padding:8px;border:1px solid #ddd;">低分辨率（老旧屏幕）</td></tr>
+      <tr><td style="padding:8px;border:1px solid #ddd;">160-240 PPI</td><td style="padding:8px;border:1px solid #ddd;">标准分辨率</td></tr>
+      <tr><td style="padding:8px;border:1px solid #ddd;">240-320 PPI</td><td style="padding:8px;border:1px solid #ddd;">高清 (HD)</td></tr>
+      <tr><td style="padding:8px;border:1px solid #ddd;">320-480 PPI</td><td style="padding:8px;border:1px solid #ddd;">视网膜屏 (Retina)</td></tr>
+      <tr><td style="padding:8px;border:1px solid #ddd;">>480 PPI</td><td style="padding:8px;border:1px solid #ddd;">超视网膜 (Super Retina)</td></tr>
+    </table>
+  </div>
+
+  <div class="footer">100% 免费 · 数据不上传服务器 · 仅浏览器本地处理</div>
+
+  <script>
+    const presets = {
+      iphone14: { px: 1170, py: 2532, sx: 5.78, sy: 7.06 },
+      iphone14pm: { px: 1290, py: 2796, sx: 6.07, sy: 7.06 },
+      macbook: { px: 2560, py: 1600, sx: 11.17, sy: 7.32 },
+      dell4k: { px: 3840, py: 2160, sx: 23.5, sy: 13.2 }
+    };
+    function loadPreset(name) {
+      const p = presets[name];
+      document.getElementById('pixelsX').value = p.px;
+      document.getElementById('pixelsY').value = p.py;
+      document.getElementById('sizeX').value = p.sx;
+      document.getElementById('sizeY').value = p.sy;
+      calculate();
+    }
+    function calculate() {
+      const px = parseFloat(document.getElementById('pixelsX').value) || 0;
+      const py = parseFloat(document.getElementById('pixelsY').value) || 0;
+      const sx = parseFloat(document.getElementById('sizeX').value) || 0;
+      const sy = parseFloat(document.getElementById('sizeY').value) || 0;
+      if (px <= 0 || py <= 0 || sx <= 0 || sy <= 0) return;
+      const diagonalPx = Math.sqrt(px * px + py * py);
+      const diagonalSize = Math.sqrt(sx * sx + sy * sy);
+      const ppi = diagonalPx / diagonalSize;
+      const ppiX = px / sx;
+      const ppiY = py / sy;
+      document.getElementById('resultCard').style.display = 'block';
+      document.getElementById('ppiValue').textContent = Math.round(ppi);
+      document.getElementById('diagonalPx').textContent = Math.round(diagonalPx);
+      document.getElementById('diagonalSize').textContent = diagonalSize.toFixed(2);
+      document.getElementById('ppiX').textContent = Math.round(ppiX);
+      document.getElementById('ppiY').textContent = Math.round(ppiY);
+    }
+    calculate();
+  </script>
+    <div class="ad-banner-bottom"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+</body>
+</html>

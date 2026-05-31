@@ -1,0 +1,104 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>二维码生成器 - 免费在线QR Code批量生成</title>
+  <meta name="description" content="免费在线二维码生成器，输入文字/URL/电话即可生成高清二维码，支持自定义尺寸和纠错级别，浏览器本地处理。">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://fm-han.github.io/qrcode/">
+  <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+  <style>
+                /* 顶部横幅广告 - 透明样式 */ .ad-banner-top { border-bottom: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; } .ad-banner-bottom { border-top: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; margin-top: 40px; } .ad-container { max-width: 728px; margin: 0 auto; min-height: 38px; display: flex; align-items: center; justify-content: center; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; max-width: 700px; margin: 0 auto; padding: 20px; color: #333; line-height: 1.6; background: #fafafa; }
+    h1 { text-align: center; font-size: 1.8rem; color: #1a1a1a; }
+    h1 small { display: block; font-size: 0.85rem; color: #666; margin-top: 4px; font-weight: normal; }
+    .section { margin: 20px 0; padding: 16px; border: 1px solid #e0e0e0; border-radius: 8px; background: #fff; }
+    .section label { display: block; font-weight: 600; margin-bottom: 8px; }
+    textarea { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 1rem; box-sizing: border-box; resize: vertical; min-height: 80px; }
+    .row { display: flex; gap: 12px; align-items: center; margin-top: 12px; flex-wrap: wrap; }
+    .row label { white-space: nowrap; }
+    input, select { padding: 8px 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 0.95rem; }
+    input[type="number"] { width: 90px; }
+    input[type="color"] { width: 60px; height: 38px; padding: 2px; cursor: pointer; }
+    .preview { text-align: center; padding: 24px; background: #fff; border-radius: 8px; margin-top: 16px; min-height: 200px; display: flex; align-items: center; justify-content: center; }
+    #qrcode canvas, #qrcode img { border-radius: 8px; }
+    .buttons { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+    button { padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-size: 0.95rem; }
+    .btn-primary { background: #007bff; color: #fff; }
+    .btn-download { background: #28a745; color: #fff; }
+    button:hover { opacity: 0.9; }
+    .footer { text-align: center; margin: 24px 0; padding: 12px; font-size: 0.85rem; color: #28a745; font-weight: 500; }
+  </style>
+</head>
+<body>
+    <div class="ad-banner-top"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+
+  <h1>二维码生成器 <small>文字 / URL / 电话 · 自定义尺寸 · 浏览器本地</small></h1>
+
+  <div class="section">
+    <label>输入内容</label>
+    <textarea id="content" placeholder="输入要编码的内容，如: https://example.com 或 13800138000"></textarea>
+    <div class="row">
+      <label>尺寸(px):</label>
+      <input type="number" id="size" value="300" min="100" max="800">
+      <label>纠错:</label>
+      <select id="level">
+        <option value="L">低 L</option>
+        <option value="M" selected>中 M</option>
+        <option value="Q">高 Q</option>
+        <option value="H">最高 H</option>
+      </select>
+      <label>颜色:</label>
+      <input type="color" id="color" value="#000000">
+    </div>
+    <div class="buttons">
+      <button class="btn-primary" onclick="generate()">生成二维码</button>
+      <button class="btn-download" onclick="download()">下载 PNG</button>
+    </div>
+  </div>
+
+  <div class="section">
+    <label>预览</label>
+    <div class="preview">
+      <div id="qrcode"></div>
+    </div>
+  </div>
+
+  <div class="footer">100% 免费 · 数据不上传服务器 · 仅浏览器本地处理</div>
+
+  <script>
+    let qrInstance = null;
+
+    function generate() {
+      const text = document.getElementById('content').value.trim();
+      if (!text) { alert('请输入内容'); return; }
+      const size = parseInt(document.getElementById('size').value) || 300;
+      const level = document.getElementById('level').value;
+      const color = document.getElementById('color').value;
+
+      document.getElementById('qrcode').innerHTML = '';
+      qrInstance = new QRCode(document.getElementById('qrcode'), {
+        text: text,
+        width: size,
+        height: size,
+        colorDark: color,
+        colorLight: '#ffffff',
+        correctLevel: QRCode.CorrectLevel[level]
+      });
+    }
+
+    function download() {
+      const canvas = document.querySelector('#qrcode canvas');
+      if (!canvas) { alert('请先生成二维码'); return; }
+      const link = document.createElement('a');
+      link.download = 'qrcode.png';
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    }
+
+    generate();
+  </script>
+    <div class="ad-banner-bottom"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+</body>
+</html>

@@ -1,0 +1,124 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>一元二次方程求解器</title>
+  <meta name="description" content="免费在线一元二次方程求解工具，输入ax²+bx+c=0的系数，计算方程的解和判别式。">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://fm-han.github.io/quadratic-solver/">
+  <style>
+                /* 顶部横幅广告 - 透明样式 */ .ad-banner-top { border-bottom: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; } .ad-banner-bottom { border-top: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; margin-top: 40px; } .ad-container { max-width: 728px; margin: 0 auto; min-height: 38px; display: flex; align-items: center; justify-content: center; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; max-width: 700px; margin: 0 auto; padding: 20px; color: #333; line-height: 1.6; background: #fafafa; }
+    h1 { text-align: center; font-size: 1.8rem; color: #1a1a1a; }
+    h1 small { display: block; font-size: 0.85rem; color: #666; margin-top: 4px; font-weight: normal; }
+    .card { margin: 20px 0; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px; background: #fff; }
+    .equation { text-align: center; font-size: 1.8rem; margin: 20px 0; font-family: serif; }
+    .equation input { width: 60px; padding: 8px; border: 1px solid #ccc; border-radius: 6px; text-align: center; font-size: 1.2rem; }
+    .result-display { background: linear-gradient(135deg, #007bff, #0056b3); border-radius: 12px; padding: 24px; color: #fff; text-align: center; margin: 20px 0; }
+    .result-display .label { font-size: 1rem; opacity: 0.9; }
+    .result-display .value { font-size: 2rem; font-weight: 700; margin-top: 8px; font-family: monospace; }
+    .result-display.two-solutions { background: linear-gradient(135deg, #28a745, #218838); }
+    .result-display.one-solution { background: linear-gradient(135deg, #ffc107, #e0a800); color: #333; }
+    .result-display.no-solution { background: linear-gradient(135deg, #dc3545, #c82333); }
+    .detail-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+    .detail-item { background: #f5f5f5; padding: 16px; border-radius: 8px; text-align: center; }
+    .detail-item .label { font-size: 0.85rem; color: #666; }
+    .detail-item .value { font-size: 1.5rem; font-weight: 700; color: #007bff; }
+    .step-section { background: #f5f5f5; padding: 16px; border-radius: 8px; margin-top: 16px; }
+    .step-section pre { margin: 0; font-family: monospace; font-size: 0.9rem; white-space: pre-wrap; }
+    button { padding: 12px 28px; border: none; border-radius: 6px; cursor: pointer; font-size: 1rem; }
+    .btn-primary { background: #007bff; color: #fff; }
+    .btn-secondary { background: #6c757d; color: #fff; }
+    button:hover { opacity: 0.9; }
+    .buttons { display: flex; gap: 12px; justify-content: center; }
+    .footer { text-align: center; margin: 24px 0; padding: 12px; font-size: 0.85rem; color: #28a745; font-weight: 500; }
+  </style>
+</head>
+<body>
+    <div class="ad-banner-top"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+  <h1>一元二次方程求解器 <small>ax²+bx+c=0 · 求根公式</small></h1>
+
+  <div class="card">
+    <div class="equation">
+      <input type="number" id="coeffA" value="1" min="-99" max="99"> x² +
+      <input type="number" id="coeffB" value="-5" min="-99" max="99"> x +
+      <input type="number" id="coeffC" value="6" min="-99" max="99"> = 0
+    </div>
+    <div class="buttons">
+      <button class="btn-primary" onclick="solve()">求解方程</button>
+      <button class="btn-secondary" onclick="clearAll()">重置</button>
+    </div>
+  </div>
+
+  <div class="card" id="resultCard" style="display:none;">
+    <div class="result-display" id="resultDisplay">
+      <div class="label">方程解</div>
+      <div class="value" id="solutions"></div>
+    </div>
+    <div class="detail-grid">
+      <div class="detail-item"><div class="label">判别式 Δ</div><div class="value" id="delta">--</div></div>
+      <div class="detail-item"><div class="label">实数解个数</div><div class="value" id="rootCount">--</div></div>
+      <div class="detail-item"><div class="label">顶点 x</div><div class="value" id="vertexX">--</div></div>
+      <div class="detail-item"><div class="label">顶点 y</div><div class="value" id="vertexY">--</div></div>
+    </div>
+    <div class="step-section">
+      <h4>求解步骤</h4>
+      <pre id="steps"></pre>
+    </div>
+  </div>
+
+  <div class="footer">100% 免费 · 数据不上传服务器 · 仅浏览器本地处理</div>
+
+  <script>
+    function solve() {
+      const a = parseFloat(document.getElementById('coeffA').value);
+      const b = parseFloat(document.getElementById('coeffB').value);
+      const c = parseFloat(document.getElementById('coeffC').value);
+      if (a === 0) { alert('a不能为0，这是一元二次方程'); return; }
+      const delta = b * b - 4 * a * c;
+      const display = document.getElementById('resultDisplay');
+      let steps = `方程：${a}x² + ${b}x + ${c} = 0\n\n`;
+      steps += `判别式：Δ = b² - 4ac\n`;
+      steps += `Δ = ${b}² - 4×${a}×${c}\n`;
+      steps += `Δ = ${delta}\n\n`;
+      if (delta > 0) {
+        const x1 = (-b + Math.sqrt(delta)) / (2 * a);
+        const x2 = (-b - Math.sqrt(delta)) / (2 * a);
+        steps += `Δ > 0，有两个不相等的实数解\n\n`;
+        steps += `x₁ = (-b + √Δ) / 2a = (${-b} + √${delta}) / ${2*a} = ${x1.toFixed(4)}\n`;
+        steps += `x₂ = (-b - √Δ) / 2a = (${-b} - √${delta}) / ${2*a} = ${x2.toFixed(4)}`;
+        document.getElementById('solutions').textContent = `x₁ = ${x1.toFixed(4)}, x₂ = ${x2.toFixed(4)}`;
+        display.className = 'result-display two-solutions';
+      } else if (delta === 0) {
+        const x = -b / (2 * a);
+        steps += `Δ = 0，有两个相等的实数解\n\n`;
+        steps += `x = -b / 2a = ${-b} / ${2*a} = ${x.toFixed(4)}`;
+        document.getElementById('solutions').textContent = `x = ${x.toFixed(4)} (重根)`;
+        display.className = 'result-display one-solution';
+      } else {
+        const realPart = -b / (2 * a);
+        const imagPart = Math.sqrt(-delta) / (2 * a);
+        steps += `Δ < 0，有两个共轭复数解\n\n`;
+        steps += `x₁ = ${realPart.toFixed(4)} + ${imagPart.toFixed(4)}i\n`;
+        steps += `x₂ = ${realPart.toFixed(4)} - ${imagPart.toFixed(4)}i`;
+        document.getElementById('solutions').textContent = `复数解`;
+        display.className = 'result-display no-solution';
+      }
+      const vertexX = -b / (2 * a);
+      const vertexY = -delta / (4 * a);
+      document.getElementById('delta').textContent = delta;
+      document.getElementById('rootCount').textContent = delta > 0 ? 2 : delta === 0 ? 1 : 0;
+      document.getElementById('vertexX').textContent = vertexX.toFixed(4);
+      document.getElementById('vertexY').textContent = vertexY.toFixed(4);
+      document.getElementById('steps').textContent = steps;
+      document.getElementById('resultCard').style.display = 'block';
+    }
+    function clearAll() {
+      document.querySelectorAll('input').forEach(i => i.value = '');
+      document.getElementById('resultCard').style.display = 'none';
+    }
+  </script>
+    <div class="ad-banner-bottom"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+</body>
+</html>

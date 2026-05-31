@@ -1,0 +1,210 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>比例计算器</title>
+    <style>
+                /* 顶部横幅广告 - 透明样式 */ .ad-banner-top { border-bottom: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; } .ad-banner-bottom { border-top: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; margin-top: 40px; } .ad-container { max-width: 728px; margin: 0 auto; min-height: 38px; display: flex; align-items: center; justify-content: center; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #fafafa; min-height: 100vh; padding: 20px; }
+        .container { max-width: 600px; margin: 0 auto; }
+        .card { background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; padding: 24px; margin-bottom: 20px; }
+        h1 { font-size: 1.5rem; font-weight: 600; margin-bottom: 20px; color: #333; text-align: center; }
+        .title { font-size: 1.25rem; font-weight: 600; margin-bottom: 16px; color: #333; }
+        label { display: block; margin-bottom: 8px; color: #555; font-weight: 500; }
+        input { border: 1px solid #ddd; border-radius: 4px; padding: 8px 12px; width: 100%; box-sizing: border-box; margin-bottom: 16px; }
+        select { border: 1px solid #ddd; border-radius: 4px; padding: 8px 12px; width: 100%; box-sizing: border-box; margin-bottom: 16px; }
+        button { background: #007bff; color: #fff; border: none; padding: 8px 20px; border-radius: 4px; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        button.calc-btn { background: #28a745; width: 100%; padding: 12px; font-size: 1.1rem; }
+        .ratio-display { text-align: center; font-size: 1.5rem; padding: 20px; background: #f8f9fa; border-radius: 4px; margin-bottom: 16px; font-family: monospace; }
+        .result { background: #f0f7ff; border: 1px solid #007bff; border-radius: 4px; padding: 16px; margin-top: 16px; }
+        .result-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #e0e0e0; }
+        .result-row:last-child { border-bottom: none; }
+        .result-label { color: #666; }
+        .result-value { font-weight: 600; color: #007bff; }
+        .formula { background: #f8f9fa; padding: 12px; border-radius: 4px; font-family: monospace; font-size: 0.9rem; margin-top: 12px; }
+        .error { color: #dc3545; margin-top: 8px; font-size: 0.9rem; }
+        .mode-tabs { display: flex; gap: 10px; margin-bottom: 16px; }
+        .mode-tab { flex: 1; padding: 10px; text-align: center; background: #f0f0f0; border-radius: 4px; cursor: pointer; border: none; }
+        .mode-tab.active { background: #007bff; color: #fff; }
+    </style>
+</head>
+<body>
+    <div class="ad-banner-top"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+    <div class="container">
+        <h1>比例计算器</h1>
+        <div class="card">
+            <div class="mode-tabs">
+                <button class="mode-tab active" onclick="switchMode('solveX')">求未知数 X</button>
+                <button class="mode-tab" onclick="switchMode('check')">验证比例</button>
+                <button class="mode-tab" onclick="switchMode('simplify')">化简比例</button>
+            </div>
+            
+            <div id="solveXMode">
+                <label>比例形式: X : Y = Z : W</label>
+                <div class="ratio-display">
+                    X : <span style="color:#007bff">Y</span> = <span style="color:#28a745">Z</span> : W
+                </div>
+                <label>已知 Y (第二个数)</label>
+                <input type="number" id="yVal" placeholder="输入 Y 的值">
+                <label>已知 Z (第三个数)</label>
+                <input type="number" id="zVal" placeholder="输入 Z 的值">
+                <label>已知 W (第四个数)</label>
+                <input type="number" id="wVal" placeholder="输入 W 的值">
+                <label>求 X (点击计算)</label>
+                
+                <button class="calc-btn" onclick="solveX()">计算 X</button>
+            </div>
+            
+            <div id="checkMode" style="display:none;">
+                <label>输入四个数验证比例</label>
+                <div style="display:grid; grid-template-columns: 1fr auto 1fr; gap:10px; align-items:center;">
+                    <input type="number" id="checkA" placeholder="A">
+                    <span style="font-size:1.5rem;">:</span>
+                    <input type="number" id="checkB" placeholder="B">
+                </div>
+                <div style="text-align:center; margin:10px 0; color:#666;">=</div>
+                <div style="display:grid; grid-template-columns: 1fr auto 1fr; gap:10px; align-items:center;">
+                    <input type="number" id="checkC" placeholder="C">
+                    <span style="font-size:1.5rem;">:</span>
+                    <input type="number" id="checkD" placeholder="D">
+                </div>
+                <button class="calc-btn" onclick="checkRatio()">验证</button>
+            </div>
+            
+            <div id="simplifyMode" style="display:none;">
+                <label>输入要化简的比例</label>
+                <div style="display:grid; grid-template-columns: 1fr auto 1fr; gap:10px; align-items:center;">
+                    <input type="number" id="simpA" placeholder="A">
+                    <span style="font-size:1.5rem;">:</span>
+                    <input type="number" id="simpB" placeholder="B">
+                </div>
+                <button class="calc-btn" onclick="simplifyRatio()">化简</button>
+            </div>
+            
+            <div id="result" class="result" style="display:none;">
+                <div id="resultText" class="result-value" style="font-size:1.2rem; text-align:center;"></div>
+            </div>
+            <div id="error" class="error" style="display:none;"></div>
+        </div>
+        
+        <div class="card">
+            <div class="title">比例公式</div>
+            <div class="formula">
+                X : Y = Z : W  ⟹  X × W = Y × Z  ⟹  X = (Y × Z) / W
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentMode = 'solveX';
+        
+        function switchMode(mode) {
+            currentMode = mode;
+            document.getElementById('solveXMode').style.display = mode === 'solveX' ? 'block' : 'none';
+            document.getElementById('checkMode').style.display = mode === 'check' ? 'block' : 'none';
+            document.getElementById('simplifyMode').style.display = mode === 'simplify' ? 'block' : 'none';
+            document.querySelectorAll('.mode-tab').forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+            document.getElementById('result').style.display = 'none';
+            document.getElementById('error').style.display = 'none';
+        }
+
+        function gcd(a, b) {
+            a = Math.abs(a);
+            b = Math.abs(b);
+            while (b) {
+                [a, b] = [b, a % b];
+            }
+            return a;
+        }
+
+        function solveX() {
+            const y = parseFloat(document.getElementById('yVal').value);
+            const z = parseFloat(document.getElementById('zVal').value);
+            const w = parseFloat(document.getElementById('wVal').value);
+            
+            document.getElementById('result').style.display = 'none';
+            document.getElementById('error').style.display = 'none';
+            
+            if (isNaN(y) || isNaN(z) || isNaN(w)) {
+                document.getElementById('error').textContent = '请输入 Y、Z、W 的值';
+                document.getElementById('error').style.display = 'block';
+                return;
+            }
+            
+            if (w === 0) {
+                document.getElementById('error').textContent = 'W 不能为零';
+                document.getElementById('error').style.display = 'block';
+                return;
+            }
+            
+            const x = (y * z) / w;
+            const formula = `${x} × ${w} = ${y} × ${z} (${(x * w).toFixed(4)} = ${(y * z).toFixed(4)})`;
+            
+            document.getElementById('resultText').innerHTML = `X = <span style="color:#28a745">${x.toFixed(4)}</span><br><small style="color:#666;">验证: ${formula}</small>`;
+            document.getElementById('result').style.display = 'block';
+        }
+
+        function checkRatio() {
+            const a = parseFloat(document.getElementById('checkA').value);
+            const b = parseFloat(document.getElementById('checkB').value);
+            const c = parseFloat(document.getElementById('checkC').value);
+            const d = parseFloat(document.getElementById('checkD').value);
+            
+            document.getElementById('result').style.display = 'none';
+            document.getElementById('error').style.display = 'none';
+            
+            if ([a, b, c, d].some(isNaN)) {
+                document.getElementById('error').textContent = '请输入所有四个值';
+                document.getElementById('error').style.display = 'block';
+                return;
+            }
+            
+            const leftRatio = a / b;
+            const rightRatio = c / d;
+            const isEqual = Math.abs(leftRatio - rightRatio) < 0.0001;
+            
+            const leftCross = a * d;
+            const rightCross = b * c;
+            
+            document.getElementById('resultText').innerHTML = 
+                isEqual 
+                    ? `<span style="color:#28a745;">✓ 成立</span><br><small>交叉相乘: ${a}×${d} = ${b}×${c} = ${leftCross}</small>`
+                    : `<span style="color:#dc3545;">✗ 不成立</span><br><small>交叉相乘: ${a}×${d} = ${leftCross}, ${b}×${c} = ${rightCross}</small>`;
+            document.getElementById('result').style.display = 'block';
+        }
+
+        function simplifyRatio() {
+            const a = parseFloat(document.getElementById('simpA').value);
+            const b = parseFloat(document.getElementById('simpB').value);
+            
+            document.getElementById('result').style.display = 'none';
+            document.getElementById('error').style.display = 'none';
+            
+            if (isNaN(a) || isNaN(b)) {
+                document.getElementById('error').textContent = '请输入两个值';
+                document.getElementById('error').style.display = 'block';
+                return;
+            }
+            
+            if (b === 0) {
+                document.getElementById('error').textContent = '第二个数不能为零';
+                document.getElementById('error').style.display = 'block';
+                return;
+            }
+            
+            const g = gcd(a, b);
+            const simpA = a / g;
+            const simpB = b / g;
+            
+            document.getElementById('resultText').innerHTML = 
+                `化简后: <span style="color:#007bff;">${simpA} : ${simpB}</span><br><small>GCD = ${g}</small>`;
+            document.getElementById('result').style.display = 'block';
+        }
+    </script>
+    <div class="ad-banner-bottom"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+</body>
+</html>

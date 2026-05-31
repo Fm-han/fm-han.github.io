@@ -1,0 +1,105 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SQL格式化工具 - 免费在线工具</title>
+    <style>
+                /* 顶部横幅广告 - 透明样式 */ .ad-banner-top { border-bottom: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; } .ad-banner-bottom { border-top: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; margin-top: 40px; } .ad-container { max-width: 728px; margin: 0 auto; min-height: 38px; display: flex; align-items: center; justify-content: center; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #fafafa; min-height: 100vh; padding: 20px; }
+        .container { max-width: 900px; margin: 0 auto; }
+        .card { background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; padding: 24px; margin-bottom: 20px; }
+        h1 { font-size: 1.25rem; font-weight: 600; margin-bottom: 16px; color: #333; }
+        textarea { border: 1px solid #ddd; border-radius: 4px; padding: 12px; width: 100%; min-height: 200px; font-family: monospace; font-size: 14px; box-sizing: border-box; resize: vertical; }
+        .btn { background: #007bff; color: #fff; border: none; padding: 8px 20px; border-radius: 4px; cursor: pointer; margin: 5px 5px 5px 0; }
+        .btn:hover { background: #0056b3; }
+        .btn-secondary { background: #28a745; }
+        .btn-secondary:hover { background: #218838; }
+        .label { font-weight: 500; margin-bottom: 8px; display: block; color: #333; }
+    </style>
+</head>
+<body>
+    <div class="ad-banner-top"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+    <div class="container">
+        <h1>SQL格式化工具</h1>
+        <div class="card">
+            <label class="label">输入 SQL</label>
+            <textarea id="sqlInput" placeholder="在此粘贴您的 SQL 语句..."></textarea>
+            <div style="margin-top: 16px;">
+                <button class="btn" onclick="formatSQL()">格式化</button>
+                <button class="btn btn-secondary" onclick="compressSQL()">压缩</button>
+                <button class="btn" onclick="clearAll()">清空</button>
+            </div>
+        </div>
+        <div class="card">
+            <label class="label">格式化结果</label>
+            <textarea id="sqlOutput" readonly style="background: #f9f9f9;"></textarea>
+            <div style="margin-top: 16px;">
+                <button class="btn" onclick="copyResult()">复制结果</button>
+            </div>
+        </div>
+    </div>
+    <script>
+        function formatSQL() {
+            const input = document.getElementById('sqlInput').value;
+            let formatted = formatSQLQuery(input);
+            document.getElementById('sqlOutput').value = formatted;
+        }
+
+        function compressSQL() {
+            const input = document.getElementById('sqlInput').value;
+            let compressed = input
+                .replace(/\s+/g, ' ')
+                .replace(/\s*,\s*/g, ', ')
+                .replace(/\s*\(\s*/g, '(')
+                .replace(/\s*\)\s*/g, ')')
+                .trim();
+            document.getElementById('sqlOutput').value = compressed;
+        }
+
+        function formatSQLQuery(sql) {
+            const keywords = ['SELECT', 'FROM', 'WHERE', 'AND', 'OR', 'JOIN', 'LEFT JOIN', 'RIGHT JOIN', 'INNER JOIN', 'OUTER JOIN', 'ON', 'GROUP BY', 'HAVING', 'ORDER BY', 'LIMIT', 'OFFSET', 'INSERT INTO', 'VALUES', 'UPDATE', 'SET', 'DELETE FROM', 'CREATE TABLE', 'ALTER TABLE', 'DROP TABLE', 'INSERT', 'UPDATE', 'DELETE', 'UNION', 'AS', 'DISTINCT', 'IN', 'NOT IN', 'BETWEEN', 'LIKE', 'IS NULL', 'IS NOT NULL', 'CASE', 'WHEN', 'THEN', 'ELSE', 'END', 'EXISTS', 'NOT EXISTS'];
+            
+            let result = sql;
+            keywords.forEach(kw => {
+                const regex = new RegExp('\\b' + kw + '\\b', 'gi');
+                result = result.replace(regex, kw);
+            });
+
+            const upperKeywords = ['SELECT', 'FROM', 'WHERE', 'GROUP BY', 'HAVING', 'ORDER BY', 'LIMIT', 'INSERT INTO', 'VALUES', 'UPDATE', 'SET', 'DELETE FROM', 'CREATE TABLE', 'ALTER TABLE', 'DROP TABLE', 'UNION', 'CASE', 'WHEN', 'THEN', 'ELSE', 'END'];
+            upperKeywords.forEach(kw => {
+                const regex = new RegExp('\\b' + kw + '\\b', 'gi');
+                result = result.replace(regex, kw);
+            });
+
+            result = result.replace(/\s+/g, ' ');
+            
+            result = result.replace(/\s*(SELECT|FROM|WHERE|AND|OR|GROUP BY|HAVING|ORDER BY|LIMIT|JOIN|LEFT JOIN|RIGHT JOIN|INNER JOIN|ON|INSERT INTO|UPDATE|SET|DELETE FROM)\s*/gi, '\n$1 ');
+            
+            result = result.replace(/,\s*/g, ',\n    ');
+            result = result.replace(/\(\s+/g, '(\n    ');
+            result = result.replace(/\s+\)/g, '\n)');
+
+            result = result.replace(/^\s+/gm, '');
+            
+            result = result.split('\n').filter(line => line.trim()).join('\n');
+            
+            return result;
+        }
+
+        function clearAll() {
+            document.getElementById('sqlInput').value = '';
+            document.getElementById('sqlOutput').value = '';
+        }
+
+        function copyResult() {
+            const output = document.getElementById('sqlOutput');
+            output.select();
+            document.execCommand('copy');
+            alert('已复制到剪贴板');
+        }
+    </script>
+    <div class="ad-banner-bottom"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+</body>
+</html>

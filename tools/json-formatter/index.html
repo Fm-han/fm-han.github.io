@@ -1,0 +1,124 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JSON格式化工具 - 在线JSON格式化/压缩/校验</title>
+  <meta name="description" content="免费在线JSON格式化工具，支持格式化、压缩、校验、按键排序，浏览器本地处理。">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://fm-han.github.io/json-formatter/">
+  <style>
+                /* 顶部横幅广告 - 透明样式 */ .ad-banner-top { border-bottom: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; } .ad-banner-bottom { border-top: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; margin-top: 40px; } .ad-container { max-width: 728px; margin: 0 auto; min-height: 38px; display: flex; align-items: center; justify-content: center; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 20px; color: #333; line-height: 1.6; background: #fafafa; }
+    h1 { text-align: center; font-size: 1.8rem; color: #1a1a1a; }
+    h1 small { display: block; font-size: 0.85rem; color: #666; margin-top: 4px; font-weight: normal; }
+    .section { margin: 20px 0; padding: 16px; border: 1px solid #e0e0e0; border-radius: 8px; background: #fff; }
+    textarea { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 0.9rem; box-sizing: border-box; font-family: 'Consolas', monospace; resize: vertical; min-height: 200px; }
+    .buttons { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; align-items: center; }
+    button { padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-size: 0.95rem; }
+    .btn-format { background: #007bff; color: #fff; }
+    .btn-minify { background: #28a745; color: #fff; }
+    .btn-validate { background: #ffc107; color: #333; }
+    .btn-sort { background: #6f42c1; color: #fff; }
+    .btn-copy { background: #fd7e14; color: #fff; }
+    .btn-clear { background: #6c757d; color: #fff; }
+    button:hover { opacity: 0.9; }
+    .status { padding: 12px; border-radius: 6px; margin-top: 12px; font-size: 0.9rem; }
+    .status.success { background: #d4edda; color: #155724; }
+    .status.error { background: #f8d7da; color: #721c24; }
+    .footer { text-align: center; margin: 24px 0; padding: 12px; font-size: 0.85rem; color: #28a745; font-weight: 500; }
+  </style>
+</head>
+<body>
+    <div class="ad-banner-top"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+
+  <h1>JSON格式化工具 <small>格式化 / 压缩 / 校验 / 排序 · 浏览器本地处理</small></h1>
+
+  <div class="section">
+    <textarea id="input" placeholder="粘贴JSON内容..."></textarea>
+    <div class="buttons">
+      <button class="btn-format" onclick="format()">格式化</button>
+      <button class="btn-minify" onclick="minify()">压缩</button>
+      <button class="btn-validate" onclick="validate()">校验</button>
+      <button class="btn-sort" onclick="sortKeys()">按键排序</button>
+      <button class="btn-copy" onclick="copyResult()">复制</button>
+      <button class="btn-clear" onclick="clearAll()">清空</button>
+    </div>
+    <div id="status"></div>
+  </div>
+
+  <div class="section">
+    <textarea id="output" placeholder="结果将显示在这里" readonly style="background:#f8f9fa;"></textarea>
+  </div>
+
+  <div class="footer">100% 免费 · 数据不上传服务器 · 仅浏览器本地处理</div>
+
+  <script>
+    function format() {
+      const input = document.getElementById('input').value.trim();
+      if (!input) return showStatus('请输入JSON', 'error');
+      try {
+        const obj = JSON.parse(input);
+        document.getElementById('output').value = JSON.stringify(obj, null, 2);
+        showStatus('格式化成功', 'success');
+      } catch (e) { showStatus('错误: ' + e.message, 'error'); }
+    }
+
+    function minify() {
+      const input = document.getElementById('input').value.trim();
+      if (!input) return showStatus('请输入JSON', 'error');
+      try {
+        const obj = JSON.parse(input);
+        document.getElementById('output').value = JSON.stringify(obj);
+        showStatus('压缩成功', 'success');
+      } catch (e) { showStatus('错误: ' + e.message, 'error'); }
+    }
+
+    function validate() {
+      const input = document.getElementById('input').value.trim();
+      if (!input) return showStatus('请输入JSON', 'error');
+      try {
+        JSON.parse(input);
+        showStatus('✓ JSON格式正确', 'success');
+      } catch (e) { showStatus('✗ 错误: ' + e.message, 'error'); }
+    }
+
+    function sortKeys() {
+      const input = document.getElementById('input').value.trim();
+      if (!input) return showStatus('请输入JSON', 'error');
+      try {
+        const obj = JSON.parse(input);
+        document.getElementById('output').value = JSON.stringify(sortObject(obj), null, 2);
+        showStatus('按键排序成功', 'success');
+      } catch (e) { showStatus('错误: ' + e.message, 'error'); }
+    }
+
+    function sortObject(obj) {
+      if (Array.isArray(obj)) return obj.map(sortObject);
+      if (obj && typeof obj === 'object') {
+        return Object.keys(obj).sort().reduce((acc, key) => {
+          acc[key] = sortObject(obj[key]);
+          return acc;
+        }, {});
+      }
+      return obj;
+    }
+
+    function copyResult() {
+      const text = document.getElementById('output').value;
+      if (text) navigator.clipboard.writeText(text).then(() => alert('已复制!'));
+    }
+
+    function clearAll() {
+      document.getElementById('input').value = '';
+      document.getElementById('output').value = '';
+      document.getElementById('status').innerHTML = '';
+    }
+
+    function showStatus(msg, type) {
+      document.getElementById('status').innerHTML = `<div class="status ${type}">${msg}</div>`;
+    }
+  </script>
+    <div class="ad-banner-bottom"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+</body>
+</html>

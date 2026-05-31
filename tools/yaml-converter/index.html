@@ -1,0 +1,128 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>YAML转换器 - 在线YAML与JSON互转工具</title>
+  <meta name="description" content="免费在线YAML与JSON互转工具，输入JSON转YAML或输入YAML转JSON，实时转换语法高亮，支持格式化与压缩。">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://fm-han.github.io/yaml-converter/">
+  <style>
+                /* 顶部横幅广告 - 透明样式 */ .ad-banner-top { border-bottom: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; } .ad-banner-bottom { border-top: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; margin-top: 40px; } .ad-container { max-width: 728px; margin: 0 auto; min-height: 38px; display: flex; align-items: center; justify-content: center; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; max-width: 1000px; margin: 0 auto; padding: 20px; color: #333; line-height: 1.6; background: #fafafa; }
+    h1 { text-align: center; font-size: 1.8rem; color: #1a1a1a; }
+    h1 small { display: block; font-size: 0.85rem; color: #666; margin-top: 4px; font-weight: normal; }
+    .section { margin: 20px 0; padding: 16px; border: 1px solid #e0e0e0; border-radius: 8px; background: #fff; }
+    .section label { display: block; font-weight: 600; margin-bottom: 8px; }
+    .convert-row { display: grid; grid-template-columns: 1fr auto 1fr; gap: 12px; align-items: center; }
+    textarea { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 0.9rem; box-sizing: border-box; font-family: 'Consolas', monospace; resize: vertical; min-height: 250px; }
+    textarea.readonly { background: #f8f9fa; }
+    .arrow-btn { font-size: 2rem; cursor: pointer; color: #007bff; background: none; border: none; padding: 12px; }
+    .arrow-btn:hover { opacity: 0.7; }
+    .buttons { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+    button { padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-size: 0.95rem; }
+    .btn-primary { background: #007bff; color: #fff; }
+    .btn-copy { background: #28a745; color: #fff; }
+    .btn-clear { background: #6c757d; color: #fff; }
+    button:hover { opacity: 0.9; }
+    .footer { text-align: center; margin: 24px 0; padding: 12px; font-size: 0.85rem; color: #28a745; font-weight: 500; }
+    @media (max-width: 700px) { .convert-row { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+    <div class="ad-banner-top"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+
+  <h1>YAML转换器 <small>JSON ↔ YAML 互转 / 格式化 / 浏览器本地</small></h1>
+
+  <div class="section">
+    <div class="convert-row">
+      <div>
+        <label>JSON 输入</label>
+        <textarea id="jsonInput" placeholder='{"name":"张三","age":25,"skills":["Python","Java"]}'></textarea>
+        <div class="buttons">
+          <button class="btn-primary" onclick="jsonToYaml()">JSON → YAML</button>
+          <button class="btn-clear" onclick="document.getElementById('jsonInput').value='';document.getElementById('yamlOutput').value=''">清空</button>
+        </div>
+      </div>
+      <div>
+        <button class="arrow-btn" onclick="swapSides()">⇄</button>
+      </div>
+      <div>
+        <label>YAML 输出</label>
+        <textarea id="yamlOutput" class="readonly" readonly placeholder="# YAML 输出..."></textarea>
+        <div class="buttons">
+          <button class="btn-copy" onclick="copyYaml()">复制YAML</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <label>转换说明</label>
+    <div style="padding:12px;background:#f8f9fa;border-radius:6px;font-size:0.9rem;">
+      <p>• 点击 <strong>JSON → YAML</strong> 将左侧JSON转换为YAML格式</p>
+      <p>• 点击 <strong>⇄</strong> 交换两侧内容，继续转换</p>
+      <p>• 支持嵌套对象、数组、字符串、数字等常见JSON类型</p>
+    </div>
+  </div>
+
+  <div class="footer">100% 免费 · 数据不上传服务器 · 仅浏览器本地处理</div>
+
+  <script>
+    function jsonToYaml() {
+      const input = document.getElementById('jsonInput').value.trim();
+      if (!input) { alert('请输入JSON'); return; }
+      try {
+        const obj = JSON.parse(input);
+        const yaml = jsonToYamlStr(obj, 0);
+        document.getElementById('yamlOutput').value = yaml;
+      } catch(e) {
+        alert('JSON格式错误: ' + e.message);
+      }
+    }
+    function jsonToYamlStr(obj, indent) {
+      const spaces = '  '.repeat(indent);
+      if (Array.isArray(obj)) {
+        return obj.map(item => {
+          if (typeof item === 'object' && item !== null) {
+            return spaces + '- ' + jsonToYamlStr(item, indent + 1).split('\n').join('\n' + spaces + '  ');
+          }
+          return spaces + '- ' + yamlValue(item);
+        }).join('\n');
+      } else if (typeof obj === 'object' && obj !== null) {
+        return Object.entries(obj).map(([k, v]) => {
+          if (typeof v === 'object' && v !== null) {
+            const prefix = spaces + k + ':';
+            if (Array.isArray(v)) {
+              return prefix + '\n' + spaces + '  ' + jsonToYamlStr(v, indent + 1).split('\n').join('\n' + spaces + '  ');
+            }
+            return prefix + '\n' + spaces + '  ' + jsonToYamlStr(v, indent + 1).split('\n').join('\n' + spaces + '  ');
+          }
+          return spaces + k + ': ' + yamlValue(v);
+        }).join('\n');
+      }
+      return spaces + yamlValue(obj);
+    }
+    function yamlValue(v) {
+      if (typeof v === 'string') {
+        if (v.includes(':') || v.includes('#') || v.includes('\n') || v === '') return '"' + v.replace(/"/g, '\\"') + '"';
+        return v;
+      }
+      if (v === null) return 'null';
+      return String(v);
+    }
+    function swapSides() {
+      const j = document.getElementById('jsonInput').value;
+      const y = document.getElementById('yamlOutput').value;
+      document.getElementById('jsonInput').value = y;
+      document.getElementById('yamlOutput').value = j;
+    }
+    function copyYaml() {
+      const t = document.getElementById('yamlOutput').value;
+      if (!t) { alert('无内容'); return; }
+      navigator.clipboard.writeText(t).then(() => alert('已复制!'));
+    }
+  </script>
+    <div class="ad-banner-bottom"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+</body>
+</html>

@@ -1,0 +1,131 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>渐变色生成器 - 在线工具</title>
+    <link rel="canonical" href="https://fm-han.github.io/color-gradient/">
+    <style>
+                /* 顶部横幅广告 - 透明样式 */ .ad-banner-top { border-bottom: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; } .ad-banner-bottom { border-top: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; margin-top: 40px; } .ad-container { max-width: 728px; margin: 0 auto; min-height: 38px; display: flex; align-items: center; justify-content: center; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #fafafa; min-height: 100vh; display: flex; flex-direction: column; }
+        .container { max-width: 800px; margin: 0 auto; padding: 20px; flex: 1; }
+        h1 { text-align: center; color: #333; margin-bottom: 30px; font-size: 28px; }
+        .card { background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; padding: 24px; margin-bottom: 20px; }
+        .preview { width: 100%; height: 200px; border-radius: 8px; margin-bottom: 20px; transition: background 0.3s; }
+        .color-inputs { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+        .input-group { margin-bottom: 12px; }
+        label { display: block; margin-bottom: 8px; color: #555; font-weight: 500; }
+        input[type="color"] { width: 60px; height: 40px; border: 1px solid #ddd; border-radius: 6px; cursor: pointer; }
+        input[type="text"] { width: calc(100% - 70px); padding: 10px 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; margin-left: 10px; }
+        .direction-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; }
+        .dir-btn { padding: 10px; border: 2px solid #ddd; background: #fff; border-radius: 6px; cursor: pointer; font-size: 14px; transition: all 0.2s; }
+        .dir-btn:hover { border-color: #007bff; }
+        .dir-btn.active { border-color: #007bff; background: #e7f3ff; color: #007bff; }
+        .btn { padding: 12px 24px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; color: #fff; }
+        .btn-primary { background: #007bff; }
+        .btn-secondary { background: #28a745; }
+        .btn-gray { background: #6c757d; }
+        .btn:hover { opacity: 0.85; }
+        .css-output { margin-top: 16px; }
+        textarea { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px; font-family: monospace; font-size: 14px; resize: vertical; min-height: 80px; }
+        footer { text-align: center; padding: 20px; color: #888; font-size: 14px; }
+    </style>
+</head>
+<body>
+    <div class="ad-banner-top"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+    <div class="container">
+        <h1>渐变色生成器</h1>
+        <div class="card">
+            <div id="preview" class="preview"></div>
+            <div class="color-inputs">
+                <div class="input-group">
+                    <label>起始颜色</label>
+                    <input type="color" id="color1" value="#007bff" onchange="updateGradient()">
+                    <input type="text" id="color1Text" value="#007bff" onchange="updateFromText(1)">
+                </div>
+                <div class="input-group">
+                    <label>结束颜色</label>
+                    <input type="color" id="color2" value="#00d4ff" onchange="updateGradient()">
+                    <input type="text" id="color2Text" value="#00d4ff" onchange="updateFromText(2)">
+                </div>
+            </div>
+            <label style="display: block; margin-bottom: 12px; color: #555; font-weight: 500;">渐变方向</label>
+            <div class="direction-grid">
+                <button class="dir-btn active" onclick="setDirection('to top', this)">从上到下</button>
+                <button class="dir-btn" onclick="setDirection('to top right', this)">从左下到右上</button>
+                <button class="dir-btn" onclick="setDirection('to right', this)">从左到右</button>
+                <button class="dir-btn" onclick="setDirection('to bottom right', this)">从左上到右下</button>
+                <button class="dir-btn" onclick="setDirection('to bottom', this)">从下到上</button>
+                <button class="dir-btn" onclick="setDirection('to left', this)">从右到左</button>
+            </div>
+            <div class="css-output">
+                <label style="display: block; margin-bottom: 8px;">CSS 代码</label>
+                <textarea id="cssCode" readonly></textarea>
+            </div>
+            <div style="display: flex; gap: 10px; margin-top: 16px;">
+                <button class="btn btn-primary" onclick="copyCSS()">复制 CSS</button>
+                <button class="btn btn-secondary" onclick="randomColors()">随机颜色</button>
+                <button class="btn btn-gray" onclick="resetGradient()">重置</button>
+            </div>
+        </div>
+    </div>
+    <footer>100% 免费 · 数据不上传服务器 · 仅浏览器本地处理</footer>
+    <script>
+        let currentDirection = 'to top';
+        
+        function updateGradient() {
+            const c1 = document.getElementById('color1').value;
+            const c2 = document.getElementById('color2').value;
+            document.getElementById('color1Text').value = c1;
+            document.getElementById('color2Text').value = c2;
+            applyGradient(c1, c2);
+        }
+        
+        function updateFromText(num) {
+            const text = document.getElementById(`color${num}Text`).value;
+            const colorInput = document.getElementById(`color${num}`);
+            if (/^#[0-9a-fA-F]{6}$/.test(text)) {
+                colorInput.value = text;
+                updateGradient();
+            }
+        }
+        
+        function applyGradient(c1, c2) {
+            const css = `linear-gradient(${currentDirection}, ${c1}, ${c2})`;
+            document.getElementById('preview').style.background = css;
+            document.getElementById('cssCode').value = `background: ${css};`;
+        }
+        
+        function setDirection(dir, btn) {
+            currentDirection = dir;
+            document.querySelectorAll('.dir-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            updateGradient();
+        }
+        
+        function copyCSS() {
+            const css = document.getElementById('cssCode').value;
+            navigator.clipboard.writeText(css).then(() => alert('已复制到剪贴板'));
+        }
+        
+        function randomColors() {
+            const randomHex = () => '#' + Math.floor(Math.random()*16777215).toString(16).padStart(6,'0');
+            document.getElementById('color1').value = randomHex();
+            document.getElementById('color2').value = randomHex();
+            updateGradient();
+        }
+        
+        function resetGradient() {
+            document.getElementById('color1').value = '#007bff';
+            document.getElementById('color2').value = '#00d4ff';
+            currentDirection = 'to top';
+            document.querySelectorAll('.dir-btn').forEach((b, i) => b.classList.toggle('active', i === 0));
+            updateGradient();
+        }
+        
+        updateGradient();
+    </script>
+    <div class="ad-banner-bottom"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+</body>
+</html>

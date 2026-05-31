@@ -1,0 +1,139 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JWT解码器 - 在线JSON Web Token解析验证工具</title>
+  <meta name="description" content="免费在线JWT解码器，快速解析JSON Web Token的Header和Payload内容，查看过期时间和声明信息，浏览器本地处理。">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://fm-han.github.io/jwt-decoder/">
+  <style>
+                /* 顶部横幅广告 - 透明样式 */ .ad-banner-top { border-bottom: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; } .ad-banner-bottom { border-top: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; margin-top: 40px; } .ad-container { max-width: 728px; margin: 0 auto; min-height: 38px; display: flex; align-items: center; justify-content: center; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; color: #333; line-height: 1.6; background: #fafafa; }
+    h1 { text-align: center; font-size: 1.8rem; color: #1a1a1a; }
+    h1 small { display: block; font-size: 0.85rem; color: #666; margin-top: 4px; font-weight: normal; }
+    .section { margin: 20px 0; padding: 16px; border: 1px solid #e0e0e0; border-radius: 8px; background: #fff; }
+    .section label { display: block; font-weight: 600; margin-bottom: 8px; }
+    textarea { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 0.9rem; box-sizing: border-box; font-family: monospace; resize: vertical; min-height: 80px; }
+    .jwt-parts { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 12px; }
+    .jwt-part { padding: 8px; border-radius: 6px; text-align: center; font-size: 0.85rem; font-weight: 600; }
+    .jwt-part.header { background: #fff3cd; color: #856404; }
+    .jwt-part.payload { background: #d1ecf1; color: #0c5460; }
+    .jwt-part.signature { background: #d4edda; color: #155724; }
+    .result-box { margin-top: 12px; padding: 12px; background: #f8f9fa; border-radius: 6px; }
+    .result-box .title { font-weight: 700; margin-bottom: 8px; font-size: 0.9rem; }
+    .result-box pre { font-size: 0.85rem; white-space: pre-wrap; word-break: break-all; margin: 0; }
+    .status { padding: 8px 12px; border-radius: 6px; margin-top: 8px; font-size: 0.9rem; font-weight: 600; }
+    .status.valid { background: #d4edda; color: #155724; }
+    .status.expired { background: #f8d7da; color: #721c24; }
+    .status.error { background: #f8d7da; color: #721c24; }
+    .buttons { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+    button { padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-size: 0.95rem; }
+    .btn-primary { background: #007bff; color: #fff; }
+    .btn-copy { background: #28a745; color: #fff; }
+    .btn-clear { background: #6c757d; color: #fff; }
+    button:hover { opacity: 0.9; }
+    .footer { text-align: center; margin: 24px 0; padding: 12px; font-size: 0.85rem; color: #28a745; font-weight: 500; }
+    @media (max-width: 600px) { .jwt-parts { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+    <div class="ad-banner-top"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+
+  <h1>JWT解码器 <small>Header / Payload / 过期时间 · 浏览器本地</small></h1>
+
+  <div class="section">
+    <label>输入 JWT Token</label>
+    <textarea id="jwtInput" placeholder="粘贴JWT Token，如: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"></textarea>
+    <div class="jwt-parts">
+      <div class="jwt-part header" id="part1">HEADER</div>
+      <div class="jwt-part payload" id="part2">PAYLOAD</div>
+      <div class="jwt-part signature" id="part3">SIGNATURE</div>
+    </div>
+    <div class="buttons">
+      <button class="btn-primary" onclick="decode()">解码</button>
+      <button class="btn-copy" onclick="copyAll()">复制全部</button>
+      <button class="btn-clear" onclick="document.getElementById('jwtInput').value='';document.getElementById('result').innerHTML='';document.getElementById('status').className='status';document.getElementById('status').textContent='';['part1','part2','part3'].forEach(i=>document.getElementById(i).textContent='-')">清空</button>
+    </div>
+  </div>
+
+  <div class="section">
+    <label>解码结果</label>
+    <div id="result">
+      <div style="color:#999;text-align:center;padding:20px;">粘贴JWT后点击解码...</div>
+    </div>
+    <div id="status" class="status" style="display:none;"></div>
+  </div>
+
+  <div class="footer">100% 免费 · 数据不上传服务器 · 仅浏览器本地处理</div>
+
+  <script>
+    function decode() {
+      const token = document.getElementById('jwtInput').value.trim();
+      if (!token) { alert('请输入JWT'); return; }
+      const parts = token.split('.');
+      if (parts.length !== 3) { showError('无效的JWT格式'); return; }
+
+      try {
+        const header = JSON.parse(atob(parts[0].replace(/-/g, '+').replace(/_/g, '/')));
+        const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
+        const signature = parts[2];
+
+        document.getElementById('part1').textContent = header.alg || header.alg;
+        document.getElementById('part2').textContent = payload.sub ? (payload.sub.substring(0,10)) : '有效载荷';
+        document.getElementById('part3').textContent = signature.substring(0,20) + '...';
+
+        let expInfo = '';
+        let statusHtml = '';
+        if (payload.exp) {
+          const expDate = new Date(payload.exp * 1000);
+          const now = new Date();
+          const isExpired = expDate < now;
+          expInfo = `<div class="result-box"><div class="title">过期时间 (exp)</div><pre>${expDate.toLocaleString('zh-CN')}</pre></div>`;
+          if (isExpired) {
+            statusHtml = '<div class="status expired">⚠ Token已过期 (过期于 ' + expDate.toLocaleString('zh-CN') + ')</div>';
+          } else {
+            const remain = Math.floor((expDate - now) / 1000);
+            statusHtml = `<div class="status valid">✓ Token有效 (剩余 ${formatRemain(remain)})</div>`;
+          }
+        }
+        if (payload.iat) {
+          expInfo += `<div class="result-box"><div class="title">签发时间 (iat)</div><pre>${new Date(payload.iat * 1000).toLocaleString('zh-CN')}</pre></div>`;
+        }
+        if (payload.nbf) {
+          expInfo += `<div class="result-box"><div class="title">生效时间 (nbf)</div><pre>${new Date(payload.nbf * 1000).toLocaleString('zh-CN')}</pre></div>`;
+        }
+
+        document.getElementById('result').innerHTML = `
+          <div class="result-box"><div class="title">Header</div><pre>${JSON.stringify(header, null, 2)}</pre></div>
+          <div class="result-box"><div class="title">Payload</div><pre>${JSON.stringify(payload, null, 2)}</pre></div>
+          <div class="result-box"><div class="title">Signature (无法验证)</div><pre>${signature}</pre></div>
+          ${expInfo}
+        `;
+        document.getElementById('status').innerHTML = statusHtml;
+        document.getElementById('status').style.display = 'block';
+      } catch(e) {
+        showError('解码失败: ' + e.message);
+      }
+    }
+    function showError(msg) {
+      document.getElementById('result').innerHTML = `<div style="color:#d9534f;text-align:center;padding:20px;">${msg}</div>`;
+      document.getElementById('status').className = 'status error';
+      document.getElementById('status').textContent = msg;
+      document.getElementById('status').style.display = 'block';
+    }
+    function formatRemain(seconds) {
+      if (seconds < 60) return seconds + '秒';
+      if (seconds < 3600) return Math.floor(seconds/60) + '分钟';
+      if (seconds < 86400) return Math.floor(seconds/3600) + '小时';
+      return Math.floor(seconds/86400) + '天';
+    }
+    function copyAll() {
+      const r = document.getElementById('result').innerText;
+      if (r.includes('粘贴JWT')) { alert('无内容'); return; }
+      navigator.clipboard.writeText(r).then(() => alert('已复制!'));
+    }
+  </script>
+    <div class="ad-banner-bottom"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+</body>
+</html>

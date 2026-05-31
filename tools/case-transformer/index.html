@@ -1,0 +1,136 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>大小写转换工具 - 文本格式转换</title>
+  <meta name="description" content="免费在线大小写转换工具，支持全大写、全小写、首字母大写、驼峰命名、下划线命名等多种格式互转。">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://fm-han.github.io/case-transformer/">
+  <style>
+                /* 顶部横幅广告 - 透明样式 */ .ad-banner-top { border-bottom: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; } .ad-banner-bottom { border-top: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; margin-top: 40px; } .ad-container { max-width: 728px; margin: 0 auto; min-height: 38px; display: flex; align-items: center; justify-content: center; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; max-width: 700px; margin: 0 auto; padding: 20px; color: #333; line-height: 1.6; background: #fafafa; }
+    h1 { text-align: center; font-size: 1.8rem; color: #1a1a1a; }
+    h1 small { display: block; font-size: 0.85rem; color: #666; margin-top: 4px; font-weight: normal; }
+    .card { margin: 20px 0; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px; background: #fff; }
+    .input-section textarea { width: 100%; min-height: 120px; padding: 12px; border: 1px solid #ccc; border-radius: 6px; font-family: monospace; font-size: 1rem; resize: vertical; box-sizing: border-box; }
+    .transform-btns { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 16px 0; }
+    .transform-btn { padding: 14px; border: 1px solid #ccc; border-radius: 6px; background: #fff; cursor: pointer; text-align: center; transition: all 0.2s; }
+    .transform-btn:hover { background: #f0f0f0; border-color: #007bff; }
+    .transform-btn.active { background: #007bff; color: #fff; border-color: #007bff; }
+    .transform-btn .name { font-weight: 600; margin-bottom: 4px; }
+    .transform-btn .desc { font-size: 0.75rem; color: #666; }
+    .transform-btn.active .desc { color: rgba(255,255,255,0.8); }
+    .result-section { margin-top: 16px; }
+    .result-section textarea { width: 100%; min-height: 120px; padding: 12px; border: 1px solid #ccc; border-radius: 6px; font-family: monospace; font-size: 1rem; background: #f5f5f5; resize: vertical; box-sizing: border-box; }
+    button { padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-size: 1rem; }
+    .btn-success { background: #28a745; color: #fff; }
+    button:hover { opacity: 0.9; }
+    .buttons { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+    .footer { text-align: center; margin: 24px 0; padding: 12px; font-size: 0.85rem; color: #28a745; font-weight: 500; }
+  </style>
+</head>
+<body>
+    <div class="ad-banner-top"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+  <h1>大小写转换工具 <small>驼峰 · 下划线 · 首字母大写 · 多种格式</small></h1>
+
+  <div class="card">
+    <div class="input-section">
+      <label><strong>输入文本</strong></label>
+      <textarea id="inputText" placeholder="输入要转换的文本...">Hello World Example Text
+user_name_value
+HELLO_WORLD</textarea>
+    </div>
+    <div class="transform-btns">
+      <button class="transform-btn" onclick="transform('upper')">
+        <div class="name">大写 UPPER</div>
+        <div class="desc">全部转为大写</div>
+      </button>
+      <button class="transform-btn" onclick="transform('lower')">
+        <div class="name">小写 lower</div>
+        <div class="desc">全部转为小写</div>
+      </button>
+      <button class="transform-btn" onclick="transform('sentence')">
+        <div class="name">句首大写</div>
+        <div class="desc">每句首字母大写</div>
+      </button>
+      <button class="transform-btn" onclick="transform('title')">
+        <div class="name">标题格式</div>
+        <div class="desc">每个单词首字母大写</div>
+      </button>
+      <button class="transform-btn" onclick="transform('camel')">
+        <div class="name">驼峰 camelCase</div>
+        <div class="desc">首单词小写后续大写</div>
+      </button>
+      <button class="transform-btn" onclick="transform('pascal')">
+        <div class="name">帕斯卡 PascalCase</div>
+        <div class="desc">每个单词首字母大写</div>
+      </button>
+      <button class="transform-btn" onclick="transform('snake')">
+        <div class="name">下划线 snake_case</div>
+        <div class="desc">小写加下划线</div>
+      </button>
+      <button class="transform-btn" onclick="transform('kebab')">
+        <div class="name">短横线 kebab-case</div>
+        <div class="desc">小写加短横线</div>
+      </button>
+      <button class="transform-btn" onclick="transform('constant')">
+        <div class="name">常量 CONSTANT_CASE</div>
+        <div class="desc">大写加下划线</div>
+      </button>
+    </div>
+    <div class="result-section">
+      <label><strong>转换结果</strong></label>
+      <textarea id="outputText" readonly></textarea>
+    </div>
+    <div class="buttons" style="margin-top:16px;">
+      <button class="btn-success" onclick="copyResult()">复制结果</button>
+    </div>
+  </div>
+
+  <div class="footer">100% 免费 · 数据不上传服务器 · 仅浏览器本地处理</div>
+
+  <script>
+    function transform(type) {
+      const text = document.getElementById('inputText').value;
+      if (!text.trim()) { alert('请输入文本'); return; }
+      document.querySelectorAll('.transform-btn').forEach(b => b.classList.remove('active'));
+      event.target.closest('.transform-btn').classList.add('active');
+      const words = text.split(/[\s_\-,\.\/\\]+/).filter(w => w);
+      let result = '';
+      switch (type) {
+        case 'upper': result = text.toUpperCase(); break;
+        case 'lower': result = text.toLowerCase(); break;
+        case 'sentence':
+          result = text.toLowerCase().replace(/(^\s*|\.\s+)([a-z])/g, (m, p1, p2) => p1 + p2.toUpperCase());
+          break;
+        case 'title':
+          result = text.split(/[\s_\-,\.\/\\]+/).map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
+          break;
+        case 'camel':
+          result = words.map((w, i) => i === 0 ? w.toLowerCase() : w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join('');
+          break;
+        case 'pascal':
+          result = words.map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join('');
+          break;
+        case 'snake':
+          result = words.map(w => w.toLowerCase()).join('_');
+          break;
+        case 'kebab':
+          result = words.map(w => w.toLowerCase()).join('-');
+          break;
+        case 'constant':
+          result = words.map(w => w.toUpperCase()).join('_');
+          break;
+      }
+      document.getElementById('outputText').value = result;
+    }
+    function copyResult() {
+      const text = document.getElementById('outputText').value;
+      if (!text) { alert('请先转换'); return; }
+      navigator.clipboard.writeText(text).then(() => alert('已复制'));
+    }
+  </script>
+    <div class="ad-banner-bottom"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+</body>
+</html>

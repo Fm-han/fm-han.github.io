@@ -1,0 +1,95 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SVG转PNG工具 - SVG代码转PNG图片</title>
+  <meta name="description" content="免费在线SVG转PNG工具，粘贴SVG代码转换为PNG图片并下载，支持自定义尺寸。">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://fm-han.github.io/svg-to-png/">
+  <style>
+                /* 顶部横幅广告 - 透明样式 */ .ad-banner-top { border-bottom: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; } .ad-banner-bottom { border-top: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; margin-top: 40px; } .ad-container { max-width: 728px; margin: 0 auto; min-height: 38px; display: flex; align-items: center; justify-content: center; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; color: #333; line-height: 1.6; background: #fafafa; }
+    h1 { text-align: center; font-size: 1.8rem; color: #1a1a1a; }
+    h1 small { display: block; font-size: 0.85rem; color: #666; margin-top: 4px; font-weight: normal; }
+    .card { margin: 20px 0; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px; background: #fff; }
+    .input-group { margin-bottom: 16px; }
+    .input-group label { display: block; font-weight: 600; margin-bottom: 6px; }
+    .input-group textarea { width: 100%; min-height: 200px; padding: 12px; border: 1px solid #ccc; border-radius: 6px; font-family: monospace; font-size: 0.9rem; resize: vertical; box-sizing: border-box; }
+    .input-group input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; }
+    .preview-area { text-align: center; padding: 24px; background: repeating-conic-gradient(#f0f0f0 0% 25%, #fff 0% 50%) 50% / 20px 20px; border-radius: 8px; margin: 16px 0; min-height: 200px; display: flex; align-items: center; justify-content: center; }
+    .preview-area img, .preview-area svg { max-width: 100%; max-height: 400px; }
+    button { padding: 12px 28px; border: none; border-radius: 6px; cursor: pointer; font-size: 1rem; }
+    .btn-primary { background: #007bff; color: #fff; }
+    .btn-success { background: #28a745; color: #fff; }
+    button:hover { opacity: 0.9; }
+    .buttons { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+    .footer { text-align: center; margin: 24px 0; padding: 12px; font-size: 0.85rem; color: #28a745; font-weight: 500; }
+  </style>
+</head>
+<body>
+    <div class="ad-banner-top"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+  <h1>SVG转PNG工具 <small>矢量图转位图 · 下载PNG</small></h1>
+
+  <div class="card">
+    <div class="input-group">
+      <label>粘贴SVG代码</label>
+      <textarea id="svgInput" placeholder="粘贴SVG代码..."><svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200">
+  <circle cx="100" cy="100" r="80" fill="#007bff"/>
+  <text x="100" y="110" text-anchor="middle" fill="white" font-size="24">SVG</text>
+</svg></textarea>
+    </div>
+    <div class="input-group">
+      <label>导出尺寸 (px)</label>
+      <input type="number" id="exportSize" value="512" min="16" max="4096">
+    </div>
+    <div class="buttons">
+      <button class="btn-primary" onclick="convert()">转换为PNG</button>
+      <button class="btn-success" onclick="downloadPng()">下载PNG</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>PNG预览</h3>
+    <div class="preview-area" id="previewArea">
+      <canvas id="pngCanvas" style="display:none;"></canvas>
+      <img id="pngPreview" src="" alt="PNG预览" style="display:none;">
+    </div>
+  </div>
+
+  <div class="footer">100% 免费 · 数据不上传服务器 · 仅浏览器本地处理</div>
+
+  <script>
+    let pngDataUrl = '';
+    function convert() {
+      const svgCode = document.getElementById('svgInput').value.trim();
+      if (!svgCode) { alert('请输入SVG代码'); return; }
+      const size = parseInt(document.getElementById('exportSize').value) || 512;
+      const canvas = document.getElementById('pngCanvas');
+      const ctx = canvas.getContext('2d');
+      canvas.width = size;
+      canvas.height = size;
+      const img = new Image();
+      const svgBlob = new Blob([svgCode], { type: 'image/svg+xml;charset=utf-8' });
+      const url = URL.createObjectURL(svgBlob);
+      img.onload = function() {
+        ctx.drawImage(img, 0, 0, size, size);
+        pngDataUrl = canvas.toDataURL('image/png');
+        document.getElementById('pngPreview').src = pngDataUrl;
+        document.getElementById('pngPreview').style.display = 'block';
+        URL.revokeObjectURL(url);
+      };
+      img.onerror = function() { alert('SVG解析失败，请检查代码'); };
+      img.src = url;
+    }
+    function downloadPng() {
+      if (!pngDataUrl) { alert('请先转换'); return; }
+      const a = document.createElement('a');
+      a.href = pngDataUrl;
+      a.download = 'svg-image.png';
+      a.click();
+    }
+  </script>
+    <div class="ad-banner-bottom"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+</body>
+</html>

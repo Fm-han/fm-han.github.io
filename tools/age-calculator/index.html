@@ -1,0 +1,141 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>年龄计算器 - 精确年龄计算工具</title>
+  <meta name="description" content="免费在线年龄计算器，输入出生日期计算精确年龄，精确到年月日，支持虚岁和周岁计算。">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://fm-han.github.io/age-calculator/">
+  <style>
+                /* 顶部横幅广告 - 透明样式 */ .ad-banner-top { border-bottom: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; } .ad-banner-bottom { border-top: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; margin-top: 40px; } .ad-container { max-width: 728px; margin: 0 auto; min-height: 38px; display: flex; align-items: center; justify-content: center; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; max-width: 700px; margin: 0 auto; padding: 20px; color: #333; line-height: 1.6; background: #fafafa; }
+    h1 { text-align: center; font-size: 1.8rem; color: #1a1a1a; }
+    h1 small { display: block; font-size: 0.85rem; color: #666; margin-top: 4px; font-weight: normal; }
+    .card { margin: 20px 0; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px; background: #fff; }
+    .input-group { margin-bottom: 16px; }
+    .input-group label { display: block; font-weight: 600; margin-bottom: 6px; }
+    .input-group input { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 1rem; box-sizing: border-box; }
+    .result-display { background: linear-gradient(135deg, #007bff, #0056b3); border-radius: 12px; padding: 32px; color: #fff; text-align: center; margin: 20px 0; }
+    .result-display .big-age { font-size: 5rem; font-weight: 700; }
+    .result-display .unit { font-size: 1.5rem; }
+    .detail-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 20px 0; }
+    .detail-item { background: #f5f5f5; padding: 16px; border-radius: 8px; text-align: center; }
+    .detail-item .num { font-size: 2rem; font-weight: 700; color: #007bff; }
+    .detail-item .label { font-size: 0.85rem; color: #666; }
+    .milestones { margin-top: 20px; }
+    .milestone { display: flex; justify-content: space-between; padding: 12px; border-bottom: 1px solid #eee; }
+    .milestone:nth-child(odd) { background: #f9f9f9; }
+    button { padding: 12px 28px; border: none; border-radius: 6px; cursor: pointer; font-size: 1rem; }
+    .btn-primary { background: #007bff; color: #fff; }
+    button:hover { opacity: 0.9; }
+    .buttons { display: flex; gap: 12px; justify-content: center; }
+    .next-birthday { background: #28a745; color: #fff; padding: 16px; border-radius: 8px; text-align: center; margin-top: 16px; }
+    .next-birthday .days { font-size: 2rem; font-weight: 700; }
+    .footer { text-align: center; margin: 24px 0; padding: 12px; font-size: 0.85rem; color: #28a745; font-weight: 500; }
+  </style>
+</head>
+<body>
+    <div class="ad-banner-top"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+  <h1>年龄计算器 <small>精确到年月日 · 虚岁周岁</small></h1>
+
+  <div class="card">
+    <div class="input-group">
+      <label>出生日期</label>
+      <input type="date" id="birthDate">
+    </div>
+    <div class="buttons">
+      <button class="btn-primary" onclick="calculate()">计算年龄</button>
+    </div>
+  </div>
+
+  <div class="card" id="resultCard" style="display:none;">
+    <div class="result-display">
+      <div class="big-age" id="totalYears">--</div>
+      <div class="unit">周岁</div>
+    </div>
+    <div class="detail-grid">
+      <div class="detail-item">
+        <div class="num" id="years">--</div>
+        <div class="label">年</div>
+      </div>
+      <div class="detail-item">
+        <div class="num" id="months">--</div>
+        <div class="label">月</div>
+      </div>
+      <div class="detail-item">
+        <div class="num" id="days">--</div>
+        <div class="label">天</div>
+      </div>
+    </div>
+    <div class="next-birthday" id="nextBirthday">
+      <div>距离下一个生日还有</div>
+      <div class="days" id="daysToBirthday">--</div>
+      <div>天</div>
+    </div>
+    <div class="milestones" id="milestones"></div>
+  </div>
+
+  <div class="card">
+    <h3>年龄划分参考</h3>
+    <table style="width:100%;border-collapse:collapse;">
+      <tr style="background:#f0f0f0;"><th style="padding:8px;border:1px solid #ddd;">阶段</th><th style="padding:8px;border:1px solid #ddd;">年龄范围</th></tr>
+      <tr><td style="padding:8px;border:1px solid #ddd;">婴儿期</td><td style="padding:8px;border:1px solid #ddd;">0-1岁</td></tr>
+      <tr><td style="padding:8px;border:1px solid #ddd;">幼儿期</td><td style="padding:8px;border:1px solid #ddd;">1-3岁</td></tr>
+      <tr><td style="padding:8px;border:1px solid #ddd;">童年期</td><td style="padding:8px;border:1px solid #ddd;">6-12岁</td></tr>
+      <tr><td style="padding:8px;border:1px solid #ddd;">青春期</td><td style="padding:8px;border:1px solid #ddd;">10-19岁</td></tr>
+      <tr><td style="padding:8px;border:1px solid #ddd;">成年期</td><td style="padding:8px;border:1px solid #ddd;">18岁以上</td></tr>
+      <tr><td style="padding:8px;border:1px solid #ddd;">老年期</td><td style="padding:8px;border:1px solid #ddd;">60岁以上</td></tr>
+    </table>
+  </div>
+
+  <div class="footer">100% 免费 · 数据不上传服务器 · 仅浏览器本地处理</div>
+
+  <script>
+    function calculate() {
+      const birthStr = document.getElementById('birthDate').value;
+      if (!birthStr) { alert('请选择出生日期'); return; }
+      const birth = new Date(birthStr);
+      const today = new Date();
+      if (birth > today) { alert('出生日期不能晚于今天'); return; }
+      let years = today.getFullYear() - birth.getFullYear();
+      let months = today.getMonth() - birth.getMonth();
+      let days = today.getDate() - birth.getDate();
+      if (days < 0) { months--; days += new Date(today.getFullYear(), today.getMonth(), 0).getDate(); }
+      if (months < 0) { years--; months += 12; }
+      const totalDays = Math.floor((today - birth) / (1000 * 60 * 60 * 24));
+      const totalWeeks = Math.floor(totalDays / 7);
+      const totalMonths = years * 12 + months;
+      document.getElementById('resultCard').style.display = 'block';
+      document.getElementById('totalYears').textContent = years;
+      document.getElementById('years').textContent = years;
+      document.getElementById('months').textContent = months;
+      document.getElementById('days').textContent = days;
+      let nextBirth = new Date(today.getFullYear(), birth.getMonth(), birth.getDate());
+      if (nextBirth <= today) nextBirth.setFullYear(nextBirth.getFullYear() + 1);
+      const daysTo = Math.ceil((nextBirth - today) / (1000 * 60 * 60 * 24));
+      document.getElementById('daysToBirthday').textContent = daysTo;
+      let milestones = '';
+      const milestonesData = [
+        { age: 1, name: '1周岁', days: 365 },
+        { age: 18, name: '18岁成年', days: 6570 },
+        { age: 30, name: '30岁而立', days: 10950 },
+        { age: 50, name: '50岁半百', days: 18250 },
+        { age: 60, name: '60岁花甲', days: 21900 },
+        { age: 70, name: '70岁古稀', days: 25550 },
+        { age: 80, name: '80岁杖朝', days: 29200 },
+        { age: 90, name: '90岁鲐背', days: 32850 },
+        { age: 100, name: '100岁期颐', days: 36500 }
+      ];
+      milestonesData.forEach(m => {
+        if (totalDays >= m.days) {
+          const passed = totalDays - m.days;
+          milestones += `<div class="milestone"><span>${m.name}</span><span style="color:#28a745;">已过 ${passed} 天</span></div>`;
+        }
+      });
+      document.getElementById('milestones').innerHTML = milestones || '<div style="text-align:center;color:#999;padding:12px;">暂无人生里程碑</div>';
+    }
+  </script>
+    <div class="ad-banner-bottom"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+</body>
+</html>

@@ -1,0 +1,175 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>颜色对比度检查器 - WCAG无障碍标准</title>
+  <meta name="description" content="免费在线颜色对比度检查器，检测前景色与背景色的对比度是否符合WCAG AA/AAA无障碍标准。">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://fm-han.github.io/color-contrast/">
+  <style>
+                /* 顶部横幅广告 - 透明样式 */ .ad-banner-top { border-bottom: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; } .ad-banner-bottom { border-top: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; margin-top: 40px; } .ad-container { max-width: 728px; margin: 0 auto; min-height: 38px; display: flex; align-items: center; justify-content: center; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; max-width: 700px; margin: 0 auto; padding: 20px; color: #333; line-height: 1.6; background: #fafafa; }
+    h1 { text-align: center; font-size: 1.8rem; color: #1a1a1a; }
+    h1 small { display: block; font-size: 0.85rem; color: #666; margin-top: 4px; font-weight: normal; }
+    .card { margin: 20px 0; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px; background: #fff; }
+    .color-inputs { display: flex; gap: 16px; margin-bottom: 16px; }
+    .color-input { flex: 1; }
+    .color-input label { display: block; font-weight: 600; margin-bottom: 6px; }
+    .color-input input[type="color"] { width: 100%; height: 60px; border: 1px solid #ccc; border-radius: 6px; cursor: pointer; }
+    .color-input input[type="text"] { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 6px; font-family: monospace; margin-top: 8px; }
+    .preview-box { padding: 32px; border-radius: 12px; margin: 20px 0; text-align: center; transition: all 0.3s; }
+    .preview-box .sample { font-size: 1.5rem; font-weight: 600; }
+    .preview-box .desc { font-size: 0.9rem; opacity: 0.9; margin-top: 8px; }
+    .result-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    .result-item { background: #f5f5f5; padding: 16px; border-radius: 8px; text-align: center; }
+    .result-item .ratio { font-size: 2rem; font-weight: 700; color: #007bff; }
+    .result-item .label { font-size: 0.85rem; color: #666; margin-top: 4px; }
+    .wcag-badges { display: flex; gap: 8px; justify-content: center; margin: 16px 0; }
+    .wcag-badge { padding: 8px 16px; border-radius: 20px; font-weight: 600; }
+    .wcag-badge.pass { background: #28a745; color: #fff; }
+    .wcag-badge.fail { background: #dc3545; color: #fff; }
+    button { padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-size: 1rem; }
+    .btn-primary { background: #007bff; color: #fff; }
+    .btn-secondary { background: #6c757d; color: #fff; }
+    button:hover { opacity: 0.9; }
+    .buttons { display: flex; gap: 12px; justify-content: center; }
+    .footer { text-align: center; margin: 24px 0; padding: 12px; font-size: 0.85rem; color: #28a745; font-weight: 500; }
+  </style>
+</head>
+<body>
+    <div class="ad-banner-top"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+  <h1>颜色对比度检查器 <small>WCAG AA/AAA · 无障碍标准</small></h1>
+
+  <div class="card">
+    <div class="color-inputs">
+      <div class="color-input">
+        <label>前景色（文字颜色）</label>
+        <input type="color" id="fgColor" value="#000000" oninput="updateContrast()">
+        <input type="text" id="fgText" value="#000000" oninput="updateFromFg()">
+      </div>
+      <div class="color-input">
+        <label>背景色</label>
+        <input type="color" id="bgColor" value="#ffffff" oninput="updateContrast()">
+        <input type="text" id="bgText" value="#ffffff" oninput="updateFromBg()">
+      </div>
+    </div>
+    <div class="buttons">
+      <button class="btn-primary" onclick="swapColors()">交换颜色</button>
+      <button class="btn-secondary" onclick="resetColors()">重置</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="preview-box" id="previewBox">
+      <div class="sample">示例文字 Sample Text</div>
+      <div class="desc">文字预览效果</div>
+    </div>
+    <div class="result-grid">
+      <div class="result-item">
+        <div class="ratio" id="contrastRatio">21:1</div>
+        <div class="label">对比度</div>
+      </div>
+      <div class="result-item">
+        <div class="ratio" id="luminance1">1.00</div>
+        <div class="label">前景亮度</div>
+      </div>
+      <div class="result-item">
+        <div class="ratio" id="luminance2">0.00</div>
+        <div class="label">背景亮度</div>
+      </div>
+    </div>
+    <div class="wcag-badges" id="wcagBadges"></div>
+  </div>
+
+  <div class="card">
+    <h3>WCAG标准参考</h3>
+    <table style="width:100%;border-collapse:collapse;">
+      <tr style="background:#f0f0f0;"><th style="padding:8px;border:1px solid #ddd;">标准</th><th style="padding:8px;border:1px solid #ddd;">正常文字</th><th style="padding:8px;border:1px solid #ddd;">大文字</th></tr>
+      <tr><td style="padding:8px;border:1px solid #ddd;">AA级</td><td style="padding:8px;border:1px solid #ddd;">≥4.5:1</td><td style="padding:8px;border:1px solid #ddd;">≥3:1</td></tr>
+      <tr><td style="padding:8px;border:1px solid #ddd;">AAA级</td><td style="padding:8px;border:1px solid #ddd;">≥7:1</td><td style="padding:8px;border:1px solid #ddd;">≥4.5:1</td></tr>
+    </table>
+  </div>
+
+  <div class="footer">100% 免费 · 数据不上传服务器 · 仅浏览器本地处理</div>
+
+  <script>
+    function hexToRgb(hex) {
+      const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+      return result ? {
+        r: parseInt(result[1], 16),
+        g: parseInt(result[2], 16),
+        b: parseInt(result[3], 16)
+      } : null;
+    }
+    function getLuminance(r, g, b) {
+      const [rs, gs, bs] = [r, g, b].map(c => {
+        c = c / 255;
+        return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+      });
+      return 0.2126 * rs + 0.7152 * gs + 0.0722 * bs;
+    }
+    function getContrastRatio(l1, l2) {
+      const lighter = Math.max(l1, l2);
+      const darker = Math.min(l1, l2);
+      return (lighter + 0.05) / (darker + 0.05);
+    }
+    function updateContrast() {
+      const fg = document.getElementById('fgColor').value;
+      const bg = document.getElementById('bgColor').value;
+      document.getElementById('fgText').value = fg;
+      document.getElementById('bgText').value = bg;
+      calculate();
+    }
+    function updateFromFg() {
+      const val = document.getElementById('fgText').value;
+      if (/^#[0-9a-fA-F]{6}$/.test(val)) {
+        document.getElementById('fgColor').value = val;
+        updateContrast();
+      }
+    }
+    function updateFromBg() {
+      const val = document.getElementById('bgText').value;
+      if (/^#[0-9a-fA-F]{6}$/.test(val)) {
+        document.getElementById('bgColor').value = val;
+        updateContrast();
+      }
+    }
+    function calculate() {
+      const fg = document.getElementById('fgColor').value;
+      const bg = document.getElementById('bgColor').value;
+      const fgRgb = hexToRgb(fg);
+      const bgRgb = hexToRgb(bg);
+      if (!fgRgb || !bgRgb) return;
+      const fgLum = getLuminance(fgRgb.r, fgRgb.g, fgRgb.b);
+      const bgLum = getLuminance(bgRgb.r, bgRgb.g, bgRgb.b);
+      const ratio = getContrastRatio(fgLum, bgLum);
+      document.getElementById('contrastRatio').textContent = ratio.toFixed(2) + ':1';
+      document.getElementById('luminance1').textContent = fgLum.toFixed(2);
+      document.getElementById('luminance2').textContent = bgLum.toFixed(2);
+      document.getElementById('previewBox').style.background = bg;
+      document.getElementById('previewBox').style.color = fg;
+      const badges = [];
+      badges.push(ratio >= 4.5 ? '<span class="wcag-badge pass">✓ AA正常文字</span>' : '<span class="wcag-badge fail">✗ AA正常文字</span>');
+      badges.push(ratio >= 3 ? '<span class="wcag-badge pass">✓ AA大文字</span>' : '<span class="wcag-badge fail">✗ AA大文字</span>');
+      badges.push(ratio >= 7 ? '<span class="wcag-badge pass">✓ AAA正常文字</span>' : '<span class="wcag-badge fail">✗ AAA正常文字</span>');
+      badges.push(ratio >= 4.5 ? '<span class="wcag-badge pass">✓ AAA大文字</span>' : '<span class="wcag-badge fail">✗ AAA大文字</span>');
+      document.getElementById('wcagBadges').innerHTML = badges.join('');
+    }
+    function swapColors() {
+      const fg = document.getElementById('fgColor').value;
+      const bg = document.getElementById('bgColor').value;
+      document.getElementById('fgColor').value = bg;
+      document.getElementById('bgColor').value = fg;
+      updateContrast();
+    }
+    function resetColors() {
+      document.getElementById('fgColor').value = '#000000';
+      document.getElementById('bgColor').value = '#ffffff';
+      updateContrast();
+    }
+    updateContrast();
+  </script>
+    <div class="ad-banner-bottom"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+</body>
+</html>

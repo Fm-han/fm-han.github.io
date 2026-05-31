@@ -1,0 +1,27 @@
+# WeChat Mini Program
+miniprogram/
+project.config.json
+project.private.config.json
+
+# WorkBuddy internal
+.workbuddy/
+
+# Scripts and docs
+*.ps1
+*.md
+deploy.yml
+
+# Deployment artifacts
+deploy-dist/
+
+# GitHub Actions (if any)
+.github/
+
+# Node modules
+node_modules/
+
+# Python cache
+__pycache__/
+
+# Windows reserved name
+nul

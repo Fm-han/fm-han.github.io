@@ -1,0 +1,143 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>视频缩略图 - 免费在线工具</title>
+<style>
+                /* 顶部横幅广告 - 透明样式 */ .ad-banner-top { border-bottom: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; } .ad-banner-bottom { border-top: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; margin-top: 40px; } .ad-container { max-width: 728px; margin: 0 auto; min-height: 38px; display: flex; align-items: center; justify-content: center; }
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; background:#fafafa; color:#333; min-height:100vh; }
+.header { background:#fff; border-bottom:1px solid #e0e0e0; padding:16px 24px; display:flex; align-items:center; justify-content:space-between; }
+.header h1 { font-size:1.25rem; font-weight:600; }
+.back-link { color:#007bff; text-decoration:none; font-size:0.9rem; }
+.back-link:hover { text-decoration:underline; }
+.container { max-width:900px; margin:32px auto; padding:0 16px; }
+.card { background:#fff; border:1px solid #e0e0e0; border-radius:8px; padding:24px; margin-bottom:20px; }
+.card h2 { font-size:1.25rem; font-weight:600; margin-bottom:16px; color:#333; }
+.card p { color:#666; font-size:0.95rem; margin-bottom:16px; line-height:1.6; }
+label { display:block; font-size:0.9rem; color:#555; margin-bottom:6px; font-weight:500; }
+input[type="file"], input[type="number"], select { border:1px solid #ddd; border-radius:4px; padding:8px 12px; width:100%; box-sizing:border-box; font-size:0.95rem; }
+input[type="file"] { padding:6px 12px; }
+.btn-primary { background:#007bff; color:#fff; border:none; padding:8px 20px; border-radius:4px; cursor:pointer; font-size:0.95rem; }
+.btn-primary:hover { background:#0056b3; }
+.btn-secondary { background:#28a745; color:#fff; border:none; padding:8px 20px; border-radius:4px; cursor:pointer; font-size:0.95rem; }
+.btn-secondary:hover { background:#1e7e34; }
+.btn-danger { background:#dc3545; color:#fff; border:none; padding:8px 20px; border-radius:4px; cursor:pointer; font-size:0.95rem; }
+.btn-danger:hover { background:#c82333; }
+.preview-area { margin-top:16px; text-align:center; }
+.preview-area img { max-width:100%; border:1px solid #e0e0e0; border-radius:4px; }
+.canvas-area { margin-top:16px; }
+.video-info { font-size:0.85rem; color:#888; margin-top:8px; }
+.flex-row { display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
+.flex-row > * { flex:1; min-width:120px; }
+@media(max-width:600px) { .flex-row { flex-direction:column; } .flex-row > * { flex:none; width:100%; } }
+</style>
+</head>
+<body>
+    <div class="ad-banner-top"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+<div class="header">
+  <h1>视频缩略图</h1>
+  <a href="https://fm-han.github.io" class="back-link">← 返回工具站</a>
+</div>
+<div class="container">
+  <div class="card">
+    <h2>视频缩略图提取</h2>
+    <p>上传视频文件，截取指定时间点的画面作为缩略图图片保存。</p>
+    <label>选择视频文件</label>
+    <input type="file" id="videoInput" accept="video/*">
+    <div class="flex-row" style="margin-top:16px;">
+      <div>
+        <label>截取时间（秒）</label>
+        <input type="number" id="timeInput" value="1" min="0" step="0.1">
+      </div>
+      <div>
+        <label>输出格式</label>
+        <select id="formatSelect">
+          <option value="image/png">PNG</option>
+          <option value="image/jpeg">JPEG</option>
+          <option value="image/webp">WebP</option>
+        </select>
+      </div>
+    </div>
+    <div style="margin-top:16px;">
+      <button class="btn-primary" onclick="capture()">截取缩略图</button>
+      <button class="btn-danger" onclick="resetAll()" style="margin-left:8px;">重置</button>
+    </div>
+    <div class="video-info" id="videoInfo"></div>
+  </div>
+  <div class="card" id="previewCard" style="display:none;">
+    <h2>缩略图预览</h2>
+    <div class="preview-area" id="previewArea"></div>
+    <div style="margin-top:16px;">
+      <button class="btn-secondary" onclick="downloadThumb()">下载缩略图</button>
+    </div>
+  </div>
+</div>
+<video id="videoEl" style="display:none;"></video>
+<canvas id="canvasEl" style="display:none;"></canvas>
+<script>
+let capturedBlob = null;
+let capturedUrl = null;
+const videoInput = document.getElementById('videoInput');
+const videoEl = document.getElementById('videoEl');
+const canvasEl = document.getElementById('canvasEl');
+
+videoInput.addEventListener('change', function() {
+  const file = this.files[0];
+  if (!file) return;
+  const url = URL.createObjectURL(file);
+  videoEl.src = url;
+  videoEl.addEventListener('loadedmetadata', function() {
+    document.getElementById('videoInfo').textContent =
+      '视频信息：' + file.name + ' | ' + videoEl.videoWidth + '×' + videoEl.videoHeight + ' | 时长：' + Math.round(videoEl.duration) + '秒';
+    document.getElementById('timeInput').max = Math.floor(videoEl.duration);
+  });
+});
+
+function capture() {
+  const file = videoInput.files[0];
+  if (!file) { alert('请先选择视频文件'); return; }
+  const time = parseFloat(document.getElementById('timeInput').value) || 0;
+  videoEl.currentTime = time;
+  videoEl.addEventListener('seeked', function onSeeked() {
+    videoEl.removeEventListener('seeked', onSeeked);
+    canvasEl.width = videoEl.videoWidth;
+    canvasEl.height = videoEl.videoHeight;
+    const ctx = canvasEl.getContext('2d');
+    ctx.drawImage(videoEl, 0, 0);
+    const format = document.getElementById('formatSelect').value;
+    canvasEl.toBlob(function(blob) {
+      capturedBlob = blob;
+      if (capturedUrl) URL.revokeObjectURL(capturedUrl);
+      capturedUrl = URL.createObjectURL(blob);
+      const previewCard = document.getElementById('previewCard');
+      previewCard.style.display = 'block';
+      document.getElementById('previewArea').innerHTML =
+        '<img src="' + capturedUrl + '" alt="缩略图"><p class="video-info">尺寸：' + canvasEl.width + '×' + canvasEl.height + ' | 大小：' + (blob.size/1024).toFixed(1) + 'KB</p>';
+    }, format);
+  });
+}
+
+function downloadThumb() {
+  if (!capturedBlob) return;
+  const format = document.getElementById('formatSelect').value;
+  const ext = format === 'image/png' ? 'png' : format === 'image/jpeg' ? 'jpg' : 'webp';
+  const a = document.createElement('a');
+  a.href = capturedUrl;
+  a.download = 'thumbnail.' + ext;
+  a.click();
+}
+
+function resetAll() {
+  videoInput.value = '';
+  document.getElementById('previewCard').style.display = 'none';
+  document.getElementById('videoInfo').textContent = '';
+  if (capturedUrl) URL.revokeObjectURL(capturedUrl);
+  capturedBlob = null;
+  capturedUrl = null;
+}
+</script>
+    <div class="ad-banner-bottom"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+</body>
+</html>

@@ -1,0 +1,113 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UUID生成器 - 随机UUID/GUID在线批量生成</title>
+  <meta name="description" content="免费在线UUID生成器，支持UUID v1/v4批量生成，可自定义数量，浏览器本地处理。">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://fm-han.github.io/uuid/">
+  <style>
+                /* 顶部横幅广告 - 透明样式 */ .ad-banner-top { border-bottom: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; } .ad-banner-bottom { border-top: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; margin-top: 40px; } .ad-container { max-width: 728px; margin: 0 auto; min-height: 38px; display: flex; align-items: center; justify-content: center; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; color: #333; line-height: 1.6; background: #fafafa; }
+    h1 { text-align: center; font-size: 1.8rem; color: #1a1a1a; }
+    h1 small { display: block; font-size: 0.85rem; color: #666; margin-top: 4px; font-weight: normal; }
+    .section { margin: 20px 0; padding: 16px; border: 1px solid #e0e0e0; border-radius: 8px; background: #fff; }
+    .section label { display: block; font-weight: 600; margin-bottom: 8px; }
+    .row { display: flex; gap: 12px; align-items: center; margin-bottom: 12px; flex-wrap: wrap; }
+    .row label { white-space: nowrap; }
+    input, select { padding: 8px 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 0.95rem; }
+    input[type="number"] { width: 90px; }
+    .uuid-list { background: #f8f9fa; border-radius: 6px; padding: 12px; max-height: 400px; overflow-y: auto; }
+    .uuid-item { font-family: monospace; font-size: 1rem; padding: 8px 12px; background: #fff; border-radius: 4px; margin-bottom: 6px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+    .uuid-item:hover { background: #e3f2fd; }
+    .uuid-item small { color: #888; font-size: 0.75rem; }
+    .buttons { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+    button { padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-size: 0.95rem; }
+    .btn-primary { background: #007bff; color: #fff; }
+    .btn-copy { background: #28a745; color: #fff; }
+    .btn-clear { background: #6c757d; color: #fff; }
+    button:hover { opacity: 0.9; }
+    .footer { text-align: center; margin: 24px 0; padding: 12px; font-size: 0.85rem; color: #28a745; font-weight: 500; }
+  </style>
+</head>
+<body>
+    <div class="ad-banner-top"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+
+  <h1>UUID生成器 <small>UUID v1 / v4 批量生成 · 浏览器本地</small></h1>
+
+  <div class="section">
+    <div class="row">
+      <label>版本:</label>
+      <select id="version">
+        <option value="4" selected>UUID v4 (随机)</option>
+        <option value="1">UUID v1 (时间序列)</option>
+      </select>
+      <label>数量:</label>
+      <input type="number" id="count" value="10" min="1" max="100">
+    </div>
+    <div class="buttons">
+      <button class="btn-primary" onclick="generate()">生成 UUID</button>
+      <button class="btn-copy" onclick="copyAll()">复制全部</button>
+      <button class="btn-clear" onclick="document.getElementById('list').innerHTML=''">清空</button>
+    </div>
+  </div>
+
+  <div class="section">
+    <label>生成的 UUID</label>
+    <div class="uuid-list" id="list">
+      <div style="color:#999;text-align:center;padding:20px;">点击"生成 UUID"开始</div>
+    </div>
+    <p style="font-size:0.8rem;color:#888;margin-top:8px;">💡 点击任意UUID可单独复制</p>
+  </div>
+
+  <div class="footer">100% 免费 · 数据不上传服务器 · 仅浏览器本地处理</div>
+
+  <script>
+    function uuidv4() {
+      return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+        const r = Math.random() * 16 | 0;
+        return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+      });
+    }
+
+    function uuidv1() {
+      const d = new Date().getTime();
+      const uuid = 'xxxxxxxx-xxxx-1xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+        let r = (c === 'x' ? (d + Math.random() * 16) : ((d & 0x3) | 0x8)) & 0xff;
+        r = (d / 16 | 0) ^ (r & 0x3);
+        return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+      });
+      return uuid;
+    }
+
+    function generate() {
+      const ver = document.getElementById('version').value;
+      const count = parseInt(document.getElementById('count').value) || 1;
+      const list = document.getElementById('list');
+      list.innerHTML = '';
+
+      for (let i = 0; i < Math.min(count, 100); i++) {
+        const uuid = ver === '4' ? uuidv4() : uuidv1();
+        const div = document.createElement('div');
+        div.className = 'uuid-item';
+        div.innerHTML = `<span>${uuid}</span><small>v${ver}</small>`;
+        div.onclick = () => {
+          navigator.clipboard.writeText(uuid).then(() => {
+            div.style.background = '#c8e6c9';
+            setTimeout(() => div.style.background = '', 300);
+          });
+        };
+        list.appendChild(div);
+      }
+    }
+
+    function copyAll() {
+      const uuids = Array.from(document.querySelectorAll('.uuid-item span')).map(el => el.textContent);
+      if (!uuids.length) return;
+      navigator.clipboard.writeText(uuids.join('\n')).then(() => alert('已复制 ' + uuids.length + ' 个UUID!'));
+    }
+  </script>
+    <div class="ad-banner-bottom"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+</body>
+</html>

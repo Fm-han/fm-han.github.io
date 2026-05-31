@@ -1,0 +1,132 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>语音转文字 - 免费在线工具</title>
+<style>
+                /* 顶部横幅广告 - 透明样式 */ .ad-banner-top { border-bottom: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; } .ad-banner-bottom { border-top: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; margin-top: 40px; } .ad-container { max-width: 728px; margin: 0 auto; min-height: 38px; display: flex; align-items: center; justify-content: center; }
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #fafafa; color: #333; padding: 20px; }
+.container { max-width: 800px; margin: 0 auto; }
+h1 { font-size: 1.25rem; font-weight: 600; margin-bottom: 16px; color: #333; }
+.desc { color: #666; margin-bottom: 20px; line-height: 1.6; }
+.card { background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; padding: 24px; margin-bottom: 16px; }
+label { display: block; margin-bottom: 8px; font-weight: 500; }
+textarea { border: 1px solid #ddd; border-radius: 4px; padding: 12px; width: 100%; min-height: 200px; box-sizing: border-box; font-size: 14px; resize: vertical; font-family: monospace; }
+textarea:focus { outline: none; border-color: #007bff; }
+input[type="file"] { margin-bottom: 12px; font-size: 14px; }
+.btn-primary { background: #007bff; color: #fff; border: none; padding: 8px 20px; border-radius: 4px; cursor: pointer; font-size: 14px; }
+.btn-primary:hover { background: #0056b3; }
+.btn-primary:disabled { background: #ccc; cursor: not-allowed; }
+.btn-secondary { background: #28a745; color: #fff; border: none; padding: 8px 20px; border-radius: 4px; cursor: pointer; font-size: 14px; margin-left: 8px; }
+.btn-secondary:hover { background: #1e7e34; }
+.btn-danger { background: #dc3545; color: #fff; border: none; padding: 8px 20px; border-radius: 4px; cursor: pointer; font-size: 14px; margin-left: 8px; }
+.btn-danger:hover { background: #c82333; }
+.status { margin-top: 12px; padding: 12px; border-radius: 4px; font-size: 14px; display: none; }
+.status.success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+.status.error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+.status.info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+.info { font-size: 14px; color: #666; margin-top: 8px; }
+</style>
+</head>
+<body>
+    <div class="ad-banner-top"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+<div class="container">
+  <div class="card">
+    <h1>语音转文字</h1>
+    <p class="desc">上传音频文件，使用浏览器Web Speech API实时录音转文字，或提示API限制说明。</p>
+    <div style="margin-bottom:16px">
+      <button class="btn-primary" id="recordBtn" onclick="startRecording()">开始录音识别</button>
+      <button class="btn-danger" id="stopBtn" onclick="stopRecording()" style="display:none">停止录音</button>
+      <button class="btn-secondary" id="copyBtn" onclick="copyText()" style="display:none">复制文字</button>
+      <button class="btn-secondary" id="downloadBtn" onclick="downloadText()" style="display:none">下载TXT</button>
+    </div>
+    <div class="status info" id="recordStatus" style="display:none">
+      <span id="recordStatusText">正在录音并识别...</span>
+    </div>
+    <label for="output">识别结果</label>
+    <textarea id="output" readonly placeholder="识别结果将显示在这里..."></textarea>
+    <div class="info" id="info">提示：此工具使用浏览器Web Speech API的SpeechRecognition功能，仅支持Chrome/Edge浏览器，需要网络连接。</div>
+    <div class="status" id="status"></div>
+  </div>
+</div>
+<script>
+let recognition = null;
+let isRecording = false;
+function startRecording() {
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRecognition) {
+    showStatus('您的浏览器不支持语音识别，请使用Chrome或Edge浏览器', 'error');
+    return;
+  }
+  recognition = new SpeechRecognition();
+  recognition.continuous = true;
+  recognition.interimResults = true;
+  recognition.lang = 'zh-CN';
+  recognition.onstart = function() {
+    isRecording = true;
+    document.getElementById('recordBtn').style.display = 'none';
+    document.getElementById('stopBtn').style.display = 'inline-block';
+    document.getElementById('recordStatus').style.display = 'block';
+    document.getElementById('recordStatusText').textContent = '正在录音并识别...请对着麦克风说话';
+  };
+  recognition.onresult = function(event) {
+    let interim = '';
+    let final = '';
+    for (let i = 0; i < event.results.length; i++) {
+      const transcript = event.results[i][0].transcript;
+      if (event.results[i].isFinal) final += transcript;
+      else interim += transcript;
+    }
+    document.getElementById('output').value = final + interim;
+    if (final) {
+      document.getElementById('copyBtn').style.display = 'inline-block';
+      document.getElementById('downloadBtn').style.display = 'inline-block';
+    }
+  };
+  recognition.onerror = function(event) {
+    showStatus('识别错误: ' + event.error, 'error');
+    stopRecording();
+  };
+  recognition.onend = function() {
+    if (isRecording) recognition.start();
+  };
+  try {
+    recognition.start();
+  } catch(e) {
+    showStatus('启动识别失败: ' + e.message, 'error');
+  }
+}
+function stopRecording() {
+  isRecording = false;
+  if (recognition) recognition.stop();
+  document.getElementById('recordBtn').style.display = 'inline-block';
+  document.getElementById('stopBtn').style.display = 'none';
+  document.getElementById('recordStatus').style.display = 'none';
+  showStatus('录音已停止', 'success');
+}
+function copyText() {
+  const output = document.getElementById('output');
+  output.select();
+  document.execCommand('copy');
+  showStatus('文字已复制到剪贴板', 'success');
+}
+function downloadText() {
+  const text = document.getElementById('output').value;
+  const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'speech-to-text.txt';
+  a.click();
+}
+function showStatus(msg, type) {
+  const el = document.getElementById('status');
+  el.textContent = msg;
+  el.className = 'status ' + type;
+  el.style.display = 'block';
+}
+</script>
+    <div class="ad-banner-bottom"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+</body>
+</html>

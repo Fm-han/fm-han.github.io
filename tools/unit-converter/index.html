@@ -1,0 +1,156 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>单位转换器 - 在线长度/重量/面积/温度换算工具</title>
+  <meta name="description" content="免费在线单位转换器，支持长度、重量、面积、温度、体积、速度、时间、数据大小等常用单位互转，浏览器本地处理。">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://fm-han.github.io/unit-converter/">
+  <style>
+                /* 顶部横幅广告 - 透明样式 */ .ad-banner-top { border-bottom: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; } .ad-banner-bottom { border-top: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; margin-top: 40px; } .ad-container { max-width: 728px; margin: 0 auto; min-height: 38px; display: flex; align-items: center; justify-content: center; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; color: #333; line-height: 1.6; background: #fafafa; }
+    h1 { text-align: center; font-size: 1.8rem; color: #1a1a1a; }
+    h1 small { display: block; font-size: 0.85rem; color: #666; margin-top: 4px; font-weight: normal; }
+    .section { margin: 20px 0; padding: 16px; border: 1px solid #e0e0e0; border-radius: 8px; background: #fff; }
+    .section label { display: block; font-weight: 600; margin-bottom: 8px; }
+    .cat-tabs { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+    .cat-tabs button { padding: 8px 16px; border: 1px solid #ccc; border-radius: 6px; background: #fff; cursor: pointer; font-size: 0.9rem; }
+    .cat-tabs button.active { background: #007bff; color: #fff; border-color: #007bff; }
+    .conv-row { display: grid; grid-template-columns: 1fr auto 1fr; gap: 12px; align-items: center; }
+    input, select { width: 100%; padding: 10px 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 1rem; box-sizing: border-box; }
+    .swap-btn { font-size: 1.5rem; cursor: pointer; color: #007bff; background: none; border: none; padding: 8px; }
+    .swap-btn:hover { opacity: 0.7; }
+    .result-box { padding: 16px; background: #f0f7ff; border-radius: 8px; text-align: center; margin-top: 12px; }
+    .result-box .value { font-size: 1.5rem; font-weight: 700; color: #007bff; }
+    .result-box .unit { font-size: 1rem; color: #333; }
+    .buttons { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+    button { padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-size: 0.95rem; }
+    .btn-primary { background: #007bff; color: #fff; }
+    .btn-copy { background: #28a745; color: #fff; }
+    button:hover { opacity: 0.9; }
+    .footer { text-align: center; margin: 24px 0; padding: 12px; font-size: 0.85rem; color: #28a745; font-weight: 500; }
+  </style>
+</head>
+<body>
+    <div class="ad-banner-top"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+
+  <h1>单位转换器 <small>长度 / 重量 / 面积 / 温度 / 体积 · 浏览器本地</small></h1>
+
+  <div class="section">
+    <label>选择类别</label>
+    <div class="cat-tabs">
+      <button class="active" onclick="setCat('length')">长度</button>
+      <button onclick="setCat('weight')">重量</button>
+      <button onclick="setCat('area')">面积</button>
+      <button onclick="setCat('temp')">温度</button>
+      <button onclick="setCat('volume')">体积</button>
+      <button onclick="setCat('speed')">速度</button>
+      <button onclick="setCat('data')">数据大小</button>
+      <button onclick="setCat('time')">时间</button>
+    </div>
+    <div class="conv-row">
+      <div>
+        <input type="number" id="inputVal" value="1" oninput="convert()">
+        <select id="fromUnit" onchange="convert()"></select>
+      </div>
+      <button class="swap-btn" onclick="swap()">⇄</button>
+      <div>
+        <div class="result-box" id="resultBox"><div class="value" id="resultVal">-</div><div class="unit" id="resultUnit"></div></div>
+        <select id="toUnit" onchange="convert()"></select>
+      </div>
+    </div>
+    <div class="buttons">
+      <button class="btn-copy" onclick="copyResult()">复制结果</button>
+    </div>
+  </div>
+
+  <div class="footer">100% 免费 · 数据不上传服务器 · 仅浏览器本地处理</div>
+
+  <script>
+    const categories = {
+      length: { name:'m', units: [
+        ['mm','毫米',1],['cm','厘米',10],['m','米',1000],['km','千米',1000000],
+        ['in','英寸',25.4],['ft','英尺',304.8],['yd','码',914.4],['mi','英里',1609344]
+      ]},
+      weight: { name:'g', units: [
+        ['mg','毫克',1],['g','克',1000],['kg','千克',1000000],['t','吨',1000000000],
+        ['oz','盎司',28349.5],['lb','磅',453592],['st','英石',6350294]
+      ]},
+      area: { name:'m2', units: [
+        ['cm2','平方厘米',1],['m2','平方米',10000],['km2','平方千米',1000000000],
+        ['in2','平方英寸',6.4516],['ft2','平方英尺',929.0304],['acre','英亩',40468564.224]
+      ]},
+      temp: { name:'C', units: [['C','摄氏度'],['F','华氏度'],['K','开尔文']]},
+      volume: { name:'L', units: [
+        ['ml','毫升',1],['L','升',1000],['m3','立方米',1000000],
+        ['gal','加仑(美)',3785.41],['qt','夸脱(美)',946.353],['pt','品脱(美)',473.176]
+      ]},
+      speed: { name:'m/s', units: [
+        ['m/s','米/秒',1],['km/h','千米/时',0.277778],['mph','英里/时',0.44704],['kn','节',0.514444],['ft/s','英尺/秒',0.3048]
+      ]},
+      data: { name:'B', units: [
+        ['B','字节',1],['KB','千字节',1024],['MB','兆字节',1048576],['GB','吉字节',1073741824],['TB','太字节',1099511627776]
+      ]},
+      time: { name:'s', units: [
+        ['ms','毫秒',1],['s','秒',1000],['min','分钟',60000],['h','小时',3600000],['day','天',86400000],['week','周',604800000]
+      ]}
+    };
+    let currentCat = 'length';
+    function setCat(cat) {
+      currentCat = cat;
+      document.querySelectorAll('.cat-tabs button').forEach(b => b.classList.remove('active'));
+      event.target.classList.add('active');
+      populate();
+      convert();
+    }
+    function populate() {
+      const cat = categories[currentCat];
+      ['fromUnit','toUnit'].forEach(id => {
+        const el = document.getElementById(id);
+        el.innerHTML = cat.units.map(([v,n]) => `<option value="${v}">${n} (${v})</option>`).join('');
+      });
+      document.getElementById('fromUnit').selectedIndex = 1;
+      document.getElementById('toUnit').selectedIndex = 0;
+    }
+    function convert() {
+      const cat = categories[currentCat];
+      const val = parseFloat(document.getElementById('inputVal').value) || 0;
+      const from = document.getElementById('fromUnit').value;
+      const to = document.getElementById('toUnit').value;
+      if (currentCat === 'temp') {
+        let c;
+        if (from === 'C') c = val;
+        else if (from === 'F') c = (val - 32) * 5/9;
+        else c = val - 273.15;
+        let result;
+        if (to === 'C') result = c;
+        else if (to === 'F') result = c * 9/5 + 32;
+        else result = c + 273.15;
+        document.getElementById('resultVal').textContent = result.toFixed(4).replace(/\.?0+$/, '');
+        document.getElementById('resultUnit').textContent = cat.units.find(u=>u[0]===to)[1];
+      } else {
+        const fromFactor = cat.units.find(u=>u[0]===from)[2];
+        const toFactor = cat.units.find(u=>u[0]===to)[2];
+        const result = val * fromFactor / toFactor;
+        document.getElementById('resultVal').textContent = result.toFixed(6).replace(/\.?0+$/, '');
+        document.getElementById('resultUnit').textContent = cat.units.find(u=>u[0]===to)[1];
+      }
+    }
+    function swap() {
+      const fi = document.getElementById('fromUnit').selectedIndex;
+      const ti = document.getElementById('toUnit').selectedIndex;
+      document.getElementById('fromUnit').selectedIndex = ti;
+      document.getElementById('toUnit').selectedIndex = fi;
+      convert();
+    }
+    function copyResult() {
+      const t = document.getElementById('resultVal').textContent + ' ' + document.getElementById('resultUnit').textContent;
+      navigator.clipboard.writeText(t).then(() => alert('已复制: ' + t));
+    }
+    populate();
+    convert();
+  </script>
+    <div class="ad-banner-bottom"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+</body>
+</html>

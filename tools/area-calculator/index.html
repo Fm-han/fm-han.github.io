@@ -1,0 +1,149 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>面积计算器 - 几何图形面积在线计算</title>
+  <meta name="description" content="免费在线面积计算器，计算矩形、三角形、圆形、梯形、平行四边形等常见图形的面积。">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://fm-han.github.io/area-calculator/">
+  <style>
+                /* 顶部横幅广告 - 透明样式 */ .ad-banner-top { border-bottom: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; } .ad-banner-bottom { border-top: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; margin-top: 40px; } .ad-container { max-width: 728px; margin: 0 auto; min-height: 38px; display: flex; align-items: center; justify-content: center; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; max-width: 700px; margin: 0 auto; padding: 20px; color: #333; line-height: 1.6; background: #fafafa; }
+    h1 { text-align: center; font-size: 1.8rem; color: #1a1a1a; }
+    h1 small { display: block; font-size: 0.85rem; color: #666; margin-top: 4px; font-weight: normal; }
+    .card { margin: 20px 0; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px; background: #fff; }
+    .shape-btns { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 16px; }
+    .shape-btn { padding: 14px; border: 1px solid #ccc; border-radius: 8px; background: #fff; cursor: pointer; text-align: center; transition: all 0.2s; }
+    .shape-btn:hover { background: #f0f0f0; }
+    .shape-btn.active { background: #007bff; color: #fff; border-color: #007bff; }
+    .shape-btn .icon { font-size: 1.5rem; }
+    .shape-btn .name { font-size: 0.85rem; margin-top: 4px; }
+    .input-section { margin-bottom: 16px; }
+    .input-row { display: flex; gap: 12px; margin-bottom: 12px; }
+    .input-group { flex: 1; }
+    .input-group label { display: block; font-weight: 600; margin-bottom: 6px; font-size: 0.9rem; }
+    .input-group input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 1rem; box-sizing: border-box; }
+    .result-display { background: linear-gradient(135deg, #007bff, #0056b3); border-radius: 12px; padding: 24px; color: #fff; text-align: center; margin: 20px 0; }
+    .result-display .formula { font-size: 1rem; opacity: 0.9; }
+    .result-display .value { font-size: 2.5rem; font-weight: 700; }
+    button { padding: 12px 28px; border: none; border-radius: 6px; cursor: pointer; font-size: 1rem; }
+    .btn-primary { background: #007bff; color: #fff; }
+    button:hover { opacity: 0.9; }
+    .buttons { display: flex; gap: 12px; justify-content: center; }
+    .footer { text-align: center; margin: 24px 0; padding: 12px; font-size: 0.85rem; color: #28a745; font-weight: 500; }
+  </style>
+</head>
+<body>
+    <div class="ad-banner-top"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+  <h1>面积计算器 <small>矩形 · 三角形 · 圆形 · 梯形</small></h1>
+
+  <div class="card">
+    <h3>选择图形</h3>
+    <div class="shape-btns">
+      <button class="shape-btn active" onclick="selectShape('rect', this)">
+        <div class="icon">▬</div>
+        <div class="name">矩形</div>
+      </button>
+      <button class="shape-btn" onclick="selectShape('tri', this)">
+        <div class="icon">△</div>
+        <div class="name">三角形</div>
+      </button>
+      <button class="shape-btn" onclick="selectShape('circle', this)">
+        <div class="icon">◯</div>
+        <div class="name">圆形</div>
+      </button>
+      <button class="shape-btn" onclick="selectShape('trapezoid', this)">
+        <div class="icon">⏢</div>
+        <div class="name">梯形</div>
+      </button>
+      <button class="shape-btn" onclick="selectShape('parallel', this)">
+        <div class="icon">▱</div>
+        <div class="name">平行四边形</div>
+      </button>
+      <button class="shape-btn" onclick="selectShape('ellipse', this)">
+        <div class="icon">⬭</div>
+        <div class="name">椭圆</div>
+      </button>
+    </div>
+    <div class="input-section" id="inputSection">
+      <div class="input-row">
+        <div class="input-group"><label>宽度 (a)</label><input type="number" id="valA" placeholder="宽度" value="10"></div>
+        <div class="input-group"><label>高度 (b)</label><input type="number" id="valB" placeholder="高度" value="5"></div>
+      </div>
+    </div>
+    <div class="buttons">
+      <button class="btn-primary" onclick="calculate()">计算面积</button>
+    </div>
+  </div>
+
+  <div class="card" id="resultCard" style="display:none;">
+    <div class="result-display">
+      <div class="formula" id="formulaText">矩形面积公式</div>
+      <div class="value" id="resultValue">--</div>
+      <div style="margin-top:8px;font-size:0.9rem;">平方单位</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>面积公式速查</h3>
+    <table style="width:100%;border-collapse:collapse;">
+      <tr style="background:#f0f0f0;"><th style="padding:8px;border:1px solid #ddd;">图形</th><th style="padding:8px;border:1px solid #ddd;">公式</th></tr>
+      <tr><td style="padding:8px;border:1px solid #ddd;">矩形</td><td style="padding:8px;border:1px solid #ddd;">S = a × b</td></tr>
+      <tr><td style="padding:8px;border:1px solid #ddd;">三角形</td><td style="padding:8px;border:1px solid #ddd;">S = (a × h) / 2</td></tr>
+      <tr><td style="padding:8px;border:1px solid #ddd;">圆形</td><td style="padding:8px;border:1px solid #ddd;">S = π × r²</td></tr>
+      <tr><td style="padding:8px;border:1px solid #ddd;">梯形</td><td style="padding:8px;border:1px solid #ddd;">S = (a + b) × h / 2</td></tr>
+      <tr><td style="padding:8px;border:1px solid #ddd;">平行四边形</td><td style="padding:8px;border:1px solid #ddd;">S = a × h</td></tr>
+      <tr><td style="padding:8px;border:1px solid #ddd;">椭圆</td><td style="padding:8px;border:1px solid #ddd;">S = π × a × b</td></tr>
+    </table>
+  </div>
+
+  <div class="footer">100% 免费 · 数据不上传服务器 · 仅浏览器本地处理</div>
+
+  <script>
+    let currentShape = 'rect';
+    function selectShape(shape, btn) {
+      currentShape = shape;
+      document.querySelectorAll('.shape-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const section = document.getElementById('inputSection');
+      switch (shape) {
+        case 'rect':
+        case 'parallel':
+          section.innerHTML = `<div class="input-row"><div class="input-group"><label>边长 a</label><input type="number" id="valA" placeholder="边长 a" value="10"></div><div class="input-group"><label>边长 b</label><input type="number" id="valB" placeholder="边长 b" value="5"></div></div>`;
+          break;
+        case 'tri':
+          section.innerHTML = `<div class="input-row"><div class="input-group"><label>底边 a</label><input type="number" id="valA" placeholder="底边" value="10"></div><div class="input-group"><label>高 h</label><input type="number" id="valB" placeholder="高" value="6"></div></div>`;
+          break;
+        case 'circle':
+          section.innerHTML = `<div class="input-row"><div class="input-group"><label>半径 r</label><input type="number" id="valA" placeholder="半径" value="5"></div></div>`;
+          break;
+        case 'trapezoid':
+          section.innerHTML = `<div class="input-row"><div class="input-group"><label>上底 a</label><input type="number" id="valA" placeholder="上底" value="6"></div><div class="input-group"><label>下底 b</label><input type="number" id="valB" placeholder="下底" value="10"></div></div><div class="input-row"><div class="input-group"><label>高 h</label><input type="number" id="valC" placeholder="高" value="4"></div></div>`;
+          break;
+        case 'ellipse':
+          section.innerHTML = `<div class="input-row"><div class="input-group"><label>半长轴 a</label><input type="number" id="valA" placeholder="半长轴" value="8"></div><div class="input-group"><label>半短轴 b</label><input type="number" id="valB" placeholder="半短轴" value="5"></div></div>`;
+          break;
+      }
+    }
+    function calculate() {
+      let area, formula;
+      const a = parseFloat(document.getElementById('valA')?.value) || 0;
+      const b = parseFloat(document.getElementById('valB')?.value) || 0;
+      const c = parseFloat(document.getElementById('valC')?.value) || 0;
+      switch (currentShape) {
+        case 'rect': area = a * b; formula = `S = ${a} × ${b}`; break;
+        case 'tri': area = a * b / 2; formula = `S = (${a} × ${b}) ÷ 2`; break;
+        case 'circle': area = Math.PI * a * a; formula = `S = π × ${a}²`; break;
+        case 'trapezoid': area = (a + b) * c / 2; formula = `S = (${a} + ${b}) × ${c} ÷ 2`; break;
+        case 'parallel': area = a * b; formula = `S = ${a} × ${b}`; break;
+        case 'ellipse': area = Math.PI * a * b; formula = `S = π × ${a} × ${b}`; break;
+      }
+      document.getElementById('resultCard').style.display = 'block';
+      document.getElementById('formulaText').textContent = formula;
+      document.getElementById('resultValue').textContent = area.toFixed(4);
+    }
+  </script>
+    <div class="ad-banner-bottom"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+</body>
+</html>

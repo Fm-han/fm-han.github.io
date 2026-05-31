@@ -1,0 +1,96 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MIME类型查询 - 在线工具</title>
+    <link rel="canonical" href="https://fm-han.github.io/mime-types/">
+    <style>
+                /* 顶部横幅广告 - 透明样式 */ .ad-banner-top { border-bottom: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; } .ad-banner-bottom { border-top: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; margin-top: 40px; } .ad-container { max-width: 728px; margin: 0 auto; min-height: 38px; display: flex; align-items: center; justify-content: center; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #fafafa; min-height: 100vh; display: flex; flex-direction: column; }
+        .container { max-width: 900px; margin: 0 auto; padding: 20px; flex: 1; }
+        h1 { text-align: center; color: #333; margin-bottom: 30px; font-size: 28px; }
+        .card { background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; padding: 24px; margin-bottom: 20px; }
+        .search-box { margin-bottom: 20px; }
+        input[type="text"] { width: 100%; padding: 12px 16px; border: 1px solid #ddd; border-radius: 6px; font-size: 16px; }
+        input[type="text"]:focus { outline: none; border-color: #007bff; }
+        .mime-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
+        .mime-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: #f8f9fa; border-radius: 6px; cursor: pointer; transition: background 0.2s; }
+        .mime-item:hover { background: #e9ecef; }
+        .mime-ext { font-weight: 600; color: #333; font-size: 14px; }
+        .mime-type { color: #007bff; font-size: 12px; font-family: monospace; }
+        .mime-item.copied .mime-type { color: #28a745; }
+        .toast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); background: #28a745; color: #fff; padding: 12px 24px; border-radius: 6px; font-size: 14px; opacity: 0; transition: opacity 0.3s; }
+        .toast.show { opacity: 1; }
+        footer { text-align: center; padding: 20px; color: #888; font-size: 14px; }
+    </style>
+</head>
+<body>
+    <div class="ad-banner-top"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+    <div class="container">
+        <h1>MIME 类型查询</h1>
+        <div class="card">
+            <div class="search-box">
+                <input type="text" id="search" placeholder="搜索文件扩展名或MIME类型..." oninput="filterMimes()">
+            </div>
+            <div id="mimeGrid" class="mime-grid"></div>
+        </div>
+    </div>
+    <div id="toast" class="toast">已复制到剪贴板</div>
+    <footer>100% 免费 · 数据不上传服务器 · 仅浏览器本地处理</footer>
+    <script>
+        const MIME_TYPES = [
+            ['html', 'text/html'], ['htm', 'text/html'], ['css', 'text/css'], ['js', 'application/javascript'],
+            ['json', 'application/json'], ['xml', 'application/xml'], ['txt', 'text/plain'],
+            ['png', 'image/png'], ['jpg', 'image/jpeg'], ['jpeg', 'image/jpeg'], ['gif', 'image/gif'],
+            ['svg', 'image/svg+xml'], ['webp', 'image/webp'], ['ico', 'image/x-icon'], ['bmp', 'image/bmp'],
+            ['pdf', 'application/pdf'], ['zip', 'application/zip'], ['rar', 'application/x-rar-compressed'],
+            ['7z', 'application/x-7z-compressed'], ['tar', 'application/x-tar'], ['gz', 'application/gzip'],
+            ['doc', 'application/msword'], ['docx', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'],
+            ['xls', 'application/vnd.ms-excel'], ['xlsx', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'],
+            ['ppt', 'application/vnd.ms-powerpoint'], ['pptx', 'application/vnd.openxmlformats-officedocument.presentationml.presentation'],
+            ['mp3', 'audio/mpeg'], ['wav', 'audio/wav'], ['ogg', 'audio/ogg'], ['flac', 'audio/flac'],
+            ['mp4', 'video/mp4'], ['avi', 'video/x-msvideo'], ['mkv', 'video/x-matroska'], ['webm', 'video/webm'],
+            ['woff', 'font/woff'], ['woff2', 'font/woff2'], ['ttf', 'font/ttf'], ['otf', 'font/otf'], ['eot', 'application/vnd.ms-fontobject'],
+            ['csv', 'text/csv'], ['tsv', 'text/tab-separated-values'], ['md', 'text/markdown'],
+            ['exe', 'application/x-msdownload'], ['dmg', 'application/x-apple-diskimage'], ['iso', 'application/x-iso9660-image'],
+            ['rtf', 'application/rtf'], ['swf', 'application/x-shockwave-flash'], ['class', 'application/java-vm'],
+            ['jar', 'application/java-archive'], ['war', 'application/x-webarchive'],
+        ];
+        
+        function renderMimes(filter = '') {
+            const grid = document.getElementById('mimeGrid');
+            const filtered = MIME_TYPES.filter(([ext, type]) => 
+                ext.includes(filter.toLowerCase()) || type.includes(filter.toLowerCase())
+            );
+            grid.innerHTML = filtered.map(([ext, type]) => `
+                <div class="mime-item" onclick="copyMime(this, '${type}')">
+                    <span class="mime-ext">.${ext}</span>
+                    <span class="mime-type">${type}</span>
+                </div>
+            `).join('');
+        }
+        
+        function filterMimes() {
+            const filter = document.getElementById('search').value;
+            renderMimes(filter);
+        }
+        
+        function copyMime(el, type) {
+            navigator.clipboard.writeText(type).then(() => {
+                el.classList.add('copied');
+                const toast = document.getElementById('toast');
+                toast.classList.add('show');
+                setTimeout(() => {
+                    el.classList.remove('copied');
+                    toast.classList.remove('show');
+                }, 1500);
+            });
+        }
+        
+        renderMimes();
+    </script>
+    <div class="ad-banner-bottom"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+</body>
+</html>

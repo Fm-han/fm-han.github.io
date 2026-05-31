@@ -1,0 +1,240 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DPI/PPI 计算器</title>
+    <style>
+                /* 顶部横幅广告 - 透明样式 */ .ad-banner-top { border-bottom: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; } .ad-banner-bottom { border-top: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; margin-top: 40px; } .ad-container { max-width: 728px; margin: 0 auto; min-height: 38px; display: flex; align-items: center; justify-content: center; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #fafafa; min-height: 100vh; padding: 20px; }
+        .container { max-width: 600px; margin: 0 auto; }
+        .card { background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; padding: 24px; margin-bottom: 20px; }
+        h1 { font-size: 1.5rem; font-weight: 600; margin-bottom: 20px; color: #333; text-align: center; }
+        .title { font-size: 1.25rem; font-weight: 600; margin-bottom: 16px; color: #333; }
+        label { display: block; margin-bottom: 8px; color: #555; font-weight: 500; }
+        input { border: 1px solid #ddd; border-radius: 4px; padding: 8px 12px; width: 100%; box-sizing: border-box; margin-bottom: 16px; }
+        select { border: 1px solid #ddd; border-radius: 4px; padding: 8px 12px; width: 100%; box-sizing: border-box; margin-bottom: 16px; }
+        button { background: #007bff; color: #fff; border: none; padding: 8px 20px; border-radius: 4px; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        button.calc-btn { background: #28a745; width: 100%; padding: 12px; font-size: 1.1rem; }
+        .input-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .result { background: #f0f7ff; border: 1px solid #007bff; border-radius: 4px; padding: 16px; margin-top: 16px; }
+        .result-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        .result-item { background: #fff; padding: 16px; border-radius: 8px; text-align: center; }
+        .result-label { color: #666; font-size: 0.9rem; margin-bottom: 8px; }
+        .result-value { color: #007bff; font-size: 1.5rem; font-weight: 700; }
+        .result-unit { color: #666; font-size: 0.85rem; margin-left: 4px; }
+        .formula { background: #f8f9fa; padding: 12px; border-radius: 4px; font-family: monospace; font-size: 0.9rem; margin-top: 16px; }
+        .error { color: #dc3545; margin-top: 8px; font-size: 0.9rem; }
+    </style>
+</head>
+<body>
+    <div class="ad-banner-top"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+    <div class="container">
+        <h1>DPI/PPI 计算器</h1>
+        <div class="card">
+            <div class="title">输入参数</div>
+            
+            <label>模式</label>
+            <select id="mode" onchange="updateMode()">
+                <option value="calcDpi">计算 DPI/PPI</option>
+                <option value="calcPixels">计算像素尺寸</option>
+                <option value="calcPrint">计算打印尺寸</option>
+            </select>
+            
+            <div id="dpiMode">
+                <div class="input-row">
+                    <div>
+                        <label>宽度 (像素)</label>
+                        <input type="number" id="pxWidth" placeholder="像素宽度" step="any">
+                    </div>
+                    <div>
+                        <label>高度 (像素)</label>
+                        <input type="number" id="pxHeight" placeholder="像素高度" step="any">
+                    </div>
+                </div>
+                <div class="input-row">
+                    <div>
+                        <label>宽度 (英寸)</label>
+                        <input type="number" id="inWidth" placeholder="英寸宽度" step="any">
+                    </div>
+                    <div>
+                        <label>高度 (英寸)</label>
+                        <input type="number" id="inHeight" placeholder="英寸高度" step="any">
+                    </div>
+                </div>
+            </div>
+            
+            <div id="pixelsMode" style="display:none;">
+                <div class="input-row">
+                    <div>
+                        <label>宽度 (英寸)</label>
+                        <input type="number" id="pWidth" placeholder="宽度" step="any">
+                    </div>
+                    <div>
+                        <label>高度 (英寸)</label>
+                        <input type="number" id="pHeight" placeholder="高度" step="any">
+                    </div>
+                </div>
+                <label>DPI/PPI</label>
+                <input type="number" id="pDpi" placeholder="如: 300" step="any">
+            </div>
+            
+            <div id="printMode" style="display:none;">
+                <div class="input-row">
+                    <div>
+                        <label>宽度 (像素)</label>
+                        <input type="number" id="rPxWidth" placeholder="像素宽度" step="any">
+                    </div>
+                    <div>
+                        <label>高度 (像素)</label>
+                        <input type="number" id="rPxHeight" placeholder="像素高度" step="any">
+                    </div>
+                </div>
+                <label>DPI/PPI</label>
+                <input type="number" id="rDpi" placeholder="如: 300" step="any">
+            </div>
+            
+            <button class="calc-btn" onclick="calculate()">计算</button>
+            
+            <div id="result" class="result" style="display:none;">
+                <div id="resultGrid" class="result-grid"></div>
+            </div>
+            <div id="error" class="error" style="display:none;"></div>
+            
+            <div class="formula" id="formulaDisplay">
+                PPI = 像素宽度 / 英寸宽度
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="title">常见 DPI/PPI 参考</div>
+            <p style="color:#666; font-size:0.9rem; line-height:1.6;">
+                <strong>72 PPI</strong>: 网页标准<br>
+                <strong>150 PPI</strong>: 普通打印<br>
+                <strong>300 PPI</strong>: 高质量打印<br>
+                <strong>600 PPI</strong>: 专业印刷
+            </p>
+        </div>
+    </div>
+
+    <script>
+        function updateMode() {
+            const mode = document.getElementById('mode').value;
+            document.getElementById('dpiMode').style.display = mode === 'calcDpi' ? 'block' : 'none';
+            document.getElementById('pixelsMode').style.display = mode === 'calcPixels' ? 'block' : 'none';
+            document.getElementById('printMode').style.display = mode === 'calcPrint' ? 'block' : 'none';
+            
+            const formula = document.getElementById('formulaDisplay');
+            if (mode === 'calcDpi') {
+                formula.textContent = 'PPI = 像素宽度 / 英寸宽度';
+            } else if (mode === 'calcPixels') {
+                formula.textContent = '像素 = 英寸 × DPI';
+            } else {
+                formula.textContent = '英寸 = 像素 / DPI';
+            }
+            
+            document.getElementById('result').style.display = 'none';
+            document.getElementById('error').style.display = 'none';
+        }
+
+        function calculate() {
+            const mode = document.getElementById('mode').value;
+            const errorDiv = document.getElementById('error');
+            const resultDiv = document.getElementById('result');
+            const resultGrid = document.getElementById('resultGrid');
+            
+            errorDiv.style.display = 'none';
+            resultDiv.style.display = 'none';
+
+            try {
+                let html = '';
+                
+                if (mode === 'calcDpi') {
+                    const pxW = parseFloat(document.getElementById('pxWidth').value);
+                    const pxH = parseFloat(document.getElementById('pxHeight').value);
+                    const inW = parseFloat(document.getElementById('inWidth').value);
+                    const inH = parseFloat(document.getElementById('inHeight').value);
+                    
+                    if ([pxW, pxH, inW, inH].some(isNaN) || inW <= 0 || inH <= 0) throw '请输入有效的值';
+                    
+                    const ppiW = pxW / inW;
+                    const ppiH = pxH / inH;
+                    const ppi = (ppiW + ppiH) / 2;
+                    
+                    html = `
+                        <div class="result-item">
+                            <div class="result-label">水平 PPI</div>
+                            <div class="result-value">${ppiW.toFixed(1)}<span class="result-unit">PPI</span></div>
+                        </div>
+                        <div class="result-item">
+                            <div class="result-label">垂直 PPI</div>
+                            <div class="result-value">${ppiH.toFixed(1)}<span class="result-unit">PPI</span></div>
+                        </div>
+                        <div class="result-item" style="grid-column: span 2;">
+                            <div class="result-label">平均 PPI</div>
+                            <div class="result-value">${ppi.toFixed(1)}<span class="result-unit">PPI</span></div>
+                        </div>
+                    `;
+                } else if (mode === 'calcPixels') {
+                    const w = parseFloat(document.getElementById('pWidth').value);
+                    const h = parseFloat(document.getElementById('pHeight').value);
+                    const dpi = parseFloat(document.getElementById('pDpi').value);
+                    
+                    if ([w, h, dpi].some(isNaN) || w <= 0 || h <= 0 || dpi <= 0) throw '请输入有效的值';
+                    
+                    const pxW = w * dpi;
+                    const pxH = h * dpi;
+                    
+                    html = `
+                        <div class="result-item">
+                            <div class="result-label">宽度 (像素)</div>
+                            <div class="result-value">${Math.round(pxW)}<span class="result-unit">px</span></div>
+                        </div>
+                        <div class="result-item">
+                            <div class="result-label">高度 (像素)</div>
+                            <div class="result-value">${Math.round(pxH)}<span class="result-unit">px</span></div>
+                        </div>
+                        <div class="result-item" style="grid-column: span 2;">
+                            <div class="result-label">总像素</div>
+                            <div class="result-value">${Math.round(pxW * pxH / 1000000)}<span class="result-unit">MP</span></div>
+                        </div>
+                    `;
+                } else {
+                    const pxW = parseFloat(document.getElementById('rPxWidth').value);
+                    const pxH = parseFloat(document.getElementById('rPxHeight').value);
+                    const dpi = parseFloat(document.getElementById('rDpi').value);
+                    
+                    if ([pxW, pxH, dpi].some(isNaN) || pxW <= 0 || pxH <= 0 || dpi <= 0) throw '请输入有效的值';
+                    
+                    const inW = pxW / dpi;
+                    const inH = pxH / dpi;
+                    
+                    html = `
+                        <div class="result-item">
+                            <div class="result-label">宽度 (英寸)</div>
+                            <div class="result-value">${inW.toFixed(2)}<span class="result-unit">in</span></div>
+                        </div>
+                        <div class="result-item">
+                            <div class="result-label">高度 (英寸)</div>
+                            <div class="result-value">${inH.toFixed(2)}<span class="result-unit">in</span></div>
+                        </div>
+                        <div class="result-item" style="grid-column: span 2;">
+                            <div class="result-label">对角线 (英寸)</div>
+                            <div class="result-value">${Math.sqrt(inW * inW + inH * inH).toFixed(2)}<span class="result-unit">in</span></div>
+                        </div>
+                    `;
+                }
+                
+                resultGrid.innerHTML = html;
+                resultDiv.style.display = 'block';
+            } catch (e) {
+                errorDiv.textContent = e;
+                errorDiv.style.display = 'block';
+            }
+        }
+    </script>
+    <div class="ad-banner-bottom"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+</body>
+</html>

@@ -1,0 +1,112 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>密码强度检测 - 安全密码检测工具</title>
+  <meta name="description" content="免费在线密码强度检测工具，检测密码安全性，评估强度评分，提供改进建议。">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://fm-han.github.io/password-strength/">
+  <style>
+                /* 顶部横幅广告 - 透明样式 */ .ad-banner-top { border-bottom: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; } .ad-banner-bottom { border-top: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; margin-top: 40px; } .ad-container { max-width: 728px; margin: 0 auto; min-height: 38px; display: flex; align-items: center; justify-content: center; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; max-width: 700px; margin: 0 auto; padding: 20px; color: #333; line-height: 1.6; background: #fafafa; }
+    h1 { text-align: center; font-size: 1.8rem; color: #1a1a1a; }
+    h1 small { display: block; font-size: 0.85rem; color: #666; margin-top: 4px; font-weight: normal; }
+    .card { margin: 20px 0; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px; background: #fff; }
+    .input-group { margin-bottom: 16px; }
+    .input-group label { display: block; font-weight: 600; margin-bottom: 6px; }
+    .input-group input { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 1rem; box-sizing: border-box; }
+    .strength-bar { height: 20px; background: #e0e0e0; border-radius: 10px; overflow: hidden; margin: 16px 0; }
+    .strength-fill { height: 100%; width: 0; transition: all 0.3s; border-radius: 10px; }
+    .strength-fill.weak { background: #dc3545; }
+    .strength-fill.fair { background: #ffc107; }
+    .strength-fill.good { background: #28a745; }
+    .strength-fill.strong { background: #007bff; }
+    .result-section { margin-top: 16px; }
+    .score-display { text-align: center; padding: 24px; background: linear-gradient(135deg, #007bff, #0056b3); border-radius: 12px; color: #fff; margin: 16px 0; }
+    .score-display .score { font-size: 4rem; font-weight: 700; }
+    .score-display .label { font-size: 1rem; opacity: 0.9; }
+    .checklist { list-style: none; padding: 0; margin: 0; }
+    .checklist li { padding: 8px 0; display: flex; align-items: center; gap: 8px; }
+    .checklist li .icon { font-size: 1.2rem; }
+    .checklist li.pass .icon { color: #28a745; }
+    .checklist li.fail .icon { color: #dc3545; }
+    .checklist li.pass { color: #28a745; }
+    .checklist li.fail { color: #dc3545; }
+    button { padding: 12px 28px; border: none; border-radius: 6px; cursor: pointer; font-size: 1rem; }
+    .btn-primary { background: #007bff; color: #fff; }
+    button:hover { opacity: 0.9; }
+    .buttons { display: flex; gap: 12px; justify-content: center; }
+    .footer { text-align: center; margin: 24px 0; padding: 12px; font-size: 0.85rem; color: #28a745; font-weight: 500; }
+  </style>
+</head>
+<body>
+    <div class="ad-banner-top"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+  <h1>密码强度检测 <small>安全评估 · 强度评分 · 改进建议</small></h1>
+
+  <div class="card">
+    <div class="input-group">
+      <label>输入密码检测强度</label>
+      <input type="password" id="password" placeholder="输入要检测的密码" oninput="checkStrength()">
+    </div>
+    <div class="strength-bar"><div class="strength-fill" id="strengthFill"></div></div>
+    <div class="result-section">
+      <div class="score-display" id="scoreDisplay">
+        <div class="score" id="scoreValue">0</div>
+        <div class="label" id="scoreLabel">输入密码查看强度</div>
+      </div>
+      <ul class="checklist" id="checklist"></ul>
+    </div>
+    <div class="buttons">
+      <button class="btn-primary" onclick="togglePassword()">显示/隐藏密码</button>
+    </div>
+  </div>
+
+  <div class="footer">100% 免费 · 数据不上传服务器 · 仅浏览器本地处理</div>
+
+  <script>
+    function checkStrength() {
+      const pwd = document.getElementById('password').value;
+      if (!pwd) {
+        document.getElementById('strengthFill').style.width = '0%';
+        document.getElementById('scoreValue').textContent = '0';
+        document.getElementById('scoreLabel').textContent = '输入密码查看强度';
+        document.getElementById('checklist').innerHTML = '';
+        return;
+      }
+      let score = 0;
+      const checks = [
+        { name: '长度至少8位', pass: pwd.length >= 8 },
+        { name: '长度至少12位', pass: pwd.length >= 12 },
+        { name: '包含小写字母', pass: /[a-z]/.test(pwd) },
+        { name: '包含大写字母', pass: /[A-Z]/.test(pwd) },
+        { name: '包含数字', pass: /\d/.test(pwd) },
+        { name: '包含特殊字符', pass: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(pwd) },
+        { name: '不包含常见单词', pass: !/(password|123456|qwerty|admin)/i.test(pwd) },
+        { name: '无连续重复字符(3+)', pass: !/(.)\1{2,}/.test(pwd) }
+      ];
+      checks.forEach(c => { if (c.pass) score += 12.5; });
+      if (pwd.length > 16) score += 12.5;
+      if (/^[a-zA-Z0-9!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]+$/.test(pwd)) score += 12.5;
+      score = Math.min(100, Math.round(score));
+      const fill = document.getElementById('strengthFill');
+      fill.style.width = score + '%';
+      fill.className = 'strength-fill ' + (score < 30 ? 'weak' : score < 50 ? 'fair' : score < 75 ? 'good' : 'strong');
+      const labels = ['非常弱', '弱', '一般', '强', '非常强'];
+      const labelIndex = score < 20 ? 0 : score < 40 ? 1 : score < 60 ? 2 : score < 80 ? 3 : 4;
+      document.getElementById('scoreValue').textContent = score;
+      document.getElementById('scoreLabel').textContent = labels[labelIndex];
+      const bgColors = ['#dc3545', '#dc3545', '#ffc107', '#28a745', '#007bff'];
+      document.getElementById('scoreDisplay').style.background = `linear-gradient(135deg, ${bgColors[labelIndex]}, ${bgColors[labelIndex]})`;
+      document.getElementById('checklist').innerHTML = checks.map(c =>
+        `<li class="${c.pass ? 'pass' : 'fail'}"><span class="icon">${c.pass ? '✓' : '✗'}</span>${c.name}</li>`
+      ).join('');
+    }
+    function togglePassword() {
+      const input = document.getElementById('password');
+      input.type = input.type === 'password' ? 'text' : 'password';
+    }
+  </script>
+    <div class="ad-banner-bottom"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+</body>
+</html>

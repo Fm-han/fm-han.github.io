@@ -1,0 +1,356 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>面积计算器</title>
+    <style>
+                /* 顶部横幅广告 - 透明样式 */ .ad-banner-top { border-bottom: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; } .ad-banner-bottom { border-top: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; margin-top: 40px; } .ad-container { max-width: 728px; margin: 0 auto; min-height: 38px; display: flex; align-items: center; justify-content: center; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #fafafa; min-height: 100vh; padding: 20px; }
+        .container { max-width: 600px; margin: 0 auto; }
+        .card { background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; padding: 24px; margin-bottom: 20px; }
+        h1 { font-size: 1.5rem; font-weight: 600; margin-bottom: 20px; color: #333; text-align: center; }
+        .title { font-size: 1.25rem; font-weight: 600; margin-bottom: 16px; color: #333; }
+        label { display: block; margin-bottom: 8px; color: #555; font-weight: 500; }
+        input { border: 1px solid #ddd; border-radius: 4px; padding: 8px 12px; width: 100%; box-sizing: border-box; margin-bottom: 16px; }
+        select { border: 1px solid #ddd; border-radius: 4px; padding: 8px 12px; width: 100%; box-sizing: border-box; margin-bottom: 16px; }
+        button { background: #007bff; color: #fff; border: none; padding: 8px 20px; border-radius: 4px; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        button.calc-btn { background: #28a745; width: 100%; padding: 12px; font-size: 1.1rem; }
+        .shapes-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 16px; }
+        .shape-btn { padding: 12px 8px; text-align: center; background: #f0f0f0; border: 2px solid transparent; border-radius: 8px; cursor: pointer; font-size: 0.9rem; transition: all 0.2s; }
+        .shape-btn:hover { background: #e0e0e0; }
+        .shape-btn.active { background: #e7f3ff; border-color: #007bff; color: #007bff; }
+        .shape-icon { font-size: 2rem; display: block; margin-bottom: 4px; }
+        .inputs-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .input-group { display: none; }
+        .input-group.active { display: block; }
+        .input-with-unit { position: relative; }
+        .input-with-unit input { padding-right: 50px; }
+        .input-unit { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: #999; font-size: 0.85rem; }
+        .result { background: #f0f7ff; border: 1px solid #007bff; border-radius: 4px; padding: 16px; margin-top: 16px; text-align: center; }
+        .result-label { color: #666; font-size: 0.9rem; margin-bottom: 8px; }
+        .result-value { color: #007bff; font-size: 1.8rem; font-weight: 700; }
+        .formula { background: #f8f9fa; padding: 12px; border-radius: 4px; font-family: monospace; font-size: 0.9rem; margin-top: 12px; }
+        .error { color: #dc3545; margin-top: 8px; font-size: 0.9rem; }
+    </style>
+</head>
+<body>
+    <div class="ad-banner-top"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+    <div class="container">
+        <h1>面积计算器</h1>
+        <div class="card">
+            <div class="title">选择形状</div>
+            <div class="shapes-grid">
+                <div class="shape-btn active" onclick="selectShape('circle', this)">
+                    <span class="shape-icon">⚪</span>
+                    圆形
+                </div>
+                <div class="shape-btn" onclick="selectShape('rectangle', this)">
+                    <span class="shape-icon">▭</span>
+                    矩形
+                </div>
+                <div class="shape-btn" onclick="selectShape('triangle', this)">
+                    <span class="shape-icon">△</span>
+                    三角形
+                </div>
+                <div class="shape-btn" onclick="selectShape('trapezoid', this)">
+                    <span class="shape-icon">⏢</span>
+                    梯形
+                </div>
+                <div class="shape-btn" onclick="selectShape('ellipse', this)">
+                    <span class="shape-icon">⬭</span>
+                    椭圆
+                </div>
+                <div class="shape-btn" onclick="selectShape('parallelogram', this)">
+                    <span class="shape-icon">▱</span>
+                    平行四边形
+                </div>
+                <div class="shape-btn" onclick="selectShape('rhombus', this)">
+                    <span class="shape-icon">◇</span>
+                    菱形
+                </div>
+                <div class="shape-btn" onclick="selectShape('regular-polygon', this)">
+                    <span class="shape-icon">⬡</span>
+                    正多边形
+                </div>
+                <div class="shape-btn" onclick="selectShape('sector', this)">
+                    <span class="shape-icon">🍕</span>
+                    扇形
+                </div>
+            </div>
+            
+            <div id="circleInputs" class="input-group active">
+                <label>半径 r</label>
+                <div class="input-with-unit">
+                    <input type="number" id="circleR" placeholder="输入半径" step="any">
+                    <span class="input-unit">单位</span>
+                </div>
+                <div class="formula">A = πr²</div>
+            </div>
+            
+            <div id="rectangleInputs" class="input-group">
+                <div class="inputs-row">
+                    <div>
+                        <label>长度</label>
+                        <div class="input-with-unit">
+                            <input type="number" id="rectL" placeholder="长度" step="any">
+                            <span class="input-unit">单位</span>
+                        </div>
+                    </div>
+                    <div>
+                        <label>宽度</label>
+                        <div class="input-with-unit">
+                            <input type="number" id="rectW" placeholder="宽度" step="any">
+                            <span class="input-unit">单位</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="formula">A = 长 × 宽</div>
+            </div>
+            
+            <div id="triangleInputs" class="input-group">
+                <div class="inputs-row">
+                    <div>
+                        <label>底边 b</label>
+                        <div class="input-with-unit">
+                            <input type="number" id="triB" placeholder="底边" step="any">
+                            <span class="input-unit">单位</span>
+                        </div>
+                    </div>
+                    <div>
+                        <label>高 h</label>
+                        <div class="input-with-unit">
+                            <input type="number" id="triH" placeholder="高度" step="any">
+                            <span class="input-unit">单位</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="formula">A = ½ × 底 × 高</div>
+            </div>
+            
+            <div id="trapezoidInputs" class="input-group">
+                <div class="inputs-row">
+                    <div>
+                        <label>上底 a</label>
+                        <div class="input-with-unit">
+                            <input type="number" id="trapA" placeholder="上底" step="any">
+                            <span class="input-unit">单位</span>
+                        </div>
+                    </div>
+                    <div>
+                        <label>下底 b</label>
+                        <div class="input-with-unit">
+                            <input type="number" id="trapB" placeholder="下底" step="any">
+                            <span class="input-unit">单位</span>
+                        </div>
+                    </div>
+                </div>
+                <label style="margin-top:8px;">高 h</label>
+                <div class="input-with-unit">
+                    <input type="number" id="trapH" placeholder="高度" step="any">
+                    <span class="input-unit">单位</span>
+                </div>
+                <div class="formula">A = ½ × (上底 + 下底) × 高</div>
+            </div>
+            
+            <div id="ellipseInputs" class="input-group">
+                <div class="inputs-row">
+                    <div>
+                        <label>半长轴 a</label>
+                        <div class="input-with-unit">
+                            <input type="number" id="ellA" placeholder="半长轴" step="any">
+                            <span class="input-unit">单位</span>
+                        </div>
+                    </div>
+                    <div>
+                        <label>半短轴 b</label>
+                        <div class="input-with-unit">
+                            <input type="number" id="ellB" placeholder="半短轴" step="any">
+                            <span class="input-unit">单位</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="formula">A = πab</div>
+            </div>
+            
+            <div id="parallelogramInputs" class="input-group">
+                <div class="inputs-row">
+                    <div>
+                        <label>底边 b</label>
+                        <div class="input-with-unit">
+                            <input type="number" id="paraB" placeholder="底边" step="any">
+                            <span class="input-unit">单位</span>
+                        </div>
+                    </div>
+                    <div>
+                        <label>高 h</label>
+                        <div class="input-with-unit">
+                            <input type="number" id="paraH" placeholder="高度" step="any">
+                            <span class="input-unit">单位</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="formula">A = 底 × 高</div>
+            </div>
+            
+            <div id="rhombusInputs" class="input-group">
+                <div class="inputs-row">
+                    <div>
+                        <label>对角线 d₁</label>
+                        <div class="input-with-unit">
+                            <input type="number" id="rhoD1" placeholder="对角线1" step="any">
+                            <span class="input-unit">单位</span>
+                        </div>
+                    </div>
+                    <div>
+                        <label>对角线 d₂</label>
+                        <div class="input-with-unit">
+                            <input type="number" id="rhoD2" placeholder="对角线2" step="any">
+                            <span class="input-unit">单位</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="formula">A = ½ × d₁ × d₂</div>
+            </div>
+            
+            <div id="regular-polygonInputs" class="input-group">
+                <label>边数 n</label>
+                <input type="number" id="polyN" placeholder="边数 (如: 6)" min="3" max="12" value="6">
+                <label style="margin-top:8px;">边长 a</label>
+                <div class="input-with-unit">
+                    <input type="number" id="polyA" placeholder="边长" step="any">
+                    <span class="input-unit">单位</span>
+                </div>
+                <div class="formula">A = (n × a²) / (4 × tan(π/n))</div>
+            </div>
+            
+            <div id="sectorInputs" class="input-group">
+                <div class="inputs-row">
+                    <div>
+                        <label>半径 r</label>
+                        <div class="input-with-unit">
+                            <input type="number" id="secR" placeholder="半径" step="any">
+                            <span class="input-unit">单位</span>
+                        </div>
+                    </div>
+                    <div>
+                        <label>圆心角 θ</label>
+                        <div class="input-with-unit">
+                            <input type="number" id="secTheta" placeholder="角度" step="any">
+                            <span class="input-unit">°</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="formula">A = (θ/360) × πr²</div>
+            </div>
+            
+            <button class="calc-btn" onclick="calculate()">计算面积</button>
+            
+            <div id="result" class="result" style="display:none;">
+                <div class="result-label">计算结果</div>
+                <div id="resultValue" class="result-value"></div>
+                <div id="resultDetail" style="color:#666; font-size:0.85rem; margin-top:8px;"></div>
+            </div>
+            <div id="error" class="error" style="display:none;"></div>
+        </div>
+    </div>
+
+    <script>
+        let currentShape = 'circle';
+
+        function selectShape(shape, btn) {
+            currentShape = shape;
+            document.querySelectorAll('.shape-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            document.querySelectorAll('.input-group').forEach(g => g.classList.remove('active'));
+            document.getElementById(shape + 'Inputs').classList.add('active');
+            document.getElementById('result').style.display = 'none';
+            document.getElementById('error').style.display = 'none';
+        }
+
+        function calculate() {
+            let area, detail;
+            const errorDiv = document.getElementById('error');
+            errorDiv.style.display = 'none';
+
+            try {
+                switch (currentShape) {
+                    case 'circle':
+                        const r = parseFloat(document.getElementById('circleR').value);
+                        if (isNaN(r) || r <= 0) throw '请输入有效的半径';
+                        area = Math.PI * r * r;
+                        detail = `π × ${r}² = π × ${(r*r).toFixed(4)} = ${area.toFixed(4)}`;
+                        break;
+                    case 'rectangle':
+                        const l = parseFloat(document.getElementById('rectL').value);
+                        const w = parseFloat(document.getElementById('rectW').value);
+                        if (isNaN(l) || isNaN(w) || l <= 0 || w <= 0) throw '请输入有效的长和宽';
+                        area = l * w;
+                        detail = `${l} × ${w} = ${area.toFixed(4)}`;
+                        break;
+                    case 'triangle':
+                        const tb = parseFloat(document.getElementById('triB').value);
+                        const th = parseFloat(document.getElementById('triH').value);
+                        if (isNaN(tb) || isNaN(th) || tb <= 0 || th <= 0) throw '请输入有效的底和高';
+                        area = 0.5 * tb * th;
+                        detail = `½ × ${tb} × ${th} = ${area.toFixed(4)}`;
+                        break;
+                    case 'trapezoid':
+                        const ta = parseFloat(document.getElementById('trapA').value);
+                        const tb2 = parseFloat(document.getElementById('trapB').value);
+                        const th2 = parseFloat(document.getElementById('trapH').value);
+                        if ([ta, tb2, th2].some(isNaN) || [ta, tb2, th2].some(v => v <= 0)) throw '请输入有效的上底、下底和高';
+                        area = 0.5 * (ta + tb2) * th2;
+                        detail = `½ × (${ta} + ${tb2}) × ${th2} = ${area.toFixed(4)}`;
+                        break;
+                    case 'ellipse':
+                        const ea = parseFloat(document.getElementById('ellA').value);
+                        const eb = parseFloat(document.getElementById('ellB').value);
+                        if (isNaN(ea) || isNaN(eb) || ea <= 0 || eb <= 0) throw '请输入有效的半长轴和半短轴';
+                        area = Math.PI * ea * eb;
+                        detail = `π × ${ea} × ${eb} = ${area.toFixed(4)}`;
+                        break;
+                    case 'parallelogram':
+                        const pb = parseFloat(document.getElementById('paraB').value);
+                        const ph = parseFloat(document.getElementById('paraH').value);
+                        if (isNaN(pb) || isNaN(ph) || pb <= 0 || ph <= 0) throw '请输入有效的底和高';
+                        area = pb * ph;
+                        detail = `${pb} × ${ph} = ${area.toFixed(4)}`;
+                        break;
+                    case 'rhombus':
+                        const rd1 = parseFloat(document.getElementById('rhoD1').value);
+                        const rd2 = parseFloat(document.getElementById('rhoD2').value);
+                        if (isNaN(rd1) || isNaN(rd2) || rd1 <= 0 || rd2 <= 0) throw '请输入有效的两条对角线';
+                        area = 0.5 * rd1 * rd2;
+                        detail = `½ × ${rd1} × ${rd2} = ${area.toFixed(4)}`;
+                        break;
+                    case 'regular-polygon':
+                        const n = parseInt(document.getElementById('polyN').value);
+                        const pa = parseFloat(document.getElementById('polyA').value);
+                        if (isNaN(n) || isNaN(pa) || n < 3 || pa <= 0) throw '请输入有效的边数(≥3)和边长';
+                        area = (n * pa * pa) / (4 * Math.tan(Math.PI / n));
+                        detail = `(${n} × ${pa}²) / (4 × tan(π/${n})) = ${area.toFixed(4)}`;
+                        break;
+                    case 'sector':
+                        const sr = parseFloat(document.getElementById('secR').value);
+                        const st = parseFloat(document.getElementById('secTheta').value);
+                        if (isNaN(sr) || isNaN(st) || sr <= 0) throw '请输入有效的半径和角度';
+                        area = (st / 360) * Math.PI * sr * sr;
+                        detail = `(${st}/360) × π × ${sr}² = ${area.toFixed(4)}`;
+                        break;
+                }
+
+                document.getElementById('resultValue').textContent = area.toFixed(4);
+                document.getElementById('resultDetail').textContent = detail;
+                document.getElementById('result').style.display = 'block';
+            } catch (e) {
+                errorDiv.textContent = e;
+                errorDiv.style.display = 'block';
+            }
+        }
+    </script>
+    <div class="ad-banner-bottom"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+</body>
+</html>

@@ -1,0 +1,147 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JSON压缩工具 - JSON压缩格式化</title>
+  <meta name="description" content="免费在线JSON压缩工具，去除JSON中的空格和换行符，压缩JSON数据，支持格式化输出。">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://fm-han.github.io/json-minify/">
+  <style>
+                /* 顶部横幅广告 - 透明样式 */ .ad-banner-top { border-bottom: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; } .ad-banner-bottom { border-top: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; margin-top: 40px; } .ad-container { max-width: 728px; margin: 0 auto; min-height: 38px; display: flex; align-items: center; justify-content: center; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; color: #333; line-height: 1.6; background: #fafafa; }
+    h1 { text-align: center; font-size: 1.8rem; color: #1a1a1a; }
+    h1 small { display: block; font-size: 0.85rem; color: #666; margin-top: 4px; font-weight: normal; }
+    .card { margin: 20px 0; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px; background: #fff; }
+    .editor-row { display: flex; gap: 16px; height: 400px; }
+    .editor-panel { flex: 1; display: flex; flex-direction: column; }
+    .editor-panel label { font-weight: 600; margin-bottom: 8px; }
+    textarea { flex: 1; width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; font-family: monospace; font-size: 0.9rem; resize: none; box-sizing: border-box; }
+    .stats { display: flex; gap: 16px; justify-content: center; margin: 16px 0; }
+    .stat-item { text-align: center; padding: 12px 20px; background: #f5f5f5; border-radius: 8px; }
+    .stat-item .num { font-size: 1.5rem; font-weight: 700; color: #007bff; }
+    .stat-item .label { font-size: 0.85rem; color: #666; }
+    .stat-item.highlight { background: #007bff; color: #fff; }
+    .stat-item.highlight .num { color: #fff; }
+    .stat-item.highlight .label { color: rgba(255,255,255,0.9); }
+    button { padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-size: 1rem; }
+    .btn-primary { background: #007bff; color: #fff; }
+    .btn-success { background: #28a745; color: #fff; }
+    .btn-secondary { background: #6c757d; color: #fff; }
+    .btn-warning { background: #ffc107; color: #333; }
+    button:hover { opacity: 0.9; }
+    .buttons { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+    .error-msg { background: #f8d7da; color: #721c24; padding: 12px; border-radius: 6px; margin-top: 12px; display: none; }
+    .footer { text-align: center; margin: 24px 0; padding: 12px; font-size: 0.85rem; color: #28a745; font-weight: 500; }
+  </style>
+</head>
+<body>
+    <div class="ad-banner-top"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+  <h1>JSON压缩工具 <small>去除空格 · 压缩JSON · 格式化输出</small></h1>
+
+  <div class="card">
+    <div class="stats">
+      <div class="stat-item" id="statInput"><div class="num" id="inputSize">0</div><div class="label">原始大小</div></div>
+      <div class="stat-item" id="statOutput"><div class="num" id="outputSize">0</div><div class="label">压缩后</div></div>
+      <div class="stat-item highlight" id="statSaved"><div class="num" id="savedSize">0</div><div class="label">节省</div></div>
+    </div>
+    <div class="editor-row">
+      <div class="editor-panel">
+        <label>输入JSON</label>
+        <textarea id="inputJson" placeholder="粘贴JSON内容...">{
+  "name": "张三",
+  "age": 30,
+  "email": "zhangsan@example.com",
+  "skills": ["JavaScript", "Python", "Go"],
+  "address": {
+    "city": "北京",
+    "district": "朝阳区"
+  }
+}</textarea>
+      </div>
+      <div class="editor-panel">
+        <label>压缩结果</label>
+        <textarea id="outputJson" readonly placeholder="压缩后的JSON..."></textarea>
+      </div>
+    </div>
+    <div class="error-msg" id="errorMsg"></div>
+    <div class="buttons" style="margin-top:16px;">
+      <button class="btn-primary" onclick="minifyJson()">压缩JSON</button>
+      <button class="btn-warning" onclick="formatJson()">格式化JSON</button>
+      <button class="btn-success" onclick="copyOutput()">复制结果</button>
+      <button class="btn-secondary" onclick="clearAll()">清空</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>功能说明</h3>
+    <ul style="padding-left:20px;color:#666;">
+      <li><strong>压缩JSON：</strong>去除所有空格、换行和缩进，减小数据体积</li>
+      <li><strong>格式化JSON：</strong>美化JSON结构，便于阅读</li>
+      <li><strong>实时统计：</strong>显示原始大小、压缩后大小和节省比例</li>
+    </ul>
+  </div>
+
+  <div class="footer">100% 免费 · 数据不上传服务器 · 仅浏览器本地处理</div>
+
+  <script>
+    function formatSize(bytes) {
+      if (bytes < 1024) return bytes + ' B';
+      if (bytes < 1048576) return (bytes / 1024).toFixed(2) + ' KB';
+      return (bytes / 1048576).toFixed(2) + ' MB';
+    }
+    function showError(msg) {
+      document.getElementById('errorMsg').textContent = msg;
+      document.getElementById('errorMsg').style.display = 'block';
+    }
+    function hideError() {
+      document.getElementById('errorMsg').style.display = 'none';
+    }
+    function updateStats(input, output) {
+      document.getElementById('inputSize').textContent = formatSize(input.length);
+      document.getElementById('outputSize').textContent = formatSize(output.length);
+      const saved = input.length - output.length;
+      const percent = input.length > 0 ? ((saved / input.length) * 100).toFixed(1) : 0;
+      document.getElementById('savedSize').textContent = percent + '%';
+    }
+    function minifyJson() {
+      hideError();
+      const input = document.getElementById('inputJson').value;
+      if (!input.trim()) { showError('请输入JSON内容'); return; }
+      try {
+        const parsed = JSON.parse(input);
+        const minified = JSON.stringify(parsed);
+        document.getElementById('outputJson').value = minified;
+        updateStats(input, minified);
+      } catch (e) {
+        showError('JSON格式错误: ' + e.message);
+      }
+    }
+    function formatJson() {
+      hideError();
+      const input = document.getElementById('inputJson').value;
+      if (!input.trim()) { showError('请输入JSON内容'); return; }
+      try {
+        const parsed = JSON.parse(input);
+        const formatted = JSON.stringify(parsed, null, 2);
+        document.getElementById('outputJson').value = formatted;
+        updateStats(input, formatted);
+      } catch (e) {
+        showError('JSON格式错误: ' + e.message);
+      }
+    }
+    function copyOutput() {
+      const output = document.getElementById('outputJson').value;
+      if (!output) { alert('请先压缩或格式化JSON'); return; }
+      navigator.clipboard.writeText(output).then(() => alert('已复制到剪贴板'));
+    }
+    function clearAll() {
+      document.getElementById('inputJson').value = '';
+      document.getElementById('outputJson').value = '';
+      hideError();
+      updateStats('', '');
+    }
+  </script>
+    <div class="ad-banner-bottom"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+</body>
+</html>

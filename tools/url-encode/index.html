@@ -1,0 +1,106 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>URL编码解码工具 - 在线URL/全文本编码</title>
+  <meta name="description" content="免费在线URL编码解码工具，支持URL编码、全文本编码、混合模式，浏览器本地处理。">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://fm-han.github.io/url-encode/">
+  <style>
+                /* 顶部横幅广告 - 透明样式 */ .ad-banner-top { border-bottom: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; } .ad-banner-bottom { border-top: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; margin-top: 40px; } .ad-container { max-width: 728px; margin: 0 auto; min-height: 38px; display: flex; align-items: center; justify-content: center; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; color: #333; line-height: 1.6; background: #fafafa; }
+    h1 { text-align: center; font-size: 1.8rem; color: #1a1a1a; }
+    h1 small { display: block; font-size: 0.85rem; color: #666; margin-top: 4px; font-weight: normal; }
+    .section { margin: 20px 0; padding: 16px; border: 1px solid #e0e0e0; border-radius: 8px; background: #fff; }
+    .section label { display: block; font-weight: 600; margin-bottom: 8px; }
+    textarea, input[type="text"] { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 1rem; box-sizing: border-box; font-family: monospace; }
+    textarea { resize: vertical; min-height: 120px; }
+    .tabs { display: flex; gap: 8px; margin-bottom: 16px; }
+    .tab { padding: 8px 16px; border: 1px solid #ccc; border-radius: 6px; background: #fff; cursor: pointer; font-size: 0.9rem; }
+    .tab.active { background: #007bff; color: #fff; border-color: #007bff; }
+    .buttons { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+    button { padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-size: 0.95rem; }
+    .btn-encode { background: #007bff; color: #fff; }
+    .btn-decode { background: #28a745; color: #fff; }
+    .btn-clear { background: #6c757d; color: #fff; }
+    .btn-copy { background: #ffc107; color: #333; }
+    button:hover { opacity: 0.9; }
+    .result { margin-top: 12px; padding: 12px; background: #f8f9fa; border-radius: 6px; word-break: break-all; font-family: monospace; font-size: 0.9rem; }
+    .footer { text-align: center; margin: 24px 0; padding: 12px; font-size: 0.85rem; color: #28a745; font-weight: 500; }
+  </style>
+</head>
+<body>
+    <div class="ad-banner-top"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+
+  <h1>URL编码解码工具 <small>支持URL编码 / 全文本编码 / 浏览器本地处理</small></h1>
+
+  <div class="section">
+    <label>输入文本</label>
+    <div class="tabs">
+      <button class="tab active" onclick="setMode('url')">URL编码</button>
+      <button class="tab" onclick="setMode('full')">全文本编码</button>
+      <button class="tab" onclick="setMode('component')">组件编码</button>
+    </div>
+    <textarea id="input" placeholder="输入需要编码或解码的文本..."></textarea>
+    <div class="buttons">
+      <button class="btn-encode" onclick="encode()">编码 →</button>
+      <button class="btn-decode" onclick="decode()">← 解码</button>
+      <button class="btn-copy" onclick="copyResult()">复制结果</button>
+      <button class="btn-clear" onclick="clearAll()">清空</button>
+    </div>
+  </div>
+
+  <div class="section">
+    <label>结果</label>
+    <div id="result" class="result">等待输入...</div>
+  </div>
+
+  <div class="footer">100% 免费 · 数据不上传服务器 · 仅浏览器本地处理</div>
+
+  <script>
+    let mode = 'url';
+
+    function setMode(m) {
+      mode = m;
+      document.querySelectorAll('.tab').forEach((t, i) => {
+        t.classList.toggle('active', (m === 'url' && i === 0) || (m === 'full' && i === 1) || (m === 'component' && i === 2));
+      });
+    }
+
+    function encode() {
+      const input = document.getElementById('input').value;
+      if (!input) { document.getElementById('result').textContent = '请输入文本'; return; }
+      try {
+        let encoded;
+        if (mode === 'url') encoded = encodeURI(input);
+        else if (mode === 'full') encoded = encodeURIComponent(input);
+        else encoded = encodeURIComponent(input);
+        document.getElementById('result').textContent = encoded;
+      } catch (e) { document.getElementById('result').textContent = '编码失败: ' + e.message; }
+    }
+
+    function decode() {
+      const input = document.getElementById('input').value;
+      if (!input) { document.getElementById('result').textContent = '请输入文本'; return; }
+      try {
+        const decoded = decodeURIComponent(input);
+        document.getElementById('result').textContent = decoded;
+      } catch (e) { document.getElementById('result').textContent = '解码失败: ' + e.message; }
+    }
+
+    function copyResult() {
+      const text = document.getElementById('result').textContent;
+      if (text && text !== '等待输入...' && text !== '请输入文本') {
+        navigator.clipboard.writeText(text).then(() => alert('已复制!'));
+      }
+    }
+
+    function clearAll() {
+      document.getElementById('input').value = '';
+      document.getElementById('result').textContent = '等待输入...';
+    }
+  </script>
+    <div class="ad-banner-bottom"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+</body>
+</html>

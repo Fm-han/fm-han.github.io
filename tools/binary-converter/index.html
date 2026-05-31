@@ -1,0 +1,154 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>进制转换器 - 在线二进制/八进制/十进制/十六进制互转</title>
+  <meta name="description" content="免费在线进制转换器，支持2/8/10/16/32/64进制互转，实时转换高亮显示，点击任意结果即可复制。">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://fm-han.github.io/binary-converter/">
+  <style>
+                /* 顶部横幅广告 - 透明样式 */ .ad-banner-top { border-bottom: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; } .ad-banner-bottom { border-top: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; margin-top: 40px; } .ad-container { max-width: 728px; margin: 0 auto; min-height: 38px; display: flex; align-items: center; justify-content: center; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; max-width: 700px; margin: 0 auto; padding: 20px; color: #333; line-height: 1.6; background: #fafafa; }
+    h1 { text-align: center; font-size: 1.8rem; color: #1a1a1a; }
+    h1 small { display: block; font-size: 0.85rem; color: #666; margin-top: 4px; font-weight: normal; }
+    .section { margin: 20px 0; padding: 16px; border: 1px solid #e0e0e0; border-radius: 8px; background: #fff; }
+    .section label { display: block; font-weight: 600; margin-bottom: 8px; }
+    .base-tabs { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+    .base-tabs button { padding: 8px 14px; border: 1px solid #ccc; border-radius: 6px; background: #fff; cursor: pointer; font-size: 0.9rem; font-weight: 600; }
+    .base-tabs button.active { background: #007bff; color: #fff; border-color: #007bff; }
+    textarea, input[type="text"] { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 1rem; box-sizing: border-box; font-family: monospace; }
+    textarea { resize: vertical; min-height: 80px; }
+    .result-grid { display: grid; grid-template-columns: 80px 1fr; gap: 8px; margin-top: 12px; }
+    .result-grid .base-label { font-weight: 700; color: #007bff; padding: 10px 0; }
+    .result-grid .base-val { padding: 10px 12px; background: #f8f9fa; border-radius: 6px; font-family: monospace; font-size: 0.95rem; word-break: break-all; cursor: pointer; border: 1px solid transparent; }
+    .result-grid .base-val:hover { border-color: #28a745; background: #e8f5e9; }
+    .buttons { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+    button { padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-size: 0.95rem; }
+    .btn-primary { background: #007bff; color: #fff; }
+    .btn-clear { background: #6c757d; color: #fff; }
+    button:hover { opacity: 0.9; }
+    .footer { text-align: center; margin: 24px 0; padding: 12px; font-size: 0.85rem; color: #28a745; font-weight: 500; }
+  </style>
+</head>
+<body>
+    <div class="ad-banner-top"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+
+  <h1>进制转换器 <small>2 / 8 / 10 / 16 / 32 / 64进制 · 实时转换 · 点击复制 · 浏览器本地</small></h1>
+
+  <div class="section">
+    <label>选择源进制</label>
+    <div class="base-tabs" id="baseTabs">
+      <button class="active" onclick="setBase(2)">二进制 BIN</button>
+      <button onclick="setBase(8)">八进制 OCT</button>
+      <button onclick="setBase(10)">十进制 DEC</button>
+      <button onclick="setBase(16)">十六进制 HEX</button>
+      <button onclick="setBase(32)">三十二进制</button>
+      <button onclick="setBase(64)">六十四进制</button>
+    </div>
+    <textarea id="inputVal" placeholder="输入数字，如: 255 或 11111111 或 0xFF" oninput="convert()"></textarea>
+    <div class="buttons">
+      <button class="btn-primary" onclick="random()">随机示例</button>
+      <button class="btn-clear" onclick="document.getElementById('inputVal').value='';document.getElementById('resultGrid').innerHTML=''">清空</button>
+    </div>
+  </div>
+
+  <div class="section">
+    <label>转换结果（点击复制）</label>
+    <div class="result-grid" id="resultGrid">
+      <span class="base-label">二进制</span><div class="base-val" onclick="copy(this)" id="rBin">-</div>
+      <span class="base-label">八进制</span><div class="base-val" onclick="copy(this)" id="rOct">-</div>
+      <span class="base-label">十进制</span><div class="base-val" onclick="copy(this)" id="rDec">-</div>
+      <span class="base-label">十六进制</span><div class="base-val" onclick="copy(this)" id="rHex">-</div>
+      <span class="base-label">三十二进制</span><div class="base-val" onclick="copy(this)" id="rB32">-</div>
+      <span class="base-label">六十四进制</span><div class="base-val" onclick="copy(this)" id="rB64">-</div>
+    </div>
+  </div>
+
+  <div class="footer">100% 免费 · 数据不上传服务器 · 仅浏览器本地处理</div>
+
+  <script>
+    let currentBase = 2;
+    const CHARS32 = '0123456789ABCDEFGHIJKLMNOPQRSTUV';
+    const CHARS64 = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz+/';
+
+    function setBase(b) {
+      currentBase = b;
+      document.querySelectorAll('.base-tabs button').forEach((btn, i) => {
+        btn.classList.toggle('active', [2,8,10,16,32,64][i] === b);
+      });
+    }
+
+    function toDecimal(str, base) {
+      if (base === 10) return BigInt(str);
+      return BigInt('0x' + BigInt(str).toString(16));
+    }
+
+    function fromDecimal(num, base) {
+      if (base === 10) return num.toString();
+      if (base === 2) return num.toString(2);
+      if (base === 8) return num.toString(8);
+      if (base === 16) return num.toString(16).toUpperCase();
+      if (base === 32) {
+        let res = '';
+        let n = num;
+        while (n > 0n) { res = CHARS32[Number(n % 32n)] + res; n /= 32n; }
+        return res || '0';
+      }
+      if (base === 64) {
+        let res = '';
+        let n = num;
+        while (n > 0n) { res = CHARS64[Number(n % 64n)] + res; n /= 64n; }
+        return res || '0';
+      }
+      return num.toString(base);
+    }
+
+    function convert() {
+      const input = document.getElementById('inputVal').value.trim();
+      if (!input) {
+        ['rBin','rOct','rDec','rHex','rB32','rB64'].forEach(id => document.getElementById(id).textContent = '-');
+        return;
+      }
+      try {
+        let dec;
+        if (currentBase === 10) {
+          dec = BigInt(input);
+        } else if (currentBase === 16) {
+          dec = BigInt(input.startsWith('0x') ? input : '0x' + input);
+        } else {
+          dec = BigInt(parseInt(input, currentBase));
+        }
+        document.getElementById('rBin').textContent = dec.toString(2);
+        document.getElementById('rOct').textContent = dec.toString(8);
+        document.getElementById('rDec').textContent = dec.toString();
+        document.getElementById('rHex').textContent = dec.toString(16).toUpperCase();
+        document.getElementById('rB32').textContent = fromDecimal(dec, 32);
+        document.getElementById('rB64').textContent = fromDecimal(dec, 64);
+      } catch(e) {
+        ['rBin','rOct','rDec','rHex','rB32','rB64'].forEach(id => document.getElementById(id).textContent = '无效输入');
+      }
+    }
+
+    function copy(el) {
+      const text = el.textContent;
+      if (text.startsWith('无效') || text === '-') return;
+      navigator.clipboard.writeText(text).then(() => {
+        const orig = el.style.background;
+        el.style.background = '#e8f5e9';
+        setTimeout(() => el.style.background = orig, 300);
+      });
+    }
+
+    function random() {
+      const bases = [2,8,10,16];
+      const b = bases[Math.floor(Math.random()*bases.length)];
+      const num = Math.floor(Math.random() * 65536);
+      setBase(b);
+      document.getElementById('inputVal').value = b === 16 ? num.toString(16).toUpperCase() : num.toString(b);
+      convert();
+    }
+  </script>
+    <div class="ad-banner-bottom"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+</body>
+</html>

@@ -1,0 +1,139 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>百分比计算器 - 在线增长/减少/占比/折扣计算</title>
+  <meta name="description" content="免费在线百分比计算器，支持增长百分比、减少百分比、占比计算、折扣计算，浏览器本地处理。">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://fm-han.github.io/percentage/">
+  <style>
+                /* 顶部横幅广告 - 透明样式 */ .ad-banner-top { border-bottom: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; } .ad-banner-bottom { border-top: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; margin-top: 40px; } .ad-container { max-width: 728px; margin: 0 auto; min-height: 38px; display: flex; align-items: center; justify-content: center; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; max-width: 700px; margin: 0 auto; padding: 20px; color: #333; line-height: 1.6; background: #fafafa; }
+    h1 { text-align: center; font-size: 1.8rem; color: #1a1a1a; }
+    h1 small { display: block; font-size: 0.85rem; color: #666; margin-top: 4px; font-weight: normal; }
+    .section { margin: 20px 0; padding: 16px; border: 1px solid #e0e0e0; border-radius: 8px; background: #fff; }
+    .section label { display: block; font-weight: 600; margin-bottom: 8px; }
+    .calc-card { padding: 16px; background: #f8f9fa; border-radius: 8px; margin-bottom: 16px; }
+    .calc-card h3 { margin: 0 0 12px; font-size: 1rem; color: #007bff; }
+    .input-row { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; flex-wrap: wrap; }
+    .input-row label { white-space: nowrap; min-width: 80px; }
+    .input-row input { padding: 8px 12px; border: 1px solid #ccc; border-radius: 6px; width: 120px; font-size: 1rem; }
+    .result-box { padding: 12px 16px; background: #fff; border-radius: 6px; font-size: 1.3rem; font-weight: 700; color: #007bff; text-align: center; margin-top: 8px; }
+    .buttons { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
+    button { padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer; font-size: 0.9rem; }
+    .btn-primary { background: #007bff; color: #fff; }
+    button:hover { opacity: 0.9; }
+    .footer { text-align: center; margin: 24px 0; padding: 12px; font-size: 0.85rem; color: #28a745; font-weight: 500; }
+  </style>
+</head>
+<body>
+    <div class="ad-banner-top"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+
+  <h1>百分比计算器 <small>增长 / 减少 / 占比 / 折扣 · 浏览器本地</small></h1>
+
+  <div class="section">
+    <!-- 增长计算 -->
+    <div class="calc-card">
+      <h3>📈 增长百分比</h3>
+      <div class="input-row">
+        <label>原价:</label>
+        <input type="number" id="growth-a" placeholder="100">
+        <label>现价:</label>
+        <input type="number" id="growth-b" placeholder="120">
+      </div>
+      <div class="result-box" id="growth-result">-</div>
+      <div class="buttons">
+        <button class="btn-primary" onclick="calcGrowth()">计算</button>
+      </div>
+    </div>
+
+    <!-- 占比计算 -->
+    <div class="calc-card">
+      <h3>📊 占比计算 (A占B的多少%)</h3>
+      <div class="input-row">
+        <label>部分值:</label>
+        <input type="number" id="ratio-a" placeholder="30">
+        <label>总值:</label>
+        <input type="number" id="ratio-b" placeholder="200">
+      </div>
+      <div class="result-box" id="ratio-result">-</div>
+      <div class="buttons">
+        <button class="btn-primary" onclick="calcRatio()">计算</button>
+      </div>
+    </div>
+
+    <!-- 折扣计算 -->
+    <div class="calc-card">
+      <h3>🏷️ 折扣计算 (原价×折扣)</h3>
+      <div class="input-row">
+        <label>原价:</label>
+        <input type="number" id="disc-price" placeholder="1000">
+        <label>折扣:</label>
+        <input type="number" id="disc-rate" placeholder="8" step="0.1">
+        <span>折</span>
+      </div>
+      <div class="result-box" id="disc-result">-</div>
+      <div class="buttons">
+        <button class="btn-primary" onclick="calcDiscount()">计算</button>
+      </div>
+    </div>
+
+    <!-- 反推计算 -->
+    <div class="calc-card">
+      <h3>🔄 反推计算 (已知百分比和结果，求原值)</h3>
+      <div class="input-row">
+        <label>结果值:</label>
+        <input type="number" id="rev-result" placeholder="80">
+        <label>百分比:</label>
+        <input type="number" id="rev-pct" placeholder="20"> %
+      </div>
+      <div class="result-box" id="rev-result-out">-</div>
+      <div class="buttons">
+        <button class="btn-primary" onclick="calcReverse()">计算原值</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">100% 免费 · 数据不上传服务器 · 仅浏览器本地处理</div>
+
+  <script>
+    function calcGrowth() {
+      const a = parseFloat(document.getElementById('growth-a').value);
+      const b = parseFloat(document.getElementById('growth-b').value);
+      if (!a && a !== 0 || !b && b !== 0) return;
+      const pct = ((b - a) / Math.abs(a) * 100).toFixed(2);
+      const sign = pct >= 0 ? '+' : '';
+      const color = pct >= 0 ? '#28a745' : '#dc3545';
+      document.getElementById('growth-result').innerHTML = `变化: <span style="color:${color}">${sign}${pct}%</span>`;
+    }
+
+    function calcRatio() {
+      const a = parseFloat(document.getElementById('ratio-a').value);
+      const b = parseFloat(document.getElementById('ratio-b').value);
+      if (!a && a !== 0 || !b && b !== 0) return;
+      if (b === 0) { document.getElementById('ratio-result').textContent = '总值不能为0'; return; }
+      const pct = (a / b * 100).toFixed(2);
+      document.getElementById('ratio-result').textContent = `${pct}%`;
+    }
+
+    function calcDiscount() {
+      const price = parseFloat(document.getElementById('disc-price').value);
+      const rate = parseFloat(document.getElementById('disc-rate').value);
+      if (!price && price !== 0 || !rate && rate !== 0) return;
+      const final = (price * rate / 10).toFixed(2);
+      const saved = (price - final).toFixed(2);
+      document.getElementById('disc-result').innerHTML = `应付: <b>¥${final}</b> (省 ¥${saved})`;
+    }
+
+    function calcReverse() {
+      const result = parseFloat(document.getElementById('rev-result').value);
+      const pct = parseFloat(document.getElementById('rev-pct').value);
+      if (!result && result !== 0 || !pct && pct !== 0) return;
+      const original = (result / pct * 100).toFixed(4);
+      document.getElementById('rev-result-out').textContent = `原值 = ${original}`;
+    }
+  </script>
+    <div class="ad-banner-bottom"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+</body>
+</html>

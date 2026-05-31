@@ -1,0 +1,148 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>分数计算器 - 分数加减乘除运算</title>
+  <meta name="description" content="免费在线分数计算器，支持分数的加减乘除运算，自动约分，显示计算过程。">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://fm-han.github.io/fraction-calculator/">
+  <style>
+                /* 顶部横幅广告 - 透明样式 */ .ad-banner-top { border-bottom: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; } .ad-banner-bottom { border-top: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; margin-top: 40px; } .ad-container { max-width: 728px; margin: 0 auto; min-height: 38px; display: flex; align-items: center; justify-content: center; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; max-width: 700px; margin: 0 auto; padding: 20px; color: #333; line-height: 1.6; background: #fafafa; }
+    h1 { text-align: center; font-size: 1.8rem; color: #1a1a1a; }
+    h1 small { display: block; font-size: 0.85rem; color: #666; margin-top: 4px; font-weight: normal; }
+    .card { margin: 20px 0; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px; background: #fff; }
+    .calc-input { display: flex; gap: 8px; align-items: center; justify-content: center; margin: 20px 0; }
+    .fraction-input { display: flex; flex-direction: column; align-items: center; }
+    .fraction-input input { width: 80px; padding: 10px; border: 1px solid #ccc; border-radius: 6px; text-align: center; font-size: 1.2rem; }
+    .fraction-input .line { width: 80px; height: 2px; background: #333; margin: 4px 0; }
+    .op-select { font-size: 2rem; color: #007bff; cursor: pointer; padding: 10px; }
+    .result-display { background: linear-gradient(135deg, #007bff, #0056b3); border-radius: 12px; padding: 24px; color: #fff; text-align: center; margin: 20px 0; }
+    .result-display .equation { font-size: 1.5rem; margin-bottom: 8px; }
+    .result-display .result { font-size: 2.5rem; font-weight: 700; }
+    .step-section { background: #f5f5f5; padding: 16px; border-radius: 8px; margin-top: 16px; }
+    .step-section h4 { margin: 0 0 8px 0; }
+    .step-section pre { margin: 0; font-family: monospace; font-size: 0.9rem; white-space: pre-wrap; }
+    button { padding: 12px 28px; border: none; border-radius: 6px; cursor: pointer; font-size: 1rem; }
+    .btn-primary { background: #007bff; color: #fff; }
+    .btn-secondary { background: #6c757d; color: #fff; }
+    button:hover { opacity: 0.9; }
+    .buttons { display: flex; gap: 12px; justify-content: center; }
+    .footer { text-align: center; margin: 24px 0; padding: 12px; font-size: 0.85rem; color: #28a745; font-weight: 500; }
+  </style>
+</head>
+<body>
+    <div class="ad-banner-top"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+  <h1>分数计算器 <small>加减乘除 · 自动约分 · 详细步骤</small></h1>
+
+  <div class="card">
+    <div class="calc-input">
+      <div class="fraction-input">
+        <input type="number" id="n1" value="1" min="-9999" max="9999">
+        <div class="line"></div>
+        <input type="number" id="d1" value="2" min="1" max="9999">
+      </div>
+      <select class="op-select" id="operator">
+        <option value="+">+</option>
+        <option value="-">−</option>
+        <option value="*">×</option>
+        <option value="/">÷</option>
+      </select>
+      <div class="fraction-input">
+        <input type="number" id="n2" value="1" min="-9999" max="9999">
+        <div class="line"></div>
+        <input type="number" id="d2" value="4" min="1" max="9999">
+      </div>
+    </div>
+    <div class="buttons">
+      <button class="btn-primary" onclick="calculate()">计算</button>
+      <button class="btn-secondary" onclick="clearAll()">清空</button>
+    </div>
+  </div>
+
+  <div class="card" id="resultCard" style="display:none;">
+    <div class="result-display">
+      <div class="equation" id="equation"></div>
+      <div class="result" id="resultFraction"></div>
+    </div>
+    <div class="step-section" id="stepsSection">
+      <h4>计算步骤</h4>
+      <pre id="steps"></pre>
+    </div>
+  </div>
+
+  <div class="footer">100% 免费 · 数据不上传服务器 · 仅浏览器本地处理</div>
+
+  <script>
+    function gcd(a, b) { return b === 0 ? Math.abs(a) : gcd(b, a % b); }
+    function simplify(n, d) {
+      if (d < 0) { n = -n; d = -d; }
+      const g = gcd(Math.abs(n), Math.abs(d));
+      return { n: n / g, d: d / g };
+    }
+    function formatFrac(n, d) {
+      if (d === 1) return n.toString();
+      return `${n}/${d}`;
+    }
+    function calculate() {
+      const n1 = parseInt(document.getElementById('n1').value) || 0;
+      const d1 = parseInt(document.getElementById('d1').value) || 1;
+      const n2 = parseInt(document.getElementById('n2').value) || 0;
+      const d2 = parseInt(document.getElementById('d2').value) || 1;
+      const op = document.getElementById('operator').value;
+      if (d1 === 0 || d2 === 0) { alert('分母不能为0'); return; }
+      let rn, rd, steps = '';
+      const f1 = simplify(n1, d1);
+      const f2 = simplify(n2, d2);
+      steps += `原分数：${formatFrac(f1.n, f1.d)} ${op} ${formatFrac(f2.n, f2.d)}\n`;
+      steps += `通分后：${f1.n}/${d1} ${op} ${f2.n}/${d2}\n`;
+      switch (op) {
+        case '+':
+          rd = d1 * d2;
+          rn = n1 * d2 + n2 * d1;
+          steps += `计算：(${n1}×${d2}) + (${n2}×${d1}) = ${rn}\n`;
+          steps += `       ${d1}×${d2} = ${rd}\n`;
+          break;
+        case '-':
+          rd = d1 * d2;
+          rn = n1 * d2 - n2 * d1;
+          steps += `计算：(${n1}×${d2}) - (${n2}×${d1}) = ${rn}\n`;
+          steps += `       ${d1}×${d2} = ${rd}\n`;
+          break;
+        case '*':
+          rn = n1 * n2;
+          rd = d1 * d2;
+          steps += `计算：${n1}×${n2} = ${rn}\n`;
+          steps += `       ${d1}×${d2} = ${rd}\n`;
+          break;
+        case '/':
+          rn = n1 * d2;
+          rd = d1 * n2;
+          if (rd === 0) { alert('除数不能为0'); return; }
+          steps += `计算：${n1}/${d1} ÷ ${n2}/${d2} = ${n1}/${d1} × ${d2}/${n2}\n`;
+          steps += `       ${n1}×${d2} = ${rn}\n`;
+          steps += `       ${d1}×${n2} = ${rd}\n`;
+          break;
+      }
+      const result = simplify(rn, rd);
+      const intPart = Math.floor(Math.abs(result.n) / result.d);
+      const properFrac = { n: Math.abs(result.n) % result.d, d: result.d };
+      let resultStr;
+      if (result.d === 1) resultStr = (result.n < 0 ? '-' : '') + intPart;
+      else if (intPart > 0) resultStr = (result.n < 0 ? '-' : '') + intPart + ' ' + formatFrac(properFrac.n, properFrac.d);
+      else resultStr = formatFrac(result.n, result.d);
+      steps += `约分结果：${resultStr}`;
+      document.getElementById('resultCard').style.display = 'block';
+      document.getElementById('equation').textContent = `${formatFrac(f1.n, f1.d)} ${op} ${formatFrac(f2.n, f2.d)} =`;
+      document.getElementById('resultFraction').textContent = resultStr;
+      document.getElementById('steps').textContent = steps;
+    }
+    function clearAll() {
+      document.querySelectorAll('input[type="number"]').forEach(i => i.value = '');
+      document.getElementById('resultCard').style.display = 'none';
+    }
+  </script>
+    <div class="ad-banner-bottom"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+</body>
+</html>

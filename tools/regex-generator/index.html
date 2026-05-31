@@ -1,0 +1,133 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>正则表达式生成器 - 常用正则大全</title>
+  <meta name="description" content="免费在线正则表达式生成器，提供邮箱、手机号、URL、身份证、银行卡等常用正则表达式，支持测试匹配。">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://fm-han.github.io/regex-generator/">
+  <style>
+                /* 顶部横幅广告 - 透明样式 */ .ad-banner-top { border-bottom: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; } .ad-banner-bottom { border-top: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; margin-top: 40px; } .ad-container { max-width: 728px; margin: 0 auto; min-height: 38px; display: flex; align-items: center; justify-content: center; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; max-width: 700px; margin: 0 auto; padding: 20px; color: #333; line-height: 1.6; background: #fafafa; }
+    h1 { text-align: center; font-size: 1.8rem; color: #1a1a1a; }
+    h1 small { display: block; font-size: 0.85rem; color: #666; margin-top: 4px; font-weight: normal; }
+    .card { margin: 20px 0; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px; background: #fff; }
+    .preset-list { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+    .preset-item { padding: 12px; border: 1px solid #e0e0e0; border-radius: 6px; cursor: pointer; transition: all 0.2s; }
+    .preset-item:hover { border-color: #007bff; background: #f0f7ff; }
+    .preset-item .name { font-weight: 600; color: #007bff; margin-bottom: 4px; }
+    .preset-item .desc { font-size: 0.85rem; color: #666; }
+    .regex-display { background: #1e1e1e; border-radius: 8px; padding: 16px; color: #d4d4d4; font-family: monospace; margin: 16px 0; position: relative; }
+    .regex-display code { color: #4ec9b0; word-break: break-all; }
+    .copy-btn { position: absolute; top: 8px; right: 8px; padding: 6px 12px; background: #007bff; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-size: 0.85rem; }
+    .input-group { margin-bottom: 16px; }
+    .input-group label { display: block; font-weight: 600; margin-bottom: 6px; }
+    .input-group input, .input-group textarea { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 1rem; box-sizing: border-box; font-family: monospace; }
+    .input-group textarea { min-height: 80px; resize: vertical; }
+    .test-area { margin-top: 16px; }
+    .match-result { padding: 12px; border-radius: 6px; margin-top: 12px; }
+    .match-result.success { background: #d4edda; color: #155724; }
+    .match-result.error { background: #f8d7da; color: #721c24; }
+    .match-list { margin-top: 8px; }
+    .match-item { background: #fff; padding: 4px 8px; border-radius: 4px; margin: 4px 0; font-family: monospace; }
+    .footer { text-align: center; margin: 24px 0; padding: 12px; font-size: 0.85rem; color: #28a745; font-weight: 500; }
+  </style>
+</head>
+<body>
+    <div class="ad-banner-top"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+  <h1>正则表达式生成器 <small>常用正则 · 快速复制 · 在线测试</small></h1>
+
+  <div class="card">
+    <h3>常用正则模板</h3>
+    <div class="preset-list">
+      <div class="preset-item" onclick="usePreset('email')"><div class="name">📧 邮箱</div><div class="desc">验证电子邮箱格式</div></div>
+      <div class="preset-item" onclick="usePreset('phone')"><div class="name">📱 手机号</div><div class="desc">中国大陆手机号码</div></div>
+      <div class="preset-item" onclick="usePreset('idCard')"><div class="name">🪪 身份证</div><div class="desc">18位身份证号码</div></div>
+      <div class="preset-item" onclick="usePreset('url')"><div class="name">🔗 URL</div><div class="desc">网址链接验证</div></div>
+      <div class="preset-item" onclick="usePreset('bankCard')"><div class="name">💳 银行卡</div><div class="desc">银行卡号验证</div></div>
+      <div class="preset-item" onclick="usePreset('ip')"><div class="name">🌐 IP地址</div><div class="desc">IPv4地址验证</div></div>
+      <div class="preset-item" onclick="usePreset('date')"><div class="name">📅 日期</div><div class="desc">YYYY-MM-DD格式</div></div>
+      <div class="preset-item" onclick="usePreset('zipCode')"><div class="name">📮 邮编</div><div class="desc">中国邮政编码</div></div>
+      <div class="preset-item" onclick="usePreset('username')"><div class="name">👤 用户名</div><div class="desc">字母数字下划线</div></div>
+      <div class="preset-item" onclick="usePreset('password')"><div class="name">🔐 密码</div><div class="desc">8位以上强密码</div></div>
+      <div class="preset-item" onclick="usePreset('integer')"><div class="name">🔢 整数</div><div class="desc">正负整数验证</div></div>
+      <div class="preset-item" onclick="usePreset('decimal')"><div class="name">💰 小数</div><div class="desc">金额小数验证</div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="regex-display">
+      <code id="regexCode">/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/</code>
+      <button class="copy-btn" onclick="copyRegex()">复制</button>
+    </div>
+    <div class="input-group">
+      <label>自定义正则表达式</label>
+      <input type="text" id="customRegex" placeholder="输入正则表达式..." value="/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/">
+    </div>
+    <div class="test-area">
+      <div class="input-group"><label>测试字符串（每行一个）</label><textarea id="testInput" placeholder="输入测试文本，每行一个..."></textarea></div>
+      <button style="padding:10px 20px;background:#007bff;color:#fff;border:none;border-radius:6px;cursor:pointer;" onclick="testRegex()">测试匹配</button>
+    </div>
+    <div id="testResult"></div>
+  </div>
+
+  <div class="footer">100% 免费 · 数据不上传服务器 · 仅浏览器本地处理</div>
+
+  <script>
+    const presets = {
+      email: { regex: '/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$/', desc: '邮箱地址' },
+      phone: { regex: '/^1[3-9]\\d{9}$/', desc: '手机号码' },
+      idCard: { regex: '/^[1-9]\\d{5}(19|20)\\d{2}(0[1-9]|1[0-2])(0[1-9]|[12]\\d|3[01])\\d{3}[\\dXx]$/', desc: '身份证号' },
+      url: { regex: '/^https?:\\/\\/[\\w.-]+(?:\\.[\\w.-]+)+[\\w\\-._~:/?#[\\]@!$&\'()*+,;=]*$/', desc: '网址URL' },
+      bankCard: { regex: '/^[1-9]\\d{14,18}$/', desc: '银行卡号' },
+      ip: { regex: '/^(?:(?:25[0-5]|2[0-4]\\d|[01]?\\d\\d?)\\.){3}(?:25[0-5]|2[0-4]\\d|[01]?\\d\\d?)$/', desc: 'IP地址' },
+      date: { regex: '/^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])$/', desc: '日期格式' },
+      zipCode: { regex: '/^[1-9]\\d{5}$/', desc: '邮政编码' },
+      username: { regex: '/^[a-zA-Z0-9_]{4,16}$/', desc: '用户名' },
+      password: { regex: '/^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)[^]{8,}$/', desc: '强密码' },
+      integer: { regex: '/^-?\\d+$/', desc: '整数' },
+      decimal: { regex: '/^\\d+(\\.\\d{1,2})?$/', desc: '金额小数' }
+    };
+    function usePreset(name) {
+      const preset = presets[name];
+      document.getElementById('customRegex').value = preset.regex;
+      document.getElementById('regexCode').textContent = preset.regex;
+      document.getElementById('testInput').placeholder = '测试' + preset.desc + '...';
+    }
+    function copyRegex() {
+      navigator.clipboard.writeText(document.getElementById('regexCode').textContent).then(() => alert('正则已复制'));
+    }
+    function testRegex() {
+      const regexStr = document.getElementById('customRegex').value;
+      const testStr = document.getElementById('testInput').value;
+      const resultDiv = document.getElementById('testResult');
+      try {
+        const cleanRegex = regexStr.replace(/^\/|\/[gimsuy]*$/g, '');
+        const flags = (regexStr.match(/\/[gimsuy]*$/) || [''])[0].replace('/', '');
+        const regex = new RegExp(cleanRegex, flags.includes('g') ? flags : flags + 'g');
+        const lines = testStr.split('\n').filter(l => l.trim());
+        let matches = [];
+        lines.forEach(line => {
+          let match;
+          while ((match = regex.exec(line)) !== null) {
+            matches.push(match[0]);
+            if (!flags.includes('g')) break;
+          }
+        });
+        if (matches.length > 0) {
+          resultDiv.innerHTML = `<div class="match-result success">匹配到 ${matches.length} 个结果<div class="match-list">${matches.map(m => `<div class="match-item">${m}</div>`).join('')}</div></div>`;
+        } else {
+          resultDiv.innerHTML = '<div class="match-result error">没有匹配到任何内容</div>';
+        }
+      } catch (e) {
+        resultDiv.innerHTML = `<div class="match-result error">正则表达式错误: ${e.message}</div>`;
+      }
+    }
+    document.getElementById('customRegex').addEventListener('input', function() {
+      document.getElementById('regexCode').textContent = this.value;
+    });
+  </script>
+    <div class="ad-banner-bottom"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+</body>
+</html>

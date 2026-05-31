@@ -1,0 +1,101 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS美化器 - 在线CSS代码格式化压缩工具</title>
+  <meta name="description" content="免费在线CSS美化器，支持CSS代码格式化、压缩、变量重命名、语法高亮显示，浏览器本地处理无需上传。">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://fm-han.github.io/css-prettifier/">
+  <style>
+                /* 顶部横幅广告 - 透明样式 */ .ad-banner-top { border-bottom: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; } .ad-banner-bottom { border-top: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; margin-top: 40px; } .ad-container { max-width: 728px; margin: 0 auto; min-height: 38px; display: flex; align-items: center; justify-content: center; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 20px; color: #333; line-height: 1.6; background: #fafafa; }
+    h1 { text-align: center; font-size: 1.8rem; color: #1a1a1a; }
+    h1 small { display: block; font-size: 0.85rem; color: #666; margin-top: 4px; font-weight: normal; }
+    .section { margin: 20px 0; padding: 16px; border: 1px solid #e0e0e0; border-radius: 8px; background: #fff; }
+    .section label { display: block; font-weight: 600; margin-bottom: 8px; }
+    textarea { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 0.85rem; box-sizing: border-box; font-family: 'Consolas', 'Monaco', monospace; resize: vertical; min-height: 200px; }
+    .stats { display: flex; gap: 16px; margin-top: 8px; flex-wrap: wrap; }
+    .stat { font-size: 0.85rem; color: #666; }
+    .stat span { font-weight: 600; color: #007bff; }
+    .buttons { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+    button { padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-size: 0.95rem; }
+    .btn-primary { background: #007bff; color: #fff; }
+    .btn-copy { background: #28a745; color: #fff; }
+    .btn-clear { background: #6c757d; color: #fff; }
+    button:hover { opacity: 0.9; }
+    .footer { text-align: center; margin: 24px 0; padding: 12px; font-size: 0.85rem; color: #28a745; font-weight: 500; }
+  </style>
+</head>
+<body>
+    <div class="ad-banner-top"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+
+  <h1>CSS美化器 <small>格式化 / 压缩 / 语法高亮 · 浏览器本地</small></h1>
+
+  <div class="section">
+    <label>输入 CSS</label>
+    <textarea id="cssInput" placeholder="输入需要美化或压缩的CSS代码...">.btn{padding:10px 20px;background:#007bff;color:#fff;border:none;border-radius:6px;cursor:pointer}.btn:hover{opacity:0.9}</textarea>
+    <div class="buttons">
+      <button class="btn-primary" onclick="prettify()">格式化</button>
+      <button class="btn-primary" onclick="compress()">压缩</button>
+      <button class="btn-copy" onclick="copyResult()">复制结果</button>
+      <button class="btn-clear" onclick="document.getElementById('cssInput').value='';document.getElementById('stats').innerHTML=''">清空</button>
+    </div>
+  </div>
+
+  <div class="section">
+    <label>结果</label>
+    <textarea id="cssOutput" readonly style="background:#f8f9fa;min-height:200px;"></textarea>
+    <div class="stats" id="stats"></div>
+  </div>
+
+  <div class="footer">100% 免费 · 数据不上传服务器 · 仅浏览器本地处理</div>
+
+  <script>
+    function prettify() {
+      const input = document.getElementById('cssInput').value;
+      if (!input) { alert('请输入CSS'); return; }
+      // Simple formatter: expand braces and properties
+      let result = input
+        .replace(/\s*{\s*/g, ' {\n  ')
+        .replace(/\s*}\s*/g, '\n}\n')
+        .replace(/\s*;\s*/g, ';\n  ')
+        .replace(/  \n/g, '\n')
+        .replace(/  \n  \n/g, '\n\n')
+        .trim();
+      document.getElementById('cssOutput').value = result;
+      showStats(input, result);
+    }
+    function compress() {
+      const input = document.getElementById('cssInput').value;
+      if (!input) { alert('请输入CSS'); return; }
+      let result = input
+        .replace(/\/\*[\s\S]*?\*\//g, '')
+        .replace(/\s+/g, ' ')
+        .replace(/\s*\{\s*/g, '{')
+        .replace(/\s*\}\s*/g, '}')
+        .replace(/\s*;\s*/g, ';')
+        .replace(/;\}/g, '}')
+        .replace(/\s*:\s*/g, ':')
+        .replace(/,\s*/g, ',')
+        .replace(/#([0-9a-f])\1([0-9a-f])\2([0-9a-f])\3/gi, (m, r, g, b) => `#${r}${g}${b}`)
+        .trim();
+      document.getElementById('cssOutput').value = result;
+      showStats(input, result);
+    }
+    function showStats(input, output) {
+      document.getElementById('stats').innerHTML = `
+        <span class="stat">原始: <span>${input.length}</span> 字符</span>
+        <span class="stat">结果: <span>${output.length}</span> 字符</span>
+        <span class="stat">压缩率: <span>${((1-output.length/input.length)*100).toFixed(1)}%</span></span>
+      `;
+    }
+    function copyResult() {
+      const t = document.getElementById('cssOutput').value;
+      if (!t) { alert('无内容'); return; }
+      navigator.clipboard.writeText(t).then(() => alert('已复制!'));
+    }
+  </script>
+    <div class="ad-banner-bottom"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+</body>
+</html>

@@ -1,0 +1,105 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Base64编码解码工具 - 在线文本/文件Base64转换</title>
+  <meta name="description" content="免费在线Base64编码解码工具，支持文本与Base64互转、文件转Base64，浏览器本地处理不上传。">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://fm-han.github.io/base64/">
+  <style>
+                /* 顶部横幅广告 - 透明样式 */ .ad-banner-top { border-bottom: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; } .ad-banner-bottom { border-top: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; margin-top: 40px; } .ad-container { max-width: 728px; margin: 0 auto; min-height: 38px; display: flex; align-items: center; justify-content: center; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; color: #333; line-height: 1.6; background: #fafafa; }
+    h1 { text-align: center; font-size: 1.8rem; color: #1a1a1a; }
+    h1 small { display: block; font-size: 0.85rem; color: #666; margin-top: 4px; font-weight: normal; }
+    .section { margin: 20px 0; padding: 16px; border: 1px solid #e0e0e0; border-radius: 8px; background: #fff; }
+    .section label { display: block; font-weight: 600; margin-bottom: 8px; }
+    textarea { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 1rem; box-sizing: border-box; font-family: monospace; resize: vertical; min-height: 120px; }
+    .buttons { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+    button { padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-size: 0.95rem; }
+    .btn-encode { background: #007bff; color: #fff; }
+    .btn-decode { background: #28a745; color: #fff; }
+    .btn-clear { background: #6c757d; color: #fff; }
+    .btn-copy { background: #ffc107; color: #333; }
+    .drop-zone { border: 2px dashed #ccc; padding: 24px; text-align: center; border-radius: 8px; cursor: pointer; margin-bottom: 12px; }
+    .drop-zone:hover { border-color: #007bff; background: #f0f7ff; }
+    button:hover { opacity: 0.9; }
+    .result { margin-top: 12px; padding: 12px; background: #f8f9fa; border-radius: 6px; word-break: break-all; font-family: monospace; font-size: 0.9rem; max-height: 200px; overflow-y: auto; }
+    .footer { text-align: center; margin: 24px 0; padding: 12px; font-size: 0.85rem; color: #28a745; font-weight: 500; }
+  </style>
+</head>
+<body>
+    <div class="ad-banner-top"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+
+  <h1>Base64编码解码工具 <small>文本互转 / 文件转换 / 浏览器本地处理</small></h1>
+
+  <div class="section">
+    <label>文本模式</label>
+    <textarea id="textInput" placeholder="输入文本进行Base64编码或解码..."></textarea>
+    <div class="buttons">
+      <button class="btn-encode" onclick="textEncode()">编码 →</button>
+      <button class="btn-decode" onclick="textDecode()">← 解码</button>
+      <button class="btn-copy" onclick="copyResult()">复制结果</button>
+      <button class="btn-clear" onclick="clearText()">清空</button>
+    </div>
+  </div>
+
+  <div class="section">
+    <label>文件模式</label>
+    <div class="drop-zone" onclick="document.getElementById('fileInput').click()">
+      <input type="file" id="fileInput" class="hidden" onchange="fileToBase64(this.files[0])">
+      <p>点击选择文件，或拖拽文件到此处</p>
+      <p style="color:#888;font-size:0.85rem;margin-top:8px;">支持任意格式文件</p>
+    </div>
+    <div id="fileResult" class="result" style="display:none;"></div>
+  </div>
+
+  <div class="section">
+    <label>结果</label>
+    <div id="result" class="result">等待输入...</div>
+  </div>
+
+  <div class="footer">100% 免费 · 数据不上传服务器 · 仅浏览器本地处理</div>
+
+  <script>
+    function textEncode() {
+      const input = document.getElementById('textInput').value;
+      if (!input) { document.getElementById('result').textContent = '请输入文本'; return; }
+      const encoded = btoa(unescape(encodeURIComponent(input)));
+      document.getElementById('result').textContent = encoded;
+    }
+
+    function textDecode() {
+      const input = document.getElementById('textInput').value;
+      if (!input) { document.getElementById('result').textContent = '请输入文本'; return; }
+      try {
+        const decoded = decodeURIComponent(escape(atob(input)));
+        document.getElementById('result').textContent = decoded;
+      } catch (e) { document.getElementById('result').textContent = '解码失败: 无效的Base64字符串'; }
+    }
+
+    function fileToBase64(file) {
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        const result = document.getElementById('fileResult');
+        result.style.display = 'block';
+        result.innerHTML = `<b>${file.name}</b> (${(file.size/1024).toFixed(1)} KB)<br><br><textarea style="height:100px">${reader.result}</textarea>`;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function copyResult() {
+      const text = document.getElementById('result').textContent;
+      if (text && text !== '等待输入...') navigator.clipboard.writeText(text).then(() => alert('已复制!'));
+    }
+
+    function clearText() {
+      document.getElementById('textInput').value = '';
+      document.getElementById('result').textContent = '等待输入...';
+      document.getElementById('fileResult').style.display = 'none';
+    }
+  </script>
+    <div class="ad-banner-bottom"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+</body>
+</html>

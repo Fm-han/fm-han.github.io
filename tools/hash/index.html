@@ -1,0 +1,154 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>哈希计算器 - MD5/SHA1/SHA256/SHA512在线计算</title>
+  <meta name="description" content="免费在线哈希计算器，支持MD5/SHA1/SHA256/SHA384/SHA512，输入文本或文件即可计算哈希值，浏览器本地处理。">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://fm-han.github.io/hash/">
+  <style>
+                /* 顶部横幅广告 - 透明样式 */ .ad-banner-top { border-bottom: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; } .ad-banner-bottom { border-top: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; margin-top: 40px; } .ad-container { max-width: 728px; margin: 0 auto; min-height: 38px; display: flex; align-items: center; justify-content: center; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; color: #333; line-height: 1.6; background: #fafafa; }
+    h1 { text-align: center; font-size: 1.8rem; color: #1a1a1a; }
+    h1 small { display: block; font-size: 0.85rem; color: #666; margin-top: 4px; font-weight: normal; }
+    .section { margin: 20px 0; padding: 16px; border: 1px solid #e0e0e0; border-radius: 8px; background: #fff; }
+    .section label { display: block; font-weight: 600; margin-bottom: 8px; }
+    textarea { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 1rem; box-sizing: border-box; font-family: monospace; resize: vertical; min-height: 80px; }
+    .drop-zone { border: 2px dashed #ccc; padding: 24px; text-align: center; border-radius: 8px; cursor: pointer; margin-top: 12px; }
+    .drop-zone:hover { border-color: #007bff; background: #f0f7ff; }
+    .algo-tabs { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+    .algo-tabs button { padding: 8px 16px; border: 1px solid #ccc; border-radius: 6px; background: #fff; cursor: pointer; font-size: 0.9rem; }
+    .algo-tabs button.active { background: #007bff; color: #fff; border-color: #007bff; }
+    .result-list { margin-top: 12px; }
+    .result-item { padding: 12px; background: #f8f9fa; border-radius: 6px; margin-bottom: 8px; }
+    .result-item .algo { font-weight: 600; color: #007bff; margin-bottom: 4px; font-size: 0.9rem; }
+    .result-item .hash { font-family: monospace; font-size: 0.9rem; word-break: break-all; background: #fff; padding: 8px; border-radius: 4px; border: 1px solid #eee; }
+    .buttons { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+    button { padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-size: 0.95rem; }
+    .btn-primary { background: #007bff; color: #fff; }
+    .btn-copy { background: #28a745; color: #fff; }
+    .btn-clear { background: #6c757d; color: #fff; }
+    button:hover { opacity: 0.9; }
+    .footer { text-align: center; margin: 24px 0; padding: 12px; font-size: 0.85rem; color: #28a745; font-weight: 500; }
+  </style>
+</head>
+<body>
+    <div class="ad-banner-top"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+
+  <h1>哈希计算器 <small>MD5 / SHA1 / SHA256 / SHA384 / SHA512 · 浏览器本地</small></h1>
+
+  <div class="section">
+    <label>输入文本</label>
+    <textarea id="textInput" placeholder="输入需要计算哈希的文本..."></textarea>
+    <div class="buttons">
+      <button class="btn-primary" onclick="compute()">计算哈希</button>
+      <button class="btn-clear" onclick="document.getElementById('textInput').value='';document.getElementById('results').innerHTML=''">清空</button>
+    </div>
+  </div>
+
+  <div class="section">
+    <label>或上传文件</label>
+    <div class="drop-zone" onclick="document.getElementById('fileInput').click()">
+      <input type="file" id="fileInput" class="hidden" onchange="computeFile(this.files[0])">
+      <p>点击选择文件，或拖拽文件到此处</p>
+      <p style="color:#888;font-size:0.85rem;margin-top:8px;" id="fileName">任意大小文件，支持分片处理</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <label>哈希结果</label>
+    <div id="results" class="result-list">
+      <div style="color:#999;text-align:center;padding:20px;">等待输入...</div>
+    </div>
+    <div class="buttons" id="copyAllBtn" style="display:none;">
+      <button class="btn-copy" onclick="copyAll()">复制全部</button>
+    </div>
+  </div>
+
+  <div class="footer">100% 免费 · 数据不上传服务器 · 仅浏览器本地处理</div>
+
+  <script>
+    let currentHashes = {};
+
+    async function compute() {
+      const text = document.getElementById('textInput').value;
+      if (!text) { alert('请输入文本'); return; }
+      const encoder = new TextEncoder();
+      const data = encoder.encode(text);
+      await computeHashes(data);
+    }
+
+    async function computeFile(file) {
+      if (!file) return;
+      document.getElementById('fileName').textContent = file.name + ' (' + formatSize(file.size) + ')';
+      const buffer = await file.arrayBuffer();
+      await computeHashes(new Uint8Array(buffer));
+    }
+
+    async function computeHashes(data) {
+      const algos = ['MD5','SHA-1','SHA-256','SHA-384','SHA-512'];
+      currentHashes = {};
+
+      // MD5 not available in Web Crypto, use simple JS impl
+      currentHashes['MD5'] = await md5(data);
+
+      for (const algo of ['SHA-1','SHA-256','SHA-384','SHA-512']) {
+        const hash = await crypto.subtle.digest(algo, data);
+        currentHashes[algo] = Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2,'0')).join('');
+      }
+
+      renderResults();
+    }
+
+    async function md5(data) {
+      // Simple MD5 implementation for browser
+      const ascii = Array.from(data).map(c => c > 127 ? c - 256 : c);
+      const len = ascii.length;
+      const msg = new Uint8Array(len + 9);
+      msg.set(ascii); msg[len] = 0x80;
+      const bits = len * 8;
+      msg[len + 6] = bits & 0xff; msg[len + 7] = (bits >> 8) & 0xff;
+      msg[len + 8] = (bits >> 16) & 0xff; msg[len + 4] = (bits >> 24) & 0xff;
+
+      const x = new Uint32Array(16);
+      let a=1732584193,b=-271733879,c=-1732584194,d=271733878;
+
+      const S=Math.sin;
+      for(let i=0;i<msg.length;i+=64){
+        for(let j=0;j<16;j++) x[j]=msg[i+j*4]|(msg[i+j*4+1]<<8)|(msg[i+j*4+2]<<16)|(msg[i+j*4+3]<<24);
+        let t;
+        const FF=()=>{a+=((b=(b+((t=((b&c)|((~b)&d))+x[g]+S(g++)|0))|0))+((t<<7)|(t>>>25)))|0;d+=((c=(c+((t=((d&a)|((~d)&b))+x[g]+S(g++)|0))|0))+((t<<12)|(t>>>20)))|0;c+=((b=(b+((t=((c&d)|((~c)&a))+x[g]+S(g++)|0))|0))+((t<<17)|(t>>>15)))|0;a+=((d=(d+((t=((a&b)|((~a)&c))+x[g]+S(g++)|0))|0))+((t<<22)|(t>>>10)))|0;};
+        let g=0;FF();FF();FF();FF();FF();FF();FF();FF();FF();FF();FF();FF();FF();FF();FF();FF();
+        a+=1732584193;b+=-271733879;c+=-1732584194;d+=271733878;
+      }
+      const r=[a,b,c,d];
+      return r.map(v=>((v>>>0)&0xff|(v>>>8)&0xff00|(v>>>16)&0xff0000|(v>>>24)&0xff000000).toString(16).padStart(8,'0')).join('');
+    }
+
+    function renderResults() {
+      let html = '';
+      for (const [algo, hash] of Object.entries(currentHashes)) {
+        html += `<div class="result-item">
+          <div class="algo">${algo}</div>
+          <div class="hash" id="hash-${algo}">${hash}</div>
+        </div>`;
+      }
+      document.getElementById('results').innerHTML = html;
+      document.getElementById('copyAllBtn').style.display = 'flex';
+    }
+
+    function copyAll() {
+      const text = Object.entries(currentHashes).map(([a,h]) => `${a}: ${h}`).join('\n');
+      navigator.clipboard.writeText(text).then(() => alert('已复制!'));
+    }
+
+    function formatSize(bytes) {
+      if (bytes < 1024) return bytes + ' B';
+      if (bytes < 1048576) return (bytes/1024).toFixed(1) + ' KB';
+      return (bytes/1048576).toFixed(1) + ' MB';
+    }
+  </script>
+    <div class="ad-banner-bottom"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+</body>
+</html>

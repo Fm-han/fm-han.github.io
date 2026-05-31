@@ -1,0 +1,138 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>百分比变化计算器</title>
+    <style>
+                /* 顶部横幅广告 - 透明样式 */ .ad-banner-top { border-bottom: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; } .ad-banner-bottom { border-top: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; margin-top: 40px; } .ad-container { max-width: 728px; margin: 0 auto; min-height: 38px; display: flex; align-items: center; justify-content: center; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #fafafa; min-height: 100vh; padding: 20px; }
+        .container { max-width: 600px; margin: 0 auto; }
+        .card { background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; padding: 24px; margin-bottom: 20px; }
+        h1 { font-size: 1.5rem; font-weight: 600; margin-bottom: 20px; color: #333; text-align: center; }
+        .title { font-size: 1.25rem; font-weight: 600; margin-bottom: 16px; color: #333; }
+        label { display: block; margin-bottom: 8px; color: #555; font-weight: 500; }
+        input { border: 1px solid #ddd; border-radius: 4px; padding: 8px 12px; width: 100%; box-sizing: border-box; margin-bottom: 16px; }
+        button { background: #007bff; color: #fff; border: none; padding: 8px 20px; border-radius: 4px; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        button.calc-btn { background: #28a745; width: 100%; padding: 12px; font-size: 1.1rem; margin-top: 10px; }
+        button.calc-btn:hover { background: #218838; }
+        .result { background: #f0f7ff; border: 1px solid #007bff; border-radius: 4px; padding: 16px; margin-top: 16px; }
+        .result-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #e0e0e0; }
+        .result-row:last-child { border-bottom: none; }
+        .result-label { color: #666; }
+        .result-value { font-weight: 600; }
+        .result-value.positive { color: #28a745; }
+        .result-value.negative { color: #dc3545; }
+        .formula { background: #f8f9fa; padding: 12px; border-radius: 4px; margin-top: 16px; font-family: monospace; font-size: 0.9rem; }
+        .error { color: #dc3545; margin-top: 8px; font-size: 0.9rem; }
+        .arrow { text-align: center; font-size: 2rem; color: #007bff; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <div class="ad-banner-top"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+    <div class="container">
+        <h1>百分比变化计算器</h1>
+        <div class="card">
+            <div class="title">计算百分比变化</div>
+            
+            <label>原始值 (旧值)</label>
+            <input type="number" id="oldValue" placeholder="例如：100" step="any">
+            
+            <div class="arrow">↓</div>
+            
+            <label>新值</label>
+            <input type="number" id="newValue" placeholder="例如：150" step="any">
+            
+            <button class="calc-btn" onclick="calculate()">计算变化</button>
+            <button onclick="clearResult()" style="background:#6c757d; width:100%; margin-top:10px;">清除</button>
+            
+            <div id="result" class="result" style="display:none;">
+                <div class="result-row">
+                    <span class="result-label">变化量</span>
+                    <span id="changeValue" class="result-value"></span>
+                </div>
+                <div class="result-row">
+                    <span class="result-label">百分比变化</span>
+                    <span id="percentChange" class="result-value"></span>
+                </div>
+                <div class="result-row">
+                    <span class="result-label">变化类型</span>
+                    <span id="changeType" class="result-value"></span>
+                </div>
+            </div>
+            <div id="error" class="error" style="display:none;"></div>
+        </div>
+        
+        <div class="card">
+            <div class="title">计算公式</div>
+            <div class="formula">
+                百分比变化 = ((新值 - 旧值) / |旧值|) × 100%
+            </div>
+            <p style="color:#666; font-size:0.9rem; margin-top:12px;">
+                正值表示增加（绿色），负值表示减少（红色）。
+            </p>
+        </div>
+    </div>
+
+    <script>
+        function calculate() {
+            const oldVal = parseFloat(document.getElementById('oldValue').value);
+            const newVal = parseFloat(document.getElementById('newValue').value);
+            const resultDiv = document.getElementById('result');
+            const errorDiv = document.getElementById('error');
+            
+            resultDiv.style.display = 'none';
+            errorDiv.style.display = 'none';
+            
+            if (isNaN(oldVal) || isNaN(newVal)) {
+                errorDiv.textContent = '请输入有效的数字';
+                errorDiv.style.display = 'block';
+                return;
+            }
+            
+            if (oldVal === 0) {
+                errorDiv.textContent = '原始值不能为零（除数不能为零）';
+                errorDiv.style.display = 'block';
+                return;
+            }
+            
+            const change = newVal - oldVal;
+            const percentChange = ((newVal - oldVal) / Math.abs(oldVal)) * 100;
+            const changeAbs = Math.abs(change);
+            
+            const changeValueEl = document.getElementById('changeValue');
+            const percentChangeEl = document.getElementById('percentChange');
+            const changeTypeEl = document.getElementById('changeType');
+            
+            changeValueEl.textContent = (change >= 0 ? '+' : '-') + changeAbs.toFixed(4);
+            changeValueEl.className = 'result-value ' + (change >= 0 ? 'positive' : 'negative');
+            
+            percentChangeEl.textContent = (percentChange >= 0 ? '+' : '-') + changeAbs.toFixed(4) + '%';
+            percentChangeEl.className = 'result-value ' + (percentChange >= 0 ? 'positive' : 'negative');
+            
+            if (percentChange > 0) {
+                changeTypeEl.textContent = '增加';
+                changeTypeEl.className = 'result-value positive';
+            } else if (percentChange < 0) {
+                changeTypeEl.textContent = '减少';
+                changeTypeEl.className = 'result-value negative';
+            } else {
+                changeTypeEl.textContent = '无变化';
+                changeTypeEl.className = 'result-value';
+            }
+            
+            resultDiv.style.display = 'block';
+        }
+
+        function clearResult() {
+            document.getElementById('oldValue').value = '';
+            document.getElementById('newValue').value = '';
+            document.getElementById('result').style.display = 'none';
+            document.getElementById('error').style.display = 'none';
+        }
+    </script>
+    <div class="ad-banner-bottom"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+</body>
+</html>

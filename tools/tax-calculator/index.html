@@ -1,0 +1,155 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>个税计算器 - 个人所得税在线计算</title>
+  <meta name="description" content="免费在线个税计算器，输入税前工资计算个人所得税，支持专项附加扣除，显示详细税率表和计算过程。">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://fm-han.github.io/tax-calculator/">
+  <style>
+                /* 顶部横幅广告 - 透明样式 */ .ad-banner-top { border-bottom: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; } .ad-banner-bottom { border-top: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; margin-top: 40px; } .ad-container { max-width: 728px; margin: 0 auto; min-height: 38px; display: flex; align-items: center; justify-content: center; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; max-width: 700px; margin: 0 auto; padding: 20px; color: #333; line-height: 1.6; background: #fafafa; }
+    h1 { text-align: center; font-size: 1.8rem; color: #1a1a1a; }
+    h1 small { display: block; font-size: 0.85rem; color: #666; margin-top: 4px; font-weight: normal; }
+    .card { margin: 20px 0; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px; background: #fff; }
+    .input-group { margin-bottom: 16px; }
+    .input-group label { display: block; font-weight: 600; margin-bottom: 6px; }
+    .input-group input { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 1rem; box-sizing: border-box; }
+    .row { display: flex; gap: 16px; }
+    .row .input-group { flex: 1; }
+    .result-display { background: linear-gradient(135deg, #007bff, #0056b3); border-radius: 12px; padding: 24px; color: #fff; text-align: center; margin: 20px 0; }
+    .result-display .tax-amount { font-size: 3rem; font-weight: 700; }
+    .result-display .after-tax { font-size: 1.2rem; margin-top: 8px; opacity: 0.9; }
+    .breakdown { background: #f5f5f5; padding: 16px; border-radius: 8px; margin-top: 16px; }
+    .breakdown-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #ddd; }
+    .breakdown-row:last-child { border-bottom: none; }
+    .breakdown-row.highlight { color: #007bff; font-weight: 600; }
+    button { padding: 12px 28px; border: none; border-radius: 6px; cursor: pointer; font-size: 1rem; }
+    .btn-primary { background: #007bff; color: #fff; }
+    .btn-clear { background: #6c757d; color: #fff; }
+    button:hover { opacity: 0.9; }
+    .buttons { display: flex; gap: 12px; justify-content: center; }
+    .deductions { margin-top: 12px; }
+    .deduction-item { display: flex; align-items: center; gap: 8px; padding: 8px 0; }
+    .deduction-item input { width: 120px; padding: 6px; border: 1px solid #ccc; border-radius: 4px; }
+    .deduction-item label { flex: 1; font-size: 0.9rem; }
+    table { width: 100%; border-collapse: collapse; margin-top: 16px; }
+    th, td { padding: 8px; border: 1px solid #ddd; text-align: left; }
+    th { background: #f0f0f0; }
+    .footer { text-align: center; margin: 24px 0; padding: 12px; font-size: 0.85rem; color: #28a745; font-weight: 500; }
+  </style>
+</head>
+<body>
+    <div class="ad-banner-top"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+  <h1>个税计算器 <small>工资薪金 · 专项附加扣除 · 税率表</small></h1>
+
+  <div class="card">
+    <div class="row">
+      <div class="input-group"><label>税前月薪（元）</label><input type="number" id="salary" placeholder="例如：15000" min="0"></div>
+      <div class="input-group"><label>社保公积金个人部分</label><input type="number" id="insurance" placeholder="例如：1500" min="0" value="0"></div>
+    </div>
+    <div class="deductions">
+      <h4>专项附加扣除（月）</h4>
+      <div class="deduction-item"><label>子女教育</label><input type="number" id="edu" value="0" min="0">元</div>
+      <div class="deduction-item"><label>继续教育</label><input type="number" id="continue" value="0" min="0">元</div>
+      <div class="deduction-item"><label>大病医疗</label><input type="number" id="medical" value="0" min="0">元</div>
+      <div class="deduction-item"><label>住房贷款利息</label><input type="number" id="loan" value="0" min="0">元</div>
+      <div class="deduction-item"><label>住房租金</label><input type="number" id="rent" value="0" min="0">元</div>
+      <div class="deduction-item"><label>赡养老人</label><input type="number" id="elder" value="0" min="0">元</div>
+    </div>
+    <div class="buttons" style="margin-top:16px;">
+      <button class="btn-primary" onclick="calculate()">计算个税</button>
+      <button class="btn-clear" onclick="clearAll()">重置</button>
+    </div>
+  </div>
+
+  <div class="card" id="resultCard" style="display:none;">
+    <div class="result-display">
+      <div>应缴纳个人所得税（月）</div>
+      <div class="tax-amount" id="taxAmount">--</div>
+      <div class="after-tax">税后月薪：<span id="afterTax">--</span> 元</div>
+    </div>
+    <div class="breakdown">
+      <h4>计算明细</h4>
+      <div class="breakdown-row"><span>税前工资</span><span id="b1">--</span></div>
+      <div class="breakdown-row"><span>减：社保公积金</span><span id="b2">--</span></div>
+      <div class="breakdown-row"><span>减：起征点 5000</span><span>-5,000.00</span></div>
+      <div class="breakdown-row"><span>减：专项附加扣除</span><span id="b3">--</span></div>
+      <div class="breakdown-row highlight"><span>应纳税所得额</span><span id="b4">--</span></div>
+      <div class="breakdown-row"><span>适用税率</span><span id="b5">--</span></div>
+      <div class="breakdown-row"><span>速算扣除数</span><span id="b6">--</span></div>
+      <div class="breakdown-row highlight"><span>应缴个税（月）</span><span id="b7">--</span></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>个人所得税税率表（综合所得）</h3>
+    <table>
+      <tr><th>级数</th><th>应纳税所得额</th><th>税率</th><th>速算扣除数</th></tr>
+      <tr><td>1</td><td>不超过36,000元</td><td>3%</td><td>0</td></tr>
+      <tr><td>2</td><td>36,000-144,000元</td><td>10%</td><td>2,520</td></tr>
+      <tr><td>3</td><td>144,000-300,000元</td><td>20%</td><td>16,920</td></tr>
+      <tr><td>4</td><td>300,000-420,000元</td><td>25%</td><td>31,920</td></tr>
+      <tr><td>5</td><td>420,000-660,000元</td><td>30%</td><td>52,920</td></tr>
+      <tr><td>6</td><td>660,000-960,000元</td><td>35%</td><td>85,920</td></tr>
+      <tr><td>7</td><td>超过960,000元</td><td>45%</td><td>181,920</td></tr>
+    </table>
+  </div>
+
+  <div class="footer">100% 免费 · 数据不上传服务器 · 仅浏览器本地处理</div>
+
+  <script>
+    const taxBrackets = [
+      { min: 0, max: 36000, rate: 0.03, deduction: 0 },
+      { min: 36000, max: 144000, rate: 0.10, deduction: 2520 },
+      { min: 144000, max: 300000, rate: 0.20, deduction: 16920 },
+      { min: 300000, max: 420000, rate: 0.25, deduction: 31920 },
+      { min: 420000, max: 660000, rate: 0.30, deduction: 52920 },
+      { min: 660000, max: 960000, rate: 0.35, deduction: 85920 },
+      { min: 960000, max: Infinity, rate: 0.45, deduction: 181920 }
+    ];
+    function formatMoney(n) { return n.toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+    function calculate() {
+      const salary = parseFloat(document.getElementById('salary').value) || 0;
+      const insurance = parseFloat(document.getElementById('insurance').value) || 0;
+      const edu = parseFloat(document.getElementById('edu').value) || 0;
+      const cont = parseFloat(document.getElementById('continue').value) || 0;
+      const medical = parseFloat(document.getElementById('medical').value) || 0;
+      const loan = parseFloat(document.getElementById('loan').value) || 0;
+      const rent = parseFloat(document.getElementById('rent').value) || 0;
+      const elder = parseFloat(document.getElementById('elder').value) || 0;
+      const specialDeduction = edu + cont + medical + loan + rent + elder;
+      const taxableIncome = salary - insurance - 5000 - specialDeduction;
+      let tax = 0, rate = '0%', deduction = 0;
+      if (taxableIncome > 0) {
+        for (const bracket of taxBrackets) {
+          if (taxableIncome <= bracket.max) {
+            rate = (bracket.rate * 100) + '%';
+            deduction = bracket.deduction;
+            tax = taxableIncome * bracket.rate - deduction;
+            tax = Math.max(0, tax);
+            break;
+          }
+        }
+      }
+      const afterTax = salary - insurance - specialDeduction - tax;
+      document.getElementById('resultCard').style.display = 'block';
+      document.getElementById('taxAmount').textContent = '¥' + formatMoney(tax);
+      document.getElementById('afterTax').textContent = formatMoney(afterTax);
+      document.getElementById('b1').textContent = formatMoney(salary);
+      document.getElementById('b2').textContent = '-' + formatMoney(insurance);
+      document.getElementById('b3').textContent = '-' + formatMoney(specialDeduction);
+      document.getElementById('b4').textContent = formatMoney(taxableIncome);
+      document.getElementById('b5').textContent = rate;
+      document.getElementById('b6').textContent = formatMoney(deduction);
+      document.getElementById('b7').textContent = formatMoney(tax);
+    }
+    function clearAll() {
+      document.querySelectorAll('input').forEach(i => i.value = '');
+      document.getElementById('resultCard').style.display = 'none';
+    }
+  </script>
+    <div class="ad-banner-bottom"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+</body>
+</html>

@@ -1,0 +1,135 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>罗马数字转换器 - 阿拉伯数字与罗马数字互转</title>
+  <meta name="description" content="免费在线罗马数字转换器，支持阿拉伯数字(1-3999)与罗马数字(I-XII等)互相转换。">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://fm-han.github.io/roman-numeral/">
+  <style>
+                /* 顶部横幅广告 - 透明样式 */ .ad-banner-top { border-bottom: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; } .ad-banner-bottom { border-top: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; margin-top: 40px; } .ad-container { max-width: 728px; margin: 0 auto; min-height: 38px; display: flex; align-items: center; justify-content: center; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; max-width: 700px; margin: 0 auto; padding: 20px; color: #333; line-height: 1.6; background: #fafafa; }
+    h1 { text-align: center; font-size: 1.8rem; color: #1a1a1a; }
+    h1 small { display: block; font-size: 0.85rem; color: #666; margin-top: 4px; font-weight: normal; }
+    .card { margin: 20px 0; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px; background: #fff; }
+    .convert-box { background: linear-gradient(135deg, #007bff, #0056b3); border-radius: 12px; padding: 24px; color: #fff; margin: 20px 0; text-align: center; }
+    .convert-box .label { font-size: 1rem; opacity: 0.9; }
+    .convert-box .value { font-size: 3rem; font-weight: 700; margin: 12px 0; font-family: serif; }
+    .input-group { margin-bottom: 16px; }
+    .input-group label { display: block; font-weight: 600; margin-bottom: 6px; }
+    .input-group input { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 1rem; box-sizing: border-box; }
+    button { padding: 12px 28px; border: none; border-radius: 6px; cursor: pointer; font-size: 1rem; }
+    .btn-primary { background: #007bff; color: #fff; }
+    .btn-success { background: #28a745; color: #fff; }
+    .btn-secondary { background: #6c757d; color: #fff; }
+    button:hover { opacity: 0.9; }
+    .buttons { display: flex; gap: 12px; justify-content: center; }
+    .table-section { margin-top: 20px; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 8px; border: 1px solid #ddd; text-align: center; }
+    th { background: #f0f0f0; }
+    .footer { text-align: center; margin: 24px 0; padding: 12px; font-size: 0.85rem; color: #28a745; font-weight: 500; }
+  </style>
+</head>
+<body>
+    <div class="ad-banner-top"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+  <h1>罗马数字转换器 <small>阿拉伯数字 ↔ 罗马数字</small></h1>
+
+  <div class="card">
+    <div class="convert-box">
+      <div class="label">阿拉伯数字 → 罗马数字</div>
+      <div class="value" id="arabicDisplay">1987</div>
+      <div class="label">转换结果</div>
+      <div class="value" id="romanDisplay">MCMLXXXVII</div>
+    </div>
+    <div class="input-group">
+      <label>输入阿拉伯数字 (1-3999)</label>
+      <input type="number" id="arabicInput" placeholder="输入数字..." value="1987" oninput="arabicToRoman()">
+    </div>
+    <div class="buttons">
+      <button class="btn-primary" onclick="arabicToRoman()">转换为罗马数字</button>
+      <button class="btn-secondary" onclick="clearInput()">清空</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="convert-box" style="background:linear-gradient(135deg,#28a745,#218838);">
+      <div class="label">罗马数字 → 阿拉伯数字</div>
+      <div class="value" id="romanInputDisplay">MCMLXXXVII</div>
+      <div class="label">转换结果</div>
+      <div class="value" id="arabicResult">1987</div>
+    </div>
+    <div class="input-group">
+      <label>输入罗马数字 (如: MCMXCIX)</label>
+      <input type="text" id="romanInput" placeholder="输入罗马数字..." value="MCMLXXXVII" oninput="romanToArabic()">
+    </div>
+    <div class="buttons">
+      <button class="btn-success" onclick="romanToArabic()">转换为阿拉伯数字</button>
+    </div>
+  </div>
+
+  <div class="card table-section">
+    <h3>罗马数字对照表</h3>
+    <table>
+      <tr><th>罗马数字</th><th>阿拉伯数字</th><th>罗马数字</th><th>阿拉伯数字</th></tr>
+      <tr><td>I</td><td>1</td><td>XVI</td><td>16</td></tr>
+      <tr><td>II</td><td>2</td><td>XVII</td><td>17</td></tr>
+      <tr><td>III</td><td>3</td><td>XVIII</td><td>18</td></tr>
+      <tr><td>IV</td><td>4</td><td>XIX</td><td>19</td></tr>
+      <tr><td>V</td><td>5</td><td>XX</td><td>20</td></tr>
+      <tr><td>VI</td><td>6</td><td>L</td><td>50</td></tr>
+      <tr><td>VII</td><td>7</td><td>C</td><td>100</td></tr>
+      <tr><td>VIII</td><td>8</td><td>D</td><td>500</td></tr>
+      <tr><td>IX</td><td>9</td><td>M</td><td>1000</td></tr>
+      <tr><td>X</td><td>10</td><td>MMXXVI</td><td>2026</td></tr>
+    </table>
+  </div>
+
+  <div class="footer">100% 免费 · 数据不上传服务器 · 仅浏览器本地处理</div>
+
+  <script>
+    function arabicToRoman() {
+      const num = parseInt(document.getElementById('arabicInput').value);
+      if (isNaN(num) || num < 1 || num > 3999) {
+        document.getElementById('romanDisplay').textContent = '无效数值';
+        document.getElementById('arabicDisplay').textContent = '--';
+        return;
+      }
+      document.getElementById('arabicDisplay').textContent = num;
+      document.getElementById('romanDisplay').textContent = toRoman(num);
+    }
+    function toRoman(num) {
+      const vals = [1000,900,500,400,100,90,50,40,10,9,5,4,1];
+      const syms = ['M','CM','D','CD','C','XC','L','XL','X','IX','V','IV','I'];
+      let result = '';
+      for (let i = 0; i < vals.length; i++) {
+        while (num >= vals[i]) { result += syms[i]; num -= vals[i]; }
+      }
+      return result;
+    }
+    function romanToArabic() {
+      const roman = document.getElementById('romanInput').value.toUpperCase();
+      document.getElementById('romanInputDisplay').textContent = roman;
+      document.getElementById('arabicResult').textContent = fromRoman(roman);
+    }
+    function fromRoman(roman) {
+      const vals = { I:1, V:5, X:10, L:50, C:100, D:500, M:1000 };
+      let result = 0;
+      for (let i = 0; i < roman.length; i++) {
+        const curr = vals[roman[i]];
+        const next = vals[roman[i+1]] || 0;
+        if (curr < next) result -= curr;
+        else result += curr;
+      }
+      return result > 0 && result <= 3999 ? result : '无效';
+    }
+    function clearInput() {
+      document.getElementById('arabicInput').value = '';
+      document.getElementById('arabicDisplay').textContent = '--';
+      document.getElementById('romanDisplay').textContent = '--';
+    }
+  </script>
+    <div class="ad-banner-bottom"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+</body>
+</html>

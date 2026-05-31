@@ -1,0 +1,168 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>番茄钟 - 专注时间管理工具</title>
+  <meta name="description" content="免费在线番茄钟工具，25分钟工作+5分钟休息的循环计时器，支持任务管理、专注统计，提升工作效率。">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://fm-han.github.io/pomodoro/">
+  <style>
+                /* 顶部横幅广告 - 透明样式 */ .ad-banner-top { border-bottom: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; } .ad-banner-bottom { border-top: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; margin-top: 40px; } .ad-container { max-width: 728px; margin: 0 auto; min-height: 38px; display: flex; align-items: center; justify-content: center; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; max-width: 700px; margin: 0 auto; padding: 20px; color: #333; line-height: 1.6; background: #fafafa; }
+    h1 { text-align: center; font-size: 1.8rem; color: #1a1a1a; }
+    h1 small { display: block; font-size: 0.85rem; color: #666; margin-top: 4px; font-weight: normal; }
+    .card { margin: 20px 0; padding: 16px; border: 1px solid #e0e0e0; border-radius: 8px; background: #fff; }
+    .display { text-align: center; padding: 48px; border-radius: 12px; margin: 16px 0; color: #fff; }
+    .display.work { background: linear-gradient(135deg, #dc3545, #c82333); }
+    .display.break { background: linear-gradient(135deg, #28a745, #218838); }
+    .display .time { font-size: 5rem; font-weight: 700; font-family: monospace; }
+    .display .label { font-size: 1.2rem; margin-top: 8px; }
+    .display .task-name { font-size: 1rem; opacity: 0.9; margin-bottom: 8px; }
+    .buttons { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+    button { padding: 12px 28px; border: none; border-radius: 6px; cursor: pointer; font-size: 1rem; }
+    .btn-primary { background: #007bff; color: #fff; }
+    .btn-success { background: #28a745; color: #fff; }
+    .btn-warning { background: #ffc107; color: #333; }
+    .btn-secondary { background: #6c757d; color: #fff; }
+    button:hover { opacity: 0.9; }
+    .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; text-align: center; margin: 16px 0; }
+    .stat-box { padding: 12px; background: #f5f5f5; border-radius: 8px; }
+    .stat-box .num { font-size: 2rem; font-weight: 700; color: #007bff; }
+    .stat-box .label { font-size: 0.85rem; color: #666; }
+    .task-input { display: flex; gap: 8px; margin-bottom: 12px; }
+    .task-input input { flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 1rem; }
+    .task-list { max-height: 200px; overflow-y: auto; }
+    .task-item { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #eee; }
+    .task-item.completed { text-decoration: line-through; color: #999; }
+    .task-item .name { flex: 1; cursor: pointer; }
+    .task-item .del { color: #dc3545; cursor: pointer; margin-left: 8px; }
+    .settings { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .setting-item label { display: block; font-weight: 600; margin-bottom: 4px; }
+    .setting-item input { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 6px; }
+    .footer { text-align: center; margin: 24px 0; padding: 12px; font-size: 0.85rem; color: #28a745; font-weight: 500; }
+  </style>
+</head>
+<body>
+    <div class="ad-banner-top"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+  <h1>番茄钟 <small>25分钟专注 · 5分钟休息 · 提升效率</small></h1>
+
+  <div class="card">
+    <div class="display work" id="display">
+      <div class="task-name" id="currentTask">当前任务</div>
+      <div class="time" id="timer">25:00</div>
+      <div class="label" id="phaseLabel">工作时间</div>
+    </div>
+    <div class="buttons">
+      <button class="btn-primary" id="mainBtn" onclick="toggleTimer()">▶ 开始</button>
+      <button class="btn-secondary" onclick="skip()">⏭ 跳过</button>
+      <button class="btn-secondary" onclick="reset()">↺ 重置</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="stats">
+      <div class="stat-box"><div class="num" id="completedCount">0</div><div class="label">完成番茄数</div></div>
+      <div class="stat-box"><div class="num" id="totalMins">0</div><div class="label">累计分钟</div></div>
+      <div class="stat-box"><div class="num" id="streak">0</div><div class="label">连续完成</div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>任务列表</h3>
+    <div class="task-input">
+      <input type="text" id="taskInput" placeholder="输入新任务，按回车添加" onkeypress="if(event.key==='Enter')addTask()">
+      <button class="btn-primary" onclick="addTask()">添加</button>
+    </div>
+    <div class="task-list" id="taskList"></div>
+  </div>
+
+  <div class="card">
+    <h3>设置</h3>
+    <div class="settings">
+      <div class="setting-item"><label>工作时长（分钟）</label><input type="number" id="workTime" value="25" min="1" max="60"></div>
+      <div class="setting-item"><label>休息时长（分钟）</label><input type="number" id="breakTime" value="5" min="1" max="30"></div>
+    </div>
+  </div>
+
+  <div class="footer">100% 免费 · 数据不上传服务器 · 仅浏览器本地处理</div>
+
+  <script>
+    let workDuration = 25, breakDuration = 5;
+    let remaining = workDuration * 60, running = false, timer = null;
+    let isWorkPhase = true, completedPomodoros = 0, totalMins = 0, streak = 0;
+    let tasks = [], currentTaskIndex = -1;
+    const display = document.getElementById('display');
+    const mainBtn = document.getElementById('mainBtn');
+
+    function formatTime(s) { return String(Math.floor(s/60)).padStart(2,'0') + ':' + String(s%60).padStart(2,'0'); }
+    function updateDisplay() {
+      document.getElementById('timer').textContent = formatTime(remaining);
+      display.className = 'display ' + (isWorkPhase ? 'work' : 'break');
+      document.getElementById('phaseLabel').textContent = isWorkPhase ? '工作时间' : '休息时间';
+      const task = currentTaskIndex >= 0 && currentTaskIndex < tasks.length ? tasks[currentTaskIndex].name : '';
+      document.getElementById('currentTask').textContent = task || '当前任务';
+    }
+    function toggleTimer() {
+      if (!running) {
+        if (remaining === (isWorkPhase ? workDuration : breakDuration) * 60) {
+          if (isWorkPhase && currentTaskIndex < 0) {
+            for (let i = 0; i < tasks.length; i++) { if (!tasks[i].done) { currentTaskIndex = i; break; } }
+          }
+        }
+        running = true; mainBtn.textContent = '⏸ 暂停';
+        timer = setInterval(tick, 1000);
+      } else {
+        running = false; mainBtn.textContent = '▶ 继续';
+        clearInterval(timer);
+      }
+      updateDisplay();
+    }
+    function tick() {
+      if (remaining > 0) { remaining--; updateDisplay(); }
+      else {
+        clearInterval(timer); running = false; mainBtn.textContent = '▶ 开始';
+        if (isWorkPhase) {
+          completedPomodoros++; totalMins += workDuration; streak++;
+          document.getElementById('completedCount').textContent = completedPomodoros;
+          document.getElementById('totalMins').textContent = totalMins;
+          document.getElementById('streak').textContent = streak;
+          try { new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2teleQoLVq3k35VkHgAzpODnwH4BAA==').play(); } catch(e) {}
+          alert('⏰ 工作时间结束！休息一下吧');
+          isWorkPhase = false; remaining = breakDuration * 60;
+          if (currentTaskIndex >= 0 && currentTaskIndex < tasks.length) tasks[currentTaskIndex].done = true;
+          currentTaskIndex = -1;
+        } else {
+          try { new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2teleQoLVq3k35VkHgAzpODnwH4BAA==').play(); } catch(e) {}
+          alert('⏰ 休息结束！继续工作吧');
+          isWorkPhase = true; remaining = workDuration * 60;
+        }
+        updateDisplay(); renderTasks();
+      }
+    }
+    function skip() { clearInterval(timer); running = false; mainBtn.textContent = '▶ 开始'; isWorkPhase = !isWorkPhase; remaining = (isWorkPhase ? workDuration : breakDuration) * 60; updateDisplay(); }
+    function reset() { clearInterval(timer); running = false; mainBtn.textContent = '▶ 开始'; isWorkPhase = true; remaining = workDuration * 60; updateDisplay(); }
+    function addTask() {
+      const name = document.getElementById('taskInput').value.trim();
+      if (name) { tasks.push({name, done: false}); document.getElementById('taskInput').value = ''; renderTasks(); }
+    }
+    function renderTasks() {
+      if (tasks.length === 0) { document.getElementById('taskList').innerHTML = '<div style="text-align:center;color:#999;padding:12px;">暂无任务</div>'; return; }
+      let html = '';
+      for (let i = 0; i < tasks.length; i++) {
+        html += `<div class="task-item ${tasks[i].done ? 'completed' : ''}">
+          <span class="name" onclick="toggleTask(${i})">${tasks[i].name}</span>
+          <span class="del" onclick="deleteTask(${i})">✕</span>
+        </div>`;
+      }
+      document.getElementById('taskList').innerHTML = html;
+    }
+    function toggleTask(i) { tasks[i].done = !tasks[i].done; renderTasks(); }
+    function deleteTask(i) { tasks.splice(i, 1); if (currentTaskIndex === i) currentTaskIndex = -1; renderTasks(); }
+    document.getElementById('workTime').addEventListener('change', function() { workDuration = parseInt(this.value) || 25; if (!running && isWorkPhase) remaining = workDuration * 60; updateDisplay(); });
+    document.getElementById('breakTime').addEventListener('change', function() { breakDuration = parseInt(this.value) || 5; if (!running && !isWorkPhase) remaining = breakDuration * 60; updateDisplay(); });
+    updateDisplay(); renderTasks();
+  </script>
+    <div class="ad-banner-bottom"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+</body>
+</html>

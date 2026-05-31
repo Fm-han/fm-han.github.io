@@ -1,0 +1,145 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>行排序工具 - 文本升序降序打乱</title>
+  <meta name="description" content="免费在线行排序工具，支持升序、降序、随机打乱、按长度排序等多种排序方式。">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://fm-han.github.io/line-sorter/">
+  <style>
+                /* 顶部横幅广告 - 透明样式 */ .ad-banner-top { border-bottom: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; } .ad-banner-bottom { border-top: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; margin-top: 40px; } .ad-container { max-width: 728px; margin: 0 auto; min-height: 38px; display: flex; align-items: center; justify-content: center; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; color: #333; line-height: 1.6; background: #fafafa; }
+    h1 { text-align: center; font-size: 1.8rem; color: #1a1a1a; }
+    h1 small { display: block; font-size: 0.85rem; color: #666; margin-top: 4px; font-weight: normal; }
+    .card { margin: 20px 0; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px; background: #fff; }
+    .editor-row { display: flex; gap: 16px; height: 350px; }
+    .editor-panel { flex: 1; display: flex; flex-direction: column; }
+    .editor-panel label { font-weight: 600; margin-bottom: 8px; }
+    textarea { flex: 1; width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; font-family: monospace; font-size: 0.9rem; resize: none; box-sizing: border-box; }
+    .options { display: flex; gap: 16px; margin-bottom: 16px; flex-wrap: wrap; }
+    .option { display: flex; align-items: center; gap: 6px; }
+    .sort-btns { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+    .sort-btn { padding: 12px; border: 1px solid #ccc; border-radius: 6px; background: #fff; cursor: pointer; text-align: center; font-size: 0.9rem; }
+    .sort-btn:hover { background: #f0f0f0; }
+    .sort-btn.active { background: #007bff; color: #fff; border-color: #007bff; }
+    button { padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-size: 1rem; }
+    .btn-primary { background: #007bff; color: #fff; }
+    .btn-success { background: #28a745; color: #fff; }
+    button:hover { opacity: 0.9; }
+    .buttons { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-top: 16px; }
+    .footer { text-align: center; margin: 24px 0; padding: 12px; font-size: 0.85rem; color: #28a745; font-weight: 500; }
+  </style>
+</head>
+<body>
+    <div class="ad-banner-top"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+  <h1>行排序工具 <small>升序 · 降序 · 随机打乱 · 按长度</small></h1>
+
+  <div class="card">
+    <div class="options">
+      <div class="option">
+        <input type="checkbox" id="removeEmpty">
+        <label for="removeEmpty">移除空行</label>
+      </div>
+      <div class="option">
+        <input type="checkbox" id="caseSensitive">
+        <label for="caseSensitive">区分大小写</label>
+      </div>
+    </div>
+    <div class="sort-btns">
+      <button class="sort-btn" onclick="sortLines('asc')">↑ 升序排列</button>
+      <button class="sort-btn" onclick="sortLines('desc')">↓ 降序排列</button>
+      <button class="sort-btn" onclick="sortLines('shuffle')">⟳ 随机打乱</button>
+      <button class="sort-btn" onclick="sortLines('byLength')">↕ 按长度</button>
+      <button class="sort-btn" onclick="sortLines('byLengthDesc')">↕ 按长度倒序</button>
+      <button class="sort-btn" onclick="sortLines('natural')">123 自然排序</button>
+      <button class="sort-btn" onclick="sortLines('reverse')">⟲ 反转顺序</button>
+      <button class="sort-btn" onclick="sortLines('unique')">★ 去重排序</button>
+    </div>
+    <div class="editor-row">
+      <div class="editor-panel">
+        <label>输入文本</label>
+        <textarea id="inputText" placeholder="每行一条内容...">香蕉
+苹果
+橙子
+葡萄
+西瓜
+草莓
+猕猴桃
+芒果</textarea>
+      </div>
+      <div class="editor-panel">
+        <label>排序结果</label>
+        <textarea id="outputText" readonly></textarea>
+      </div>
+    </div>
+    <div class="buttons">
+      <button class="btn-success" onclick="copyResult()">复制结果</button>
+      <button class="btn-primary" onclick="clearAll()">清空</button>
+    </div>
+  </div>
+
+  <div class="footer">100% 免费 · 数据不上传服务器 · 仅浏览器本地处理</div>
+
+  <script>
+    let currentSort = 'asc';
+    function sortLines(type) {
+      currentSort = type;
+      let lines = document.getElementById('inputText').value.split('\n');
+      if (document.getElementById('removeEmpty').checked) {
+        lines = lines.filter(l => l.trim() !== '');
+      }
+      const caseSensitive = document.getElementById('caseSensitive').checked;
+      switch (type) {
+        case 'asc':
+          lines.sort((a, b) => caseSensitive ? a.localeCompare(b) : a.toLowerCase().localeCompare(b.toLowerCase()));
+          break;
+        case 'desc':
+          lines.sort((a, b) => caseSensitive ? b.localeCompare(a) : b.toLowerCase().localeCompare(a.toLowerCase()));
+          break;
+        case 'shuffle':
+          for (let i = lines.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [lines[i], lines[j]] = [lines[j], lines[i]];
+          }
+          break;
+        case 'byLength':
+          lines.sort((a, b) => a.length - b.length);
+          break;
+        case 'byLengthDesc':
+          lines.sort((a, b) => b.length - a.length);
+          break;
+        case 'natural':
+          lines.sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
+          break;
+        case 'reverse':
+          lines.reverse();
+          break;
+        case 'unique':
+          if (!caseSensitive) {
+            const seen = new Set();
+            lines = lines.filter(l => {
+              const k = l.toLowerCase();
+              if (seen.has(k)) return false;
+              seen.add(k); return true;
+            });
+          } else {
+            lines = [...new Set(lines)];
+          }
+          break;
+      }
+      document.getElementById('outputText').value = lines.join('\n');
+    }
+    function copyResult() {
+      const text = document.getElementById('outputText').value;
+      if (!text) { alert('请先排序'); return; }
+      navigator.clipboard.writeText(text).then(() => alert('已复制'));
+    }
+    function clearAll() {
+      document.getElementById('inputText').value = '';
+      document.getElementById('outputText').value = '';
+    }
+  </script>
+    <div class="ad-banner-bottom"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+</body>
+</html>

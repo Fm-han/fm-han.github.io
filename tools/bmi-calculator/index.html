@@ -1,0 +1,154 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BMI计算器 - 身体质量指数在线计算</title>
+  <meta name="description" content="免费在线BMI计算器，输入身高体重计算身体质量指数，判断体型类别，提供健康建议。适用于成人BMI自测。">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://fm-han.github.io/bmi-calculator/">
+  <style>
+                /* 顶部横幅广告 - 透明样式 */ .ad-banner-top { border-bottom: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; } .ad-banner-bottom { border-top: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; margin-top: 40px; } .ad-container { max-width: 728px; margin: 0 auto; min-height: 38px; display: flex; align-items: center; justify-content: center; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; max-width: 700px; margin: 0 auto; padding: 20px; color: #333; line-height: 1.6; background: #fafafa; }
+    h1 { text-align: center; font-size: 1.8rem; color: #1a1a1a; }
+    h1 small { display: block; font-size: 0.85rem; color: #666; margin-top: 4px; font-weight: normal; }
+    .card { margin: 20px 0; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px; background: #fff; }
+    .input-group { margin-bottom: 16px; }
+    .input-group label { display: block; font-weight: 600; margin-bottom: 6px; }
+    .input-group input { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 1rem; box-sizing: border-box; }
+    .unit-toggle { display: flex; gap: 8px; margin-bottom: 12px; }
+    .unit-toggle button { flex: 1; padding: 8px; border: 1px solid #ccc; border-radius: 6px; background: #fff; cursor: pointer; }
+    .unit-toggle button.active { background: #007bff; color: #fff; border-color: #007bff; }
+    .result { text-align: center; padding: 32px; border-radius: 12px; margin: 20px 0; }
+    .result .bmi-value { font-size: 4rem; font-weight: 700; }
+    .result .bmi-category { font-size: 1.5rem; margin-top: 8px; }
+    .result.normal { background: linear-gradient(135deg, #28a745, #218838); color: #fff; }
+    .result.low { background: linear-gradient(135deg, #ffc107, #e0a800); color: #333; }
+    .result.high { background: linear-gradient(135deg, #dc3545, #c82333); color: #fff; }
+    .bmi-scale { display: flex; height: 30px; border-radius: 8px; overflow: hidden; margin: 20px 0; }
+    .bmi-scale .segment { flex: 1; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; color: #fff; }
+    .bmi-scale .segment:nth-child(1) { background: #ffc107; }
+    .bmi-scale .segment:nth-child(2) { background: #28a745; }
+    .bmi-scale .segment:nth-child(3) { background: #fd7e14; }
+    .bmi-scale .segment:nth-child(4) { background: #dc3545; }
+    .bmi-scale .segment:nth-child(5) { background: #6f42c1; }
+    .indicator { width: 4px; height: 50px; background: #333; position: relative; left: 50%; top: -10px; transition: left 0.3s; }
+    button { padding: 12px 28px; border: none; border-radius: 6px; cursor: pointer; font-size: 1rem; }
+    .btn-primary { background: #007bff; color: #fff; }
+    .btn-clear { background: #6c757d; color: #fff; }
+    button:hover { opacity: 0.9; }
+    .buttons { display: flex; gap: 12px; justify-content: center; }
+    .info-box { background: #f5f5f5; padding: 16px; border-radius: 8px; margin-top: 16px; }
+    .info-box h4 { margin: 0 0 8px 0; }
+    .info-box ul { margin: 0; padding-left: 20px; }
+    .footer { text-align: center; margin: 24px 0; padding: 12px; font-size: 0.85rem; color: #28a745; font-weight: 500; }
+  </style>
+</head>
+<body>
+    <div class="ad-banner-top"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+  <h1>BMI计算器 <small>身体质量指数 · 健康体重参考</small></h1>
+
+  <div class="card">
+    <div class="unit-toggle">
+      <button class="active" onclick="setUnit('metric')">公制 (kg/cm)</button>
+      <button onclick="setUnit('imperial')">英制 (lb/ft-in)</button>
+    </div>
+    <div id="metricInputs">
+      <div class="input-group"><label>身高 (cm)</label><input type="number" id="heightCm" placeholder="例如：170" min="100" max="250"></div>
+      <div class="input-group"><label>体重 (kg)</label><input type="number" id="weightKg" placeholder="例如：65" min="30" max="300"></div>
+    </div>
+    <div id="imperialInputs" style="display:none;">
+      <div style="display:flex;gap:12px;">
+        <div class="input-group" style="flex:1;"><label>身高 (ft)</label><input type="number" id="heightFt" placeholder="英尺" min="3" max="8"></div>
+        <div class="input-group" style="flex:1;"><label>身高 (in)</label><input type="number" id="heightIn" placeholder="英寸" min="0" max="11"></div>
+      </div>
+      <div class="input-group"><label>体重 (lb)</label><input type="number" id="weightLb" placeholder="磅" min="50" max="700"></div>
+    </div>
+    <div class="buttons">
+      <button class="btn-primary" onclick="calculate()">计算BMI</button>
+      <button class="btn-clear" onclick="clearAll()">清空</button>
+    </div>
+  </div>
+
+  <div class="card" id="resultCard" style="display:none;">
+    <div class="result" id="resultBox">
+      <div class="bmi-value" id="bmiValue">--</div>
+      <div class="bmi-category" id="bmiCategory">--</div>
+    </div>
+    <div class="bmi-scale">
+      <div class="segment"><18.5</div>
+      <div class="segment">18.5-24</div>
+      <div class="segment">24-28</div>
+      <div class="segment">28-32</div>
+      <div class="segment">>32</div>
+    </div>
+    <div class="indicator" id="indicator"></div>
+    <div class="info-box" id="infoBox"></div>
+  </div>
+
+  <div class="card">
+    <h3>BMI参考标准</h3>
+    <table style="width:100%;border-collapse:collapse;">
+      <tr style="background:#f0f0f0;"><th style="padding:8px;border:1px solid #ddd;">BMI范围</th><th style="padding:8px;border:1px solid #ddd;">分类</th></tr>
+      <tr><td style="padding:8px;border:1px solid #ddd;"><18.5</td><td style="padding:8px;border:1px solid #ddd;">偏瘦</td></tr>
+      <tr><td style="padding:8px;border:1px solid #ddd;">18.5-24</td><td style="padding:8px;border:1px solid #ddd;">正常</td></tr>
+      <tr><td style="padding:8px;border:1px solid #ddd;">24-28</td><td style="padding:8px;border:1px solid #ddd;">超重</td></tr>
+      <tr><td style="padding:8px;border:1px solid #ddd;">28-32</td><td style="padding:8px;border:1px solid #ddd;">肥胖</td></tr>
+      <tr><td style="padding:8px;border:1px solid #ddd;">>32</td><td style="padding:8px;border:1px solid #ddd;">重度肥胖</td></tr>
+    </table>
+  </div>
+
+  <div class="footer">100% 免费 · 数据不上传服务器 · 仅浏览器本地处理</div>
+
+  <script>
+    let unit = 'metric';
+    function setUnit(u) {
+      unit = u;
+      document.querySelectorAll('.unit-toggle button').forEach(b => b.classList.remove('active'));
+      event.target.classList.add('active');
+      document.getElementById('metricInputs').style.display = u === 'metric' ? 'block' : 'none';
+      document.getElementById('imperialInputs').style.display = u === 'imperial' ? 'block' : 'none';
+    }
+    function calculate() {
+      let height, weight;
+      if (unit === 'metric') {
+        height = parseFloat(document.getElementById('heightCm').value) / 100;
+        weight = parseFloat(document.getElementById('weightKg').value);
+      } else {
+        const ft = parseFloat(document.getElementById('heightFt').value) || 0;
+        const inch = parseFloat(document.getElementById('heightIn').value) || 0;
+        height = ((ft * 12 + inch) * 2.54) / 100;
+        weight = parseFloat(document.getElementById('weightLb').value) * 0.453592;
+      }
+      if (!height || !weight || height <= 0 || weight <= 0) { alert('请输入有效数值'); return; }
+      const bmi = weight / (height * height);
+      const rounded = bmi.toFixed(1);
+      let category, className, advice;
+      if (bmi < 18.5) { category = '偏瘦'; className = 'low'; advice = '<h4>健康建议</h4><ul><li>适当增加营养摄入</li><li>多吃富含蛋白质和碳水化合物的食物</li><li>适当进行力量训练</li><li>保证充足睡眠</li></ul>'; }
+      else if (bmi < 24) { category = '正常'; className = 'normal'; advice = '<h4>健康建议</h4><ul><li>继续保持健康生活方式</li><li>均衡饮食</li><li>适度运动</li></ul>'; }
+      else if (bmi < 28) { category = '超重'; className = 'high'; advice = '<h4>健康建议</h4><ul><li>控制饮食，减少高热量食物</li><li>增加有氧运动</li><li>保持规律作息</li></ul>'; }
+      else if (bmi < 32) { category = '肥胖'; className = 'high'; advice = '<h4>健康建议</h4><ul><li>建议咨询医生或营养师</li><li>制定科学的减重计划</li><li>减少高糖高脂食物</li><li>增加运动量</li></ul>'; }
+      else { category = '重度肥胖'; className = 'high'; advice = '<h4>健康建议</h4><ul><li>建议寻求专业医疗帮助</li><li>制定个性化减重方案</li><li>定期体检监测健康指标</li></ul>'; }
+      document.getElementById('resultCard').style.display = 'block';
+      document.getElementById('resultBox').className = 'result ' + className;
+      document.getElementById('bmiValue').textContent = rounded;
+      document.getElementById('bmiCategory').textContent = category;
+      document.getElementById('infoBox').innerHTML = advice;
+      let pos;
+      if (bmi < 15) pos = 0;
+      else if (bmi > 40) pos = 100;
+      else pos = ((bmi - 15) / 25) * 100;
+      document.getElementById('indicator').style.left = pos + '%';
+    }
+    function clearAll() {
+      document.getElementById('heightCm').value = '';
+      document.getElementById('weightKg').value = '';
+      document.getElementById('heightFt').value = '';
+      document.getElementById('heightIn').value = '';
+      document.getElementById('weightLb').value = '';
+      document.getElementById('resultCard').style.display = 'none';
+    }
+  </script>
+    <div class="ad-banner-bottom"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+</body>
+</html>

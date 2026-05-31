@@ -1,0 +1,102 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>凯撒密码加密 - 古典加密工具</title>
+  <meta name="description" content="免费在线凯撒密码加密解密工具，支持自定义偏移量对英文进行古典加密。">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://fm-han.github.io/caesar-cipher/">
+  <style>
+                /* 顶部横幅广告 - 透明样式 */ .ad-banner-top { border-bottom: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; } .ad-banner-bottom { border-top: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; margin-top: 40px; } .ad-container { max-width: 728px; margin: 0 auto; min-height: 38px; display: flex; align-items: center; justify-content: center; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; max-width: 700px; margin: 0 auto; padding: 20px; color: #333; line-height: 1.6; background: #fafafa; }
+    h1 { text-align: center; font-size: 1.8rem; color: #1a1a1a; }
+    h1 small { display: block; font-size: 0.85rem; color: #666; margin-top: 4px; font-weight: normal; }
+    .card { margin: 20px 0; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px; background: #fff; }
+    .input-group { margin-bottom: 16px; }
+    .input-group label { display: block; font-weight: 600; margin-bottom: 6px; }
+    .input-group textarea { width: 100%; min-height: 100px; padding: 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 1rem; box-sizing: border-box; font-family: monospace; resize: vertical; }
+    .offset-control { display: flex; gap: 16px; align-items: center; margin-bottom: 16px; }
+    .offset-control input[type="range"] { flex: 1; }
+    .offset-control .value { min-width: 40px; text-align: center; font-size: 1.5rem; font-weight: 700; color: #007bff; }
+    .result-box { background: #1e1e1e; border-radius: 8px; padding: 20px; margin: 16px 0; color: #d4d4d4; font-family: monospace; font-size: 1.1rem; min-height: 60px; word-break: break-all; }
+    button { padding: 12px 28px; border: none; border-radius: 6px; cursor: pointer; font-size: 1rem; }
+    .btn-primary { background: #007bff; color: #fff; }
+    .btn-success { background: #28a745; color: #fff; }
+    button:hover { opacity: 0.9; }
+    .buttons { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+    .footer { text-align: center; margin: 24px 0; padding: 12px; font-size: 0.85rem; color: #28a745; font-weight: 500; }
+  </style>
+</head>
+<body>
+    <div class="ad-banner-top"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+  <h1>凯撒密码加密 <small>古典加密 · 字母偏移 · ROT13</small></h1>
+
+  <div class="card">
+    <div class="input-group">
+      <label>输入原文（仅支持英文字母）</label>
+      <textarea id="inputText" placeholder="输入要加密的文本...">HELLO WORLD</textarea>
+    </div>
+    <div class="offset-control">
+      <label>偏移量：</label>
+      <input type="range" id="offset" min="1" max="25" value="3" oninput="updateOffset()">
+      <div class="value" id="offsetValue">3</div>
+    </div>
+    <div class="buttons">
+      <button class="btn-primary" onclick="encrypt()">加密</button>
+      <button class="btn-success" onclick="decrypt()">解密</button>
+      <button class="btn-primary" onclick="rot13()">ROT13</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>加密结果</h3>
+    <div class="result-box" id="resultText"></div>
+    <div class="buttons">
+      <button class="btn-success" onclick="copyResult()">复制结果</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>凯撒密码原理</h3>
+    <p style="color:#666;">凯撒密码是一种最简单且最广为人知的加密技术。它是一种替换加密技术，明文中的所有字母都在字母表上向后（或向前）移动一个固定数目的位置。例如，当偏移量为3时，A变为D，B变为E，以此类推。</p>
+    <p style="color:#666;margin-top:8px;"><strong>ROT13</strong>是一种特殊情况，偏移量为13，由于字母表有26个字母，加密和解密是相同的过程。</p>
+  </div>
+
+  <div class="footer">100% 免费 · 数据不上传服务器 · 仅浏览器本地处理</div>
+
+  <script>
+    function updateOffset() {
+      document.getElementById('offsetValue').textContent = document.getElementById('offset').value;
+    }
+    function caesar(text, shift) {
+      return text.replace(/[a-zA-Z]/g, function(c) {
+        const base = c <= 'Z' ? 65 : 97;
+        return String.fromCharCode((c.charCodeAt(0) - base + shift) % 26 + base);
+      });
+    }
+    function encrypt() {
+      const text = document.getElementById('inputText').value;
+      const shift = parseInt(document.getElementById('offset').value);
+      const encrypted = caesar(text, shift);
+      document.getElementById('resultText').textContent = encrypted;
+    }
+    function decrypt() {
+      const text = document.getElementById('inputText').value;
+      const shift = parseInt(document.getElementById('offset').value);
+      const decrypted = caesar(text, 26 - shift);
+      document.getElementById('resultText').textContent = decrypted;
+    }
+    function rot13() {
+      const text = document.getElementById('inputText').value;
+      document.getElementById('resultText').textContent = caesar(text, 13);
+    }
+    function copyResult() {
+      const text = document.getElementById('resultText').textContent;
+      if (!text) { alert('先生成结果'); return; }
+      navigator.clipboard.writeText(text).then(() => alert('已复制'));
+    }
+  </script>
+    <div class="ad-banner-bottom"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+</body>
+</html>

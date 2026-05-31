@@ -1,0 +1,382 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>物理公式计算器</title>
+    <style>
+                /* 顶部横幅广告 - 透明样式 */ .ad-banner-top { border-bottom: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; } .ad-banner-bottom { border-top: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; margin-top: 40px; } .ad-container { max-width: 728px; margin: 0 auto; min-height: 38px; display: flex; align-items: center; justify-content: center; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #fafafa; min-height: 100vh; padding: 20px; }
+        .container { max-width: 600px; margin: 0 auto; }
+        .card { background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; padding: 24px; margin-bottom: 20px; }
+        h1 { font-size: 1.5rem; font-weight: 600; margin-bottom: 20px; color: #333; text-align: center; }
+        .title { font-size: 1.25rem; font-weight: 600; margin-bottom: 16px; color: #333; }
+        label { display: block; margin-bottom: 8px; color: #555; font-weight: 500; }
+        input { border: 1px solid #ddd; border-radius: 4px; padding: 8px 12px; width: 100%; box-sizing: border-box; margin-bottom: 16px; }
+        select { border: 1px solid #ddd; border-radius: 4px; padding: 8px 12px; width: 100%; box-sizing: border-box; margin-bottom: 16px; }
+        button { background: #007bff; color: #fff; border: none; padding: 8px 20px; border-radius: 4px; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        button.calc-btn { background: #28a745; width: 100%; padding: 12px; font-size: 1.1rem; }
+        .formulas-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 16px; }
+        .formula-btn { padding: 12px 8px; text-align: center; background: #f0f0f0; border: 2px solid transparent; border-radius: 8px; cursor: pointer; font-size: 0.85rem; transition: all 0.2s; }
+        .formula-btn:hover { background: #e0e0e0; }
+        .formula-btn.active { background: #e7f3ff; border-color: #007bff; color: #007bff; }
+        .input-group { display: none; }
+        .input-group.active { display: block; }
+        .input-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .formula-display { background: #f8f9fa; padding: 12px; border-radius: 4px; font-family: monospace; font-size: 1rem; text-align: center; margin-bottom: 16px; }
+        .result { background: #f0f7ff; border: 1px solid #007bff; border-radius: 4px; padding: 16px; margin-top: 16px; }
+        .result-label { color: #666; font-size: 0.9rem; margin-bottom: 8px; }
+        .result-value { color: #007bff; font-size: 1.5rem; font-weight: 700; }
+        .result-unit { color: #666; font-size: 0.9rem; margin-left: 8px; }
+        .error { color: #dc3545; margin-top: 8px; font-size: 0.9rem; }
+    </style>
+</head>
+<body>
+    <div class="ad-banner-top"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+    <div class="container">
+        <h1>物理公式计算器</h1>
+        <div class="card">
+            <div class="title">选择公式类型</div>
+            <div class="formulas-grid">
+                <div class="formula-btn active" onclick="selectFormula('velocity', this)">速度</div>
+                <div class="formula-btn" onclick="selectFormula('acceleration', this)">加速度</div>
+                <div class="formula-btn" onclick="selectFormula('force', this)">力</div>
+                <div class="formula-btn" onclick="selectFormula('work', this)">功</div>
+                <div class="formula-btn" onclick="selectFormula('power', this)">功率</div>
+                <div class="formula-btn" onclick="selectFormula('energy', this)">能量</div>
+                <div class="formula-btn" onclick="selectFormula('momentum', this)">动量</div>
+                <div class="formula-btn" onclick="selectFormula('pressure', this)">压强</div>
+            </div>
+            
+            <div id="velocityInputs" class="input-group active">
+                <div class="formula-display">v = s / t</div>
+                <div class="input-row">
+                    <div>
+                        <label>距离 s (m)</label>
+                        <input type="number" id="velS" placeholder="距离" step="any">
+                    </div>
+                    <div>
+                        <label>时间 t (s)</label>
+                        <input type="number" id="velT" placeholder="时间" step="any">
+                    </div>
+                </div>
+                <label>求什么？</label>
+                <select id="velSolve">
+                    <option value="v">求速度 v</option>
+                    <option value="s">求距离 s</option>
+                    <option value="t">求时间 t</option>
+                </select>
+            </div>
+            
+            <div id="accelerationInputs" class="input-group">
+                <div class="formula-display">a = (v - u) / t</div>
+                <div class="input-row">
+                    <div>
+                        <label>初速度 u (m/s)</label>
+                        <input type="number" id="accU" placeholder="初速度" step="any">
+                    </div>
+                    <div>
+                        <label>末速度 v (m/s)</label>
+                        <input type="number" id="accV" placeholder="末速度" step="any">
+                    </div>
+                </div>
+                <label>时间 t (s)</label>
+                <input type="number" id="accT" placeholder="时间" step="any">
+                <label>求什么？</label>
+                <select id="accSolve">
+                    <option value="a">求加速度 a</option>
+                    <option value="u">求初速度 u</option>
+                    <option value="v">求末速度 v</option>
+                    <option value="t">求时间 t</option>
+                </select>
+            </div>
+            
+            <div id="forceInputs" class="input-group">
+                <div class="formula-display">F = m × a</div>
+                <div class="input-row">
+                    <div>
+                        <label>质量 m (kg)</label>
+                        <input type="number" id="forceM" placeholder="质量" step="any">
+                    </div>
+                    <div>
+                        <label>加速度 a (m/s²)</label>
+                        <input type="number" id="forceA" placeholder="加速度" step="any">
+                    </div>
+                </div>
+                <label>求什么？</label>
+                <select id="forceSolve">
+                    <option value="f">求力 F</option>
+                    <option value="m">求质量 m</option>
+                    <option value="a">求加速度 a</option>
+                </select>
+            </div>
+            
+            <div id="workInputs" class="input-group">
+                <div class="formula-display">W = F × s</div>
+                <div class="input-row">
+                    <div>
+                        <label>力 F (N)</label>
+                        <input type="number" id="workF" placeholder="力" step="any">
+                    </div>
+                    <div>
+                        <label>距离 s (m)</label>
+                        <input type="number" id="workS" placeholder="距离" step="any">
+                    </div>
+                </div>
+                <label>求什么？</label>
+                <select id="workSolve">
+                    <option value="w">求功 W</option>
+                    <option value="f">求力 F</option>
+                    <option value="s">求距离 s</option>
+                </select>
+            </div>
+            
+            <div id="powerInputs" class="input-group">
+                <div class="formula-display">P = W / t</div>
+                <div class="input-row">
+                    <div>
+                        <label>功 W (J)</label>
+                        <input type="number" id="powW" placeholder="功" step="any">
+                    </div>
+                    <div>
+                        <label>时间 t (s)</label>
+                        <input type="number" id="powT" placeholder="时间" step="any">
+                    </div>
+                </div>
+                <label>求什么？</label>
+                <select id="powSolve">
+                    <option value="p">求功率 P</option>
+                    <option value="w">求功 W</option>
+                    <option value="t">求时间 t</option>
+                </select>
+            </div>
+            
+            <div id="energyInputs" class="input-group">
+                <div class="formula-display">KE = ½mv²</div>
+                <div class="input-row">
+                    <div>
+                        <label>质量 m (kg)</label>
+                        <input type="number" id="eneM" placeholder="质量" step="any">
+                    </div>
+                    <div>
+                        <label>速度 v (m/s)</label>
+                        <input type="number" id="eneV" placeholder="速度" step="any">
+                    </div>
+                </div>
+                <label>求什么？</label>
+                <select id="eneSolve">
+                    <option value="ke">求动能 KE</option>
+                    <option value="m">求质量 m</option>
+                    <option value="v">求速度 v</option>
+                </select>
+            </div>
+            
+            <div id="momentumInputs" class="input-group">
+                <div class="formula-display">p = m × v</div>
+                <div class="input-row">
+                    <div>
+                        <label>质量 m (kg)</label>
+                        <input type="number" id="momM" placeholder="质量" step="any">
+                    </div>
+                    <div>
+                        <label>速度 v (m/s)</label>
+                        <input type="number" id="momV" placeholder="速度" step="any">
+                    </div>
+                </div>
+                <label>求什么？</label>
+                <select id="momSolve">
+                    <option value="p">求动量 p</option>
+                    <option value="m">求质量 m</option>
+                    <option value="v">求速度 v</option>
+                </select>
+            </div>
+            
+            <div id="pressureInputs" class="input-group">
+                <div class="formula-display">P = F / A</div>
+                <div class="input-row">
+                    <div>
+                        <label>力 F (N)</label>
+                        <input type="number" id="presF" placeholder="力" step="any">
+                    </div>
+                    <div>
+                        <label>面积 A (m²)</label>
+                        <input type="number" id="presA" placeholder="面积" step="any">
+                    </div>
+                </div>
+                <label>求什么？</label>
+                <select id="presSolve">
+                    <option value="p">求压强 P</option>
+                    <option value="f">求力 F</option>
+                    <option value="a">求面积 A</option>
+                </select>
+            </div>
+            
+            <button class="calc-btn" onclick="calculate()">计算</button>
+            
+            <div id="result" class="result" style="display:none;">
+                <div class="result-label">计算结果</div>
+                <div id="resultValue" class="result-value"></div>
+            </div>
+            <div id="error" class="error" style="display:none;"></div>
+        </div>
+    </div>
+
+    <script>
+        let currentFormula = 'velocity';
+
+        function selectFormula(formula, btn) {
+            currentFormula = formula;
+            document.querySelectorAll('.formula-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            document.querySelectorAll('.input-group').forEach(g => g.classList.remove('active'));
+            document.getElementById(formula + 'Inputs').classList.add('active');
+            document.getElementById('result').style.display = 'none';
+            document.getElementById('error').style.display = 'none';
+        }
+
+        function calculate() {
+            let result, unit;
+            const errorDiv = document.getElementById('error');
+            errorDiv.style.display = 'none';
+
+            try {
+                switch (currentFormula) {
+                    case 'velocity':
+                        const s = parseFloat(document.getElementById('velS').value);
+                        const t = parseFloat(document.getElementById('velT').value);
+                        const velSolve = document.getElementById('velSolve').value;
+                        if (velSolve === 'v') {
+                            if (isNaN(s) || isNaN(t) || t === 0) throw '请输入有效的距离和时间';
+                            result = s / t; unit = 'm/s';
+                        } else if (velSolve === 's') {
+                            if (isNaN(s) || isNaN(t)) throw '请输入有效的值';
+                            result = s * t; unit = 'm';
+                        } else {
+                            if (isNaN(s) || isNaN(t) || s === 0) throw '请输入有效的值';
+                            result = s / t; unit = 's';
+                        }
+                        break;
+                    case 'acceleration':
+                        const u = parseFloat(document.getElementById('accU').value);
+                        const v = parseFloat(document.getElementById('accV').value);
+                        const att = parseFloat(document.getElementById('accT').value);
+                        const accSolve = document.getElementById('accSolve').value;
+                        if (accSolve === 'a') {
+                            if (isNaN(u) || isNaN(v) || isNaN(att) || att === 0) throw '请输入有效的值';
+                            result = (v - u) / att; unit = 'm/s²';
+                        } else if (accSolve === 'u') {
+                            if (isNaN(v) || isNaN(att) || isNaN(u)) throw '请输入有效的值';
+                            result = v - u * att; unit = 'm/s';
+                        } else if (accSolve === 'v') {
+                            if (isNaN(u) || isNaN(att) || isNaN(v)) throw '请输入有效的值';
+                            result = u + v * att; unit = 'm/s';
+                        } else {
+                            if (isNaN(u) || isNaN(v) || isNaN(att) || v === u) throw '请输入有效的值';
+                            result = (v - u) / att; unit = 's';
+                        }
+                        break;
+                    case 'force':
+                        const fm = parseFloat(document.getElementById('forceM').value);
+                        const fa = parseFloat(document.getElementById('forceA').value);
+                        const forceSolve = document.getElementById('forceSolve').value;
+                        if (forceSolve === 'f') {
+                            if (isNaN(fm) || isNaN(fa)) throw '请输入有效的质量和加速度';
+                            result = fm * fa; unit = 'N';
+                        } else if (forceSolve === 'm') {
+                            if (isNaN(fm) || isNaN(fa) || fa === 0) throw '请输入有效的值';
+                            result = fm / fa; unit = 'kg';
+                        } else {
+                            if (isNaN(fm) || isNaN(fa) || fm === 0) throw '请输入有效的值';
+                            result = fa / fm; unit = 'm/s²';
+                        }
+                        break;
+                    case 'work':
+                        const wf = parseFloat(document.getElementById('workF').value);
+                        const ws = parseFloat(document.getElementById('workS').value);
+                        const workSolve = document.getElementById('workSolve').value;
+                        if (workSolve === 'w') {
+                            if (isNaN(wf) || isNaN(ws)) throw '请输入有效的力和距离';
+                            result = wf * ws; unit = 'J';
+                        } else if (workSolve === 'f') {
+                            if (isNaN(wf) || isNaN(ws) || ws === 0) throw '请输入有效的值';
+                            result = wf / ws; unit = 'N';
+                        } else {
+                            if (isNaN(wf) || isNaN(ws) || wf === 0) throw '请输入有效的值';
+                            result = ws / wf; unit = 'm';
+                        }
+                        break;
+                    case 'power':
+                        const ww = parseFloat(document.getElementById('powW').value);
+                        const pt = parseFloat(document.getElementById('powT').value);
+                        const powSolve = document.getElementById('powSolve').value;
+                        if (powSolve === 'p') {
+                            if (isNaN(ww) || isNaN(pt) || pt === 0) throw '请输入有效的功和时间';
+                            result = ww / pt; unit = 'W';
+                        } else if (powSolve === 'w') {
+                            if (isNaN(ww) || isNaN(pt)) throw '请输入有效的值';
+                            result = ww * pt; unit = 'J';
+                        } else {
+                            if (isNaN(ww) || isNaN(pt) || ww === 0) throw '请输入有效的值';
+                            result = pt / ww; unit = 's';
+                        }
+                        break;
+                    case 'energy':
+                        const em = parseFloat(document.getElementById('eneM').value);
+                        const ev = parseFloat(document.getElementById('eneV').value);
+                        const eneSolve = document.getElementById('eneSolve').value;
+                        if (eneSolve === 'ke') {
+                            if (isNaN(em) || isNaN(ev)) throw '请输入有效的质量和速度';
+                            result = 0.5 * em * ev * ev; unit = 'J';
+                        } else if (eneSolve === 'm') {
+                            if (isNaN(em) || isNaN(ev) || ev === 0) throw '请输入有效的值';
+                            result = 2 * em / (ev * ev); unit = 'kg';
+                        } else {
+                            if (isNaN(em) || isNaN(ev) || em === 0) throw '请输入有效的值';
+                            result = Math.sqrt(2 * ev / em); unit = 'm/s';
+                        }
+                        break;
+                    case 'momentum':
+                        const mm = parseFloat(document.getElementById('momM').value);
+                        const mv = parseFloat(document.getElementById('momV').value);
+                        const momSolve = document.getElementById('momSolve').value;
+                        if (momSolve === 'p') {
+                            if (isNaN(mm) || isNaN(mv)) throw '请输入有效的质量和速度';
+                            result = mm * mv; unit = 'kg·m/s';
+                        } else if (momSolve === 'm') {
+                            if (isNaN(mm) || isNaN(mv) || mv === 0) throw '请输入有效的值';
+                            result = mm / mv; unit = 'kg';
+                        } else {
+                            if (isNaN(mm) || isNaN(mv) || mm === 0) throw '请输入有效的值';
+                            result = mv / mm; unit = 'm/s';
+                        }
+                        break;
+                    case 'pressure':
+                        const pf = parseFloat(document.getElementById('presF').value);
+                        const pa = parseFloat(document.getElementById('presA').value);
+                        const presSolve = document.getElementById('presSolve').value;
+                        if (presSolve === 'p') {
+                            if (isNaN(pf) || isNaN(pa) || pa === 0) throw '请输入有效的力和面积';
+                            result = pf / pa; unit = 'Pa';
+                        } else if (presSolve === 'f') {
+                            if (isNaN(pf) || isNaN(pa)) throw '请输入有效的值';
+                            result = pf * pa; unit = 'N';
+                        } else {
+                            if (isNaN(pf) || isNaN(pa) || pf === 0) throw '请输入有效的值';
+                            result = pa / pf; unit = 'm²';
+                        }
+                        break;
+                }
+
+                document.getElementById('resultValue').innerHTML = `${result.toFixed(4)} <span class="result-unit">${unit}</span>`;
+                document.getElementById('result').style.display = 'block';
+            } catch (e) {
+                errorDiv.textContent = e;
+                errorDiv.style.display = 'block';
+            }
+        }
+    </script>
+    <div class="ad-banner-bottom"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+</body>
+</html>

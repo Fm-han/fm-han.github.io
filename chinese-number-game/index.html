@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>24点游戏</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#fafafa;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;padding:20px;min-height:100vh}
+.container{max-width:600px;margin:0 auto}
+h1{text-align:center;color:#333;margin-bottom:24px;font-size:22px}
+.card{background:#fff;border:1px solid #e0e0e0;border-radius:8px;padding:24px;margin-bottom:16px}
+label{display:block;font-weight:600;margin-bottom:6px;color:#555;font-size:14px}
+.btn{background:#007bff;color:#fff;border:none;padding:8px 20px;border-radius:4px;cursor:pointer;font-size:14px;margin-top:8px}
+.btn:hover{background:#0056b3}
+.btn-green{background:#28a745}
+.btn-green:hover{background:#218838}
+.numbers{display:flex;gap:12px;justify-content:center;margin:20px 0}
+.num-card{width:70px;height:90px;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:bold;color:#fff;box-shadow:0 4px 12px rgba(0,0,0,.15);transition:transform .2s}
+.num-card:hover{transform:translateY(-4px)}
+.num-card .suit{font-size:16px;margin-left:4px}
+textarea{width:100%;padding:10px;border:1px solid #ddd;border-radius:4px;font-size:14px;box-sizing:border-box;resize:vertical;font-family:monospace;height:60px}
+.result{background:#f5f5f5;padding:12px;border-radius:4px;font-size:14px;margin-top:12px;min-height:40px}
+.success{background:#d4edda;color:#155724;border:1px solid #c3e6cb}
+.error{background:#f8d7da;color:#721c24;border:1px solid #f5c6cb}
+.custom-input{display:flex;gap:8px;margin-top:12px}
+.custom-input input{flex:1;padding:8px;border:1px solid #ddd;border-radius:4px;font-size:14px}
+.stats{display:flex;gap:16px;justify-content:center;margin-top:16px}
+.stat{text-align:center}
+.stat .num{font-size:24px;font-weight:bold;color:#007bff}
+.stat .label{font-size:12px;color:#888}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>24点游戏</h1>
+<div class="card" style="text-align:center">
+<p style="color:#666;margin-bottom:12px">用4个数字和 + - * / 运算符，算出结果等于24</p>
+<div class="numbers" id="numbers"></div>
+<div class="stats">
+<div class="stat"><div class="num" id="scoreNum">0</div><div class="label">答对</div></div>
+<div class="stat"><div class="num" id="totalNum">0</div><div class="label">总题</div></div>
+<div class="stat"><div class="num" id="timer">0:00</div><div class="label">用时</div></div>
+</div>
+</div>
+<div class="card">
+<label>输入你的算式</label>
+<textarea id="expression" placeholder="例如: (1 + 2) * (3 + 5)"></textarea>
+<div style="display:flex;gap:8px;margin-top:8px">
+<button class="btn" onclick="checkAnswer()">验证答案</button>
+<button class="btn btn-green" onclick="showAnswer()">查看答案</button>
+<button class="btn" onclick="newGame()" style="background:#6c757d">换一题</button>
+</div>
+<div class="result" id="result"></div>
+</div>
+<div class="card">
+<label>自定义数字</label>
+<div class="custom-input">
+<input type="text" id="customNums" placeholder="输入4个数字，用空格分隔">
+<button class="btn" onclick="startCustom()">开始</button>
+</div>
+</div>
+</div>
+<script>
+let currentNums=[];
+let solutions=[];
+let score=0,total=0,timerInterval,startTime;
+function newGame(){
+currentNums=Array.from({length:4},()=>Math.floor(Math.random()*13)+1);
+solutions=solve24(currentNums);
+total++;
+render();
+startTimer();
+document.getElementById('result').className='result';
+document.getElementById('result').textContent='';
+document.getElementById('expression').value='';
+document.getElementById('scoreNum').textContent=score;
+document.getElementById('totalNum').textContent=total;
+}
+function startCustom(){
+const input=document.getElementById('customNums').value.trim();
+const nums=input.split(/[\s,]+/).map(Number).filter(n=>!isNaN(n)&&n>0&&n<100);
+if(nums.length!==4){alert('请输入4个有效数字');return}
+currentNums=nums;
+solutions=solve24(currentNums);
+total++;
+render();
+startTimer();
+document.getElementById('result').className='result';
+document.getElementById('result').textContent='';
+document.getElementById('expression').value='';
+}
+function render(){
+const div=document.getElementById('numbers');
+div.innerHTML=currentNums.map((n,i)=>`<div class="num-card">${n}</div>`).join('');
+}
+function startTimer(){
+if(timerInterval)clearInterval(timerInterval);
+startTime=Date.now();
+timerInterval=setInterval(()=>{
+const s=Math.floor((Date.now()-startTime)/1000);
+const m=Math.floor(s/60);
+document.getElementById('timer').textContent=m+':'+(s%60).toString().padStart(2,'0');
+},1000);
+}
+function checkAnswer(){
+const expr=document.getElementById('expression').value.trim();
+if(!expr){document.getElementById('result').className='result error';document.getElementById('result').textContent='请输入算式';return}
+try{
+const sanitized=expr.replace(/×/g,'*').replace(/÷/g,'/').replace(/x/gi,'*');
+const usedNums=sanitized.match(/\d+/g);
+if(!usedNums||usedNums.length!==4){throw new Error('必须使用所有4个数字')}
+const sortedUsed=[...usedNums].sort((a,b)=>a-b);
+const sortedOrig=[...currentNums].sort((a,b)=>a-b);
+for(let i=0;i<4;i++){if(sortedUsed[i]!==String(sortedOrig[i])){throw new Error('必须使用给定的4个数字')}}
+const result=Function('"use strict";return('+sanitized+')')();
+if(Math.abs(result-24)<0.0001){
+score++;
+document.getElementById('scoreNum').textContent=score;
+if(timerInterval)clearInterval(timerInterval);
+document.getElementById('result').className='result success';
+document.getElementById('result').textContent='正确! '+expr+' = 24';
+}else{
+document.getElementById('result').className='result error';
+document.getElementById('result').textContent='结果为 '+result+'，不等于24';
+}
+}catch(e){
+document.getElementById('result').className='result error';
+document.getElementById('result').textContent=e.message||'算式无效';
+}
+}
+function showAnswer(){
+if(solutions.length){
+document.getElementById('result').className='result success';
+document.getElementById('result').textContent='答案: '+solutions[0];
+}else{
+document.getElementById('result').className='result';
+document.getElementById('result').textContent='此组合无解';
+}
+}
+function solve24(nums){
+const ops=['+','-','*','/'];
+const results=[];
+const perms=getPermutations(nums);
+for(const[a,b,c,d] of perms){
+for(const o1 of ops)for(const o2 of ops)for(const o3 of ops){
+const exprs=[
+`((${a}${o1}${b})${o2}${c})${o3}${d}`,
+`(${a}${o1}(${b}${o2}${c}))${o3}${d}`,
+`(${a}${o1}${b})${o2}(${c}${o3}${d})`,
+`${a}${o1}((${b}${o2}${c})${o3}${d})`,
+`${a}${o1}(${b}${o2}(${c}${o3}${d}))`
+];
+for(const expr of exprs){
+try{
+if(Math.abs(Function('"use strict";return('+expr+')')()-24)<0.0001){
+let display=expr.replace(/\*/g,'×').replace(/\//g,'÷');
+if(!results.includes(display))results.push(display);
+}
+}catch(e){}
+}
+}
+}
+return results;
+}
+function getPermutations(arr){
+if(arr.length<=1)return[arr];
+const res=[];
+for(let i=0;i<arr.length;i++){
+const rest=[...arr.slice(0,i),...arr.slice(i+1)];
+for(const p of getPermutations(rest)){res.push([arr[i],...p])}
+}
+return res;
+}
+newGame();
+</script>
+</body>
+</html>

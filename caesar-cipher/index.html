@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>凯撒密码加密器</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#fafafa;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;padding:20px;min-height:100vh}
+.container{max-width:650px;margin:0 auto}
+h1{text-align:center;color:#333;margin-bottom:24px;font-size:22px}
+.card{background:#fff;border:1px solid #e0e0e0;border-radius:8px;padding:24px;margin-bottom:16px}
+label{display:block;font-weight:600;margin-bottom:6px;color:#555;font-size:14px}
+textarea{width:100%;padding:10px;border:1px solid #ddd;border-radius:4px;font-size:14px;box-sizing:border-box;resize:vertical}
+input[type="number"]{width:80px;padding:8px;border:1px solid #ddd;border-radius:4px;font-size:14px}
+.btn{background:#007bff;color:#fff;border:none;padding:8px 20px;border-radius:4px;cursor:pointer;font-size:14px;margin-top:8px}
+.btn:hover{background:#0056b3}
+.btn-green{background:#28a745}
+.btn-green:hover{background:#218838}
+.result{background:#f5f5f5;padding:12px;border-radius:4px;font-family:monospace;font-size:14px;margin-top:12px;min-height:60px;word-break:break-all}
+.actions{display:flex;gap:8px;margin-top:12px}
+.row{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.slider-row{display:flex;align-items:center;gap:10px;margin-top:8px}
+input[type="range"]{flex:1}
+.offset-display{font-size:24px;font-weight:bold;color:#007bff;min-width:30px;text-align:center}
+.all-shifts{margin-top:16px;max-height:300px;overflow-y:auto}
+.shift-line{padding:6px 8px;font-family:monospace;font-size:13px;border-bottom:1px solid #eee;cursor:pointer}
+.shift-line:hover{background:#f0f7ff}
+.shift-line .label{color:#999;font-size:11px;margin-right:8px}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>凯撒密码加密器</h1>
+<div class="card">
+<label>输入文字</label>
+<textarea id="input" rows="4" placeholder="输入要加密或解密的文字..."></textarea>
+<div class="row">
+<label style="margin:0;white-space:nowrap">偏移量：</label>
+<input type="number" id="offset" value="3" min="1" max="25">
+<div class="slider-row" style="flex:1">
+<input type="range" id="offsetSlider" min="1" max="25" value="3">
+<span class="offset-display" id="offsetDisplay">3</span>
+</div>
+</div>
+<div style="display:flex;gap:8px">
+<button class="btn" onclick="process('encrypt')">加密</button>
+<button class="btn btn-green" onclick="process('decrypt')">解密</button>
+<button class="btn" onclick="showAllShifts()" style="background:#6c757d">暴力破解（显示所有偏移）</button>
+</div>
+<div class="result" id="output"></div>
+<div class="actions">
+<button class="btn btn-green" onclick="copyResult()">复制结果</button>
+</div>
+</div>
+<div class="card" id="allShiftsCard" style="display:none">
+<label>所有偏移结果</label>
+<div class="all-shifts" id="allShifts"></div>
+</div>
+</div>
+<script>
+const offsetInput=document.getElementById('offset');
+const offsetSlider=document.getElementById('offsetSlider');
+const offsetDisplay=document.getElementById('offsetDisplay');
+offsetInput.addEventListener('input',()=>{offsetSlider.value=offsetInput.value;offsetDisplay.textContent=offsetInput.value});
+offsetSlider.addEventListener('input',()=>{offsetInput.value=offsetSlider.value;offsetDisplay.textContent=offsetSlider.value});
+function caesarShift(text,shift){
+return text.split('').map(c=>{
+if(c>='A'&&c<='Z')return String.fromCharCode(((c.charCodeAt(0)-65+shift)%26+26)%26+65);
+if(c>='a'&&c<='z')return String.fromCharCode(((c.charCodeAt(0)-97+shift)%26+26)%26+97);
+return c;
+}).join('');
+}
+function process(type){
+const text=document.getElementById('input').value;
+const shift=parseInt(offsetInput.value)||3;
+const s=type==='encrypt'?shift:26-shift;
+document.getElementById('output').textContent=caesarShift(text,s);
+}
+function showAllShifts(){
+const text=document.getElementById('input').value;
+if(!text){alert('请输入文字');return}
+const div=document.getElementById('allShifts');
+div.innerHTML='';
+for(let i=1;i<=25;i++){
+const line=document.createElement('div');
+line.className='shift-line';
+line.innerHTML=`<span class="label">偏移 ${i}:</span>${caesarShift(text,i)}`;
+line.onclick=()=>{navigator.clipboard.writeText(caesarShift(text,i))};
+div.appendChild(line);
+}
+document.getElementById('allShiftsCard').style.display='block';
+}
+function copyResult(){
+navigator.clipboard.writeText(document.getElementById('output').textContent);
+alert('已复制到剪贴板!');
+}
+</script>
+</body>
+</html>

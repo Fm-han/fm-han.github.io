@@ -1,0 +1,106 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>添加行号 - 免费在线工具</title>
+    <style>
+                /* 顶部横幅广告 - 透明样式 */ .ad-banner-top { border-bottom: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; } .ad-banner-bottom { border-top: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; margin-top: 40px; } .ad-container { max-width: 728px; margin: 0 auto; min-height: 38px; display: flex; align-items: center; justify-content: center; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #fafafa; min-height: 100vh; padding: 20px; }
+        .container { max-width: 900px; margin: 0 auto; }
+        .card { background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; padding: 24px; margin-bottom: 20px; }
+        h1 { font-size: 1.25rem; font-weight: 600; margin-bottom: 16px; color: #333; }
+        textarea { border: 1px solid #ddd; border-radius: 4px; padding: 12px; width: 100%; min-height: 200px; font-family: monospace; font-size: 14px; box-sizing: border-box; resize: vertical; }
+        .btn { background: #007bff; color: #fff; border: none; padding: 8px 20px; border-radius: 4px; cursor: pointer; margin: 5px 5px 5px 0; }
+        .btn:hover { background: #0056b3; }
+        .btn-secondary { background: #28a745; }
+        .btn-secondary:hover { background: #218838; }
+        .label { font-weight: 500; margin-bottom: 8px; display: block; color: #333; }
+        .options { margin: 16px 0; }
+        .options label { margin-right: 20px; color: #555; }
+        .options select, .options input { border: 1px solid #ddd; border-radius: 4px; padding: 4px 8px; }
+    </style>
+</head>
+<body>
+    <div class="ad-banner-top"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+    <div class="container">
+        <h1>添加行号</h1>
+        <div class="card">
+            <label class="label">输入文本</label>
+            <textarea id="inputText" placeholder="在此粘贴需要添加行号的文本..."></textarea>
+            <div class="options">
+                <label>起始行号: <input type="number" id="startNum" value="1" min="0" style="width: 60px;"></label>
+                <label>间隔: <input type="number" id="step" value="1" min="1" style="width: 60px;"></label>
+                <label>前缀: <input type="text" id="prefix" value="" placeholder="如: " placeholder="无" style="width: 80px;"></label>
+                <label>后缀: <input type="text" id="suffix" value="" placeholder="如: ." style="width: 80px;"></label>
+                <label>对齐: <select id="align"><option value="left">左对齐</option><option value="right">右对齐</option></select></label>
+                <label>宽度: <input type="number" id="width" value="0" min="0" max="10" style="width: 50px;"> 位</label>
+            </div>
+            <button class="btn" onclick="addLineNumbers()">添加行号</button>
+            <button class="btn" onclick="removeLineNumbers()">移除行号</button>
+            <button class="btn btn-secondary" onclick="clearAll()">清空</button>
+        </div>
+        <div class="card">
+            <label class="label">结果</label>
+            <textarea id="outputText" readonly style="background: #f9f9f9;"></textarea>
+            <div style="margin-top: 16px;">
+                <button class="btn" onclick="copyResult()">复制结果</button>
+            </div>
+        </div>
+    </div>
+    <script>
+        function addLineNumbers() {
+            const input = document.getElementById('inputText').value;
+            const lines = input.split(/\r?\n/);
+            const start = parseInt(document.getElementById('startNum').value) || 1;
+            const step = parseInt(document.getElementById('step').value) || 1;
+            const prefix = document.getElementById('prefix').value;
+            const suffix = document.getElementById('suffix').value;
+            const align = document.getElementById('align').value;
+            const width = parseInt(document.getElementById('width').value) || 0;
+            
+            const result = lines.map((line, i) => {
+                const num = start + i * step;
+                let numStr = num.toString();
+                
+                if (width > 0) {
+                    if (align === 'right') {
+                        numStr = numStr.padStart(width, ' ');
+                    } else {
+                        numStr = numStr.padEnd(width, ' ');
+                    }
+                }
+                
+                return prefix + numStr + suffix + line;
+            });
+            
+            document.getElementById('outputText').value = result.join('\n');
+        }
+
+        function removeLineNumbers() {
+            const input = document.getElementById('inputText').value;
+            const lines = input.split(/\r?\n/);
+            
+            const result = lines.map(line => {
+                return line.replace(/^[\s]*[\d]+[\s\.、\-\:\)]+/, '');
+            });
+            
+            document.getElementById('outputText').value = result.join('\n');
+        }
+
+        function clearAll() {
+            document.getElementById('inputText').value = '';
+            document.getElementById('outputText').value = '';
+        }
+
+        function copyResult() {
+            const output = document.getElementById('outputText');
+            output.select();
+            document.execCommand('copy');
+            alert('已复制到剪贴板');
+        }
+    </script>
+    <div class="ad-banner-bottom"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+</body>
+</html>

@@ -1,0 +1,158 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>音频转换器 - 免费在线工具</title>
+<style>
+                /* 顶部横幅广告 - 透明样式 */ .ad-banner-top { border-bottom: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; } .ad-banner-bottom { border-top: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; margin-top: 40px; } .ad-container { max-width: 728px; margin: 0 auto; min-height: 38px; display: flex; align-items: center; justify-content: center; }
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #fafafa; color: #333; padding: 20px; }
+.container { max-width: 800px; margin: 0 auto; }
+h1 { font-size: 1.25rem; font-weight: 600; margin-bottom: 16px; color: #333; }
+.desc { color: #666; margin-bottom: 20px; line-height: 1.6; }
+.card { background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; padding: 24px; margin-bottom: 16px; }
+label { display: block; margin-bottom: 8px; font-weight: 500; }
+input[type="file"] { margin-bottom: 12px; font-size: 14px; }
+select { border: 1px solid #ddd; border-radius: 4px; padding: 8px 12px; font-size: 14px; }
+.btn-primary { background: #007bff; color: #fff; border: none; padding: 8px 20px; border-radius: 4px; cursor: pointer; font-size: 14px; }
+.btn-primary:hover { background: #0056b3; }
+.btn-primary:disabled { background: #ccc; cursor: not-allowed; }
+.btn-secondary { background: #28a745; color: #fff; border: none; padding: 8px 20px; border-radius: 4px; cursor: pointer; font-size: 14px; margin-left: 8px; }
+.btn-secondary:hover { background: #1e7e34; }
+.status { margin-top: 12px; padding: 12px; border-radius: 4px; font-size: 14px; display: none; }
+.status.success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+.status.error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+.status.info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+.row { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; flex-wrap: wrap; }
+.row label { margin-bottom: 0; }
+.info { font-size: 14px; color: #666; margin-top: 8px; }
+audio { margin-top: 12px; width: 100%; }
+.result { margin-top: 16px; display: none; }
+</style>
+</head>
+<body>
+    <div class="ad-banner-top"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+<div class="container">
+  <div class="card">
+    <h1>音频转换器</h1>
+    <p class="desc">上传音频文件，转换为其他格式（使用Web Audio API）。</p>
+    <label for="fileInput">选择音频文件</label>
+    <input type="file" id="fileInput" accept="audio/*" onchange="loadAudio(event)">
+    <div class="row" id="options" style="display:none">
+      <label>输出格式</label>
+      <select id="format">
+        <option value="wav">WAV</option>
+        <option value="mp3">MP3 (需浏览器支持)</option>
+        <option value="ogg">OGG</option>
+      </select>
+      <button class="btn-primary" id="convertBtn" onclick="convertAudio()">转换音频</button>
+    </div>
+    <div class="status info" id="notice" style="display:none">
+      提示：浏览器环境对音频格式转换支持有限。WAV格式可正常导出，MP3/OGG依赖浏览器编码支持。
+    </div>
+    <div class="result" id="result">
+      <label>转换结果</label>
+      <audio id="audioPlayer" controls></audio>
+      <div style="margin-top:8px">
+        <button class="btn-secondary" id="downloadBtn" onclick="downloadAudio()">下载音频文件</button>
+      </div>
+    </div>
+    <div class="status" id="status"></div>
+  </div>
+</div>
+<script>
+let audioBuffer = null;
+let audioContext = null;
+let convertedBlob = null;
+function loadAudio(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    audioContext.decodeAudioData(e.target.result, function(buffer) {
+      audioBuffer = buffer;
+      document.getElementById('options').style.display = 'flex';
+      document.getElementById('notice').style.display = 'block';
+      showStatus('音频加载成功: ' + file.name + ' (' + Math.round(buffer.duration) + '秒)', 'success');
+    }, function(e) {
+      showStatus('无法解码该音频文件', 'error');
+    });
+  };
+  reader.readAsArrayBuffer(file);
+}
+function convertAudio() {
+  if (!audioBuffer) { showStatus('请先选择音频文件', 'error'); return; }
+  const format = document.getElementById('format').value;
+  const btn = document.getElementById('convertBtn');
+  btn.disabled = true;
+  try {
+    if (format === 'wav') {
+      convertedBlob = audioBufferToWav(audioBuffer);
+    } else {
+      showStatus(format.toUpperCase() + '格式在浏览器中需要额外编码库支持，已导出为WAV格式', 'info');
+      convertedBlob = audioBufferToWav(audioBuffer);
+    }
+    const url = URL.createObjectURL(convertedBlob);
+    document.getElementById('audioPlayer').src = url;
+    document.getElementById('result').style.display = 'block';
+    showStatus('转换完成！', 'success');
+  } catch(e) {
+    showStatus('转换失败: ' + e.message, 'error');
+  }
+  btn.disabled = false;
+}
+function audioBufferToWav(buffer) {
+  const numChannels = buffer.numberOfChannels;
+  const sampleRate = buffer.sampleRate;
+  const length = buffer.length * numChannels * 2 + 44;
+  const arrayBuffer = new ArrayBuffer(length);
+  const view = new DataView(arrayBuffer);
+  function writeString(offset, str) {
+    for (let i = 0; i < str.length; i++) view.setUint8(offset + i, str.charCodeAt(i));
+  }
+  writeString(0, 'RIFF');
+  view.setUint32(4, length - 8, true);
+  writeString(8, 'WAVE');
+  writeString(12, 'fmt ');
+  view.setUint32(16, 16, true);
+  view.setUint16(20, 1, true);
+  view.setUint16(22, numChannels, true);
+  view.setUint32(24, sampleRate, true);
+  view.setUint32(28, sampleRate * numChannels * 2, true);
+  view.setUint16(32, numChannels * 2, true);
+  view.setUint16(34, 16, true);
+  writeString(36, 'data');
+  view.setUint32(40, buffer.length * numChannels * 2, true);
+  let offset = 44;
+  const channels = [];
+  for (let i = 0; i < numChannels; i++) channels.push(buffer.getChannelData(i));
+  for (let i = 0; i < buffer.length; i++) {
+    for (let ch = 0; ch < numChannels; ch++) {
+      let sample = Math.max(-1, Math.min(1, channels[ch][i]));
+      sample = sample < 0 ? sample * 0x8000 : sample * 0x7FFF;
+      view.setInt16(offset, sample, true);
+      offset += 2;
+    }
+  }
+  return new Blob([arrayBuffer], { type: 'audio/wav' });
+}
+function downloadAudio() {
+  if (!convertedBlob) return;
+  const format = document.getElementById('format').value;
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(convertedBlob);
+  a.download = 'converted-audio.' + format;
+  a.click();
+}
+function showStatus(msg, type) {
+  const el = document.getElementById('status');
+  el.textContent = msg;
+  el.className = 'status ' + type;
+  el.style.display = 'block';
+}
+</script>
+    <div class="ad-banner-bottom"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+</body>
+</html>

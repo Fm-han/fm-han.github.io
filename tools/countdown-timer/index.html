@@ -1,0 +1,125 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>倒计时器 - 在线多用途倒计时工具</title>
+  <meta name="description" content="免费在线倒计时器，支持自定义时间、会议倒计时、烹饪计时、生日倒计时、节日倒计时，浏览器本地运行，可全屏显示。">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://fm-han.github.io/countdown-timer/">
+  <style>
+                /* 顶部横幅广告 - 透明样式 */ .ad-banner-top { border-bottom: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; } .ad-banner-bottom { border-top: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; margin-top: 40px; } .ad-container { max-width: 728px; margin: 0 auto; min-height: 38px; display: flex; align-items: center; justify-content: center; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; max-width: 700px; margin: 0 auto; padding: 20px; color: #333; line-height: 1.6; background: #fafafa; }
+    h1 { text-align: center; font-size: 1.8rem; color: #1a1a1a; }
+    h1 small { display: block; font-size: 0.85rem; color: #666; margin-top: 4px; font-weight: normal; }
+    .section { margin: 20px 0; padding: 16px; border: 1px solid #e0e0e0; border-radius: 8px; background: #fff; }
+    .section label { display: block; font-weight: 600; margin-bottom: 8px; }
+    input[type="number"], input[type="datetime-local"] { padding: 10px 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 1rem; }
+    .time-inputs { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
+    .time-inputs .field { flex: 1; min-width: 80px; }
+    .time-inputs .field label { font-size: 0.8rem; color: #666; display: block; margin-bottom: 4px; }
+    .time-inputs .field input { width: 100%; }
+    .countdown-display { text-align: center; padding: 32px; background: linear-gradient(135deg, #007bff, #0056b3); border-radius: 12px; color: #fff; margin: 16px 0; }
+    .countdown-display .digits { font-size: 3.5rem; font-weight: 700; font-family: monospace; letter-spacing: 4px; }
+    .countdown-display .label { font-size: 1rem; opacity: 0.9; margin-top: 8px; }
+    .countdown-display.over { background: linear-gradient(135deg, #dc3545, #c82333); }
+    .countdown-display .event { font-size: 1.2rem; margin-bottom: 8px; }
+    .preset-btns { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+    .preset-btns button { padding: 6px 12px; border: 1px solid #ccc; border-radius: 6px; background: #fff; cursor: pointer; font-size: 0.85rem; }
+    .preset-btns button:hover { background: #f0f0f0; }
+    .buttons { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; justify-content: center; }
+    button { padding: 10px 24px; border: none; border-radius: 6px; cursor: pointer; font-size: 1rem; }
+    .btn-primary { background: #007bff; color: #fff; }
+    .btn-stop { background: #dc3545; color: #fff; }
+    .btn-clear { background: #6c757d; color: #fff; }
+    button:hover { opacity: 0.9; }
+    .footer { text-align: center; margin: 24px 0; padding: 12px; font-size: 0.85rem; color: #28a745; font-weight: 500; }
+  </style>
+</head>
+<body>
+    <div class="ad-banner-top"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+
+  <h1>倒计时器 <small>会议计时 / 烹饪计时 / 节日倒计时 · 浏览器本地</small></h1>
+
+  <div class="section">
+    <label>选择预设或自定义</label>
+    <div class="preset-btns">
+      <button onclick="setPreset(5)">5分钟</button>
+      <button onclick="setPreset(10)">10分钟</button>
+      <button onclick="setPreset(15)">15分钟</button>
+      <button onclick="setPreset(25)">25分钟</button>
+      <button onclick="setPreset(30)">30分钟</button>
+      <button onclick="setPreset(45)">45分钟</button>
+      <button onclick="setPreset(60)">1小时</button>
+      <button onclick="setPreset(120)">2小时</button>
+    </div>
+    <div class="time-inputs">
+      <div class="field"><label>小时</label><input type="number" id="h" value="0" min="0" max="99"></div>
+      <div class="field"><label>分钟</label><input type="number" id="m" value="5" min="0" max="59"></div>
+      <div class="field"><label>秒数</label><input type="number" id="s" value="0" min="0" max="59"></div>
+    </div>
+    <div style="margin-bottom:12px;">
+      <label style="font-weight:600;display:block;margin-bottom:4px;">事件名称（可选）</label>
+      <input type="text" id="eventName" placeholder="如: 会议结束、蛋糕烤好" style="width:100%;padding:10px;border:1px solid #ccc;border-radius:6px;box-sizing:border-box;">
+    </div>
+    <div class="buttons">
+      <button class="btn-primary" onclick="start()">▶ 开始倒计时</button>
+      <button class="btn-stop" onclick="stop()">■ 停止</button>
+      <button class="btn-clear" onclick="reset()">↺ 重置</button>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="countdown-display" id="countdownDisplay">
+      <div class="event" id="eventDisplay"></div>
+      <div class="digits" id="digits">05:00:00</div>
+      <div class="label">剩余时间</div>
+    </div>
+  </div>
+
+  <div class="footer">100% 免费 · 数据不上传服务器 · 仅浏览器本地处理</div>
+
+  <script>
+    let totalSeconds = 300, remaining = 300, timer = null, running = false;
+    function setPreset(min) {
+      document.getElementById('h').value = Math.floor(min / 60);
+      document.getElementById('m').value = min % 60;
+      document.getElementById('s').value = 0;
+      totalSeconds = remaining = min * 60;
+      updateDisplay();
+    }
+    function start() {
+      if (running) return;
+      const h = parseInt(document.getElementById('h').value) || 0;
+      const m = parseInt(document.getElementById('m').value) || 0;
+      const s = parseInt(document.getElementById('s').value) || 0;
+      if (totalSeconds === 300 && h===0 && m===0 && s===0) { totalSeconds = remaining = 300; }
+      else if (!running) { totalSeconds = remaining = h*3600 + m*60 + s; }
+      running = true;
+      const event = document.getElementById('eventName').value;
+      document.getElementById('eventDisplay').textContent = event ? '📌 ' + event : '';
+      timer = setInterval(tick, 1000);
+    }
+    function tick() {
+      if (remaining <= 0) { stop(); return; }
+      remaining--;
+      updateDisplay();
+      if (remaining === 0) {
+        document.getElementById('countdownDisplay').classList.add('over');
+        try { new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2teleQoLVq3k35VkHgAzpODnwH4BAGGW5OzDdAIAUJ7e7b50AgBYoNnpvngDAFuZ2eS4eQIAX5vY4rZ4AQBimdfhtXkBAF6Y1t+yeQAAYZfW3bF5AABgl9XbsHkAAGCW1dyveQAAYZfU26t5AABhl9XcqXkAAGKX1NupeQAAYZfU2qh5AABhl9Pcp3kAAGKX09qmeQAAYZbT2aV5AABhldPYpHkAAGGV09ikeQAAYZTU16J5AABhldPWoXkAAGGU09WheQAAYZTT1qB5AABhldPUoHkAAGGU09SfeQAAYZTT0595AABhlNLUnnkAAGGU0tOdeQAAYZTS05x5AABhlNLTnHkAAGGU0tKbeQAAYZTS0pt5AABhlNLSmnkAAGGU0tKaeQAAYZTS0pp5AABhlNHSmnkAAGGU0dGaeQAAYZTR0Zp5AABhlNHRmnkAAGGU0dGaeQAAYZTR0Zp5AABhlNHRmnkAAGGU0dGaeQAAYZTR0Zp5AABhlNHQ').play(); } catch(e) {}
+        alert('⏰ 时间到！');
+      }
+    }
+    function stop() { running = false; clearInterval(timer); }
+    function reset() { stop(); remaining = totalSeconds; document.getElementById('countdownDisplay').classList.remove('over'); updateDisplay(); }
+    function updateDisplay() {
+      const hh = String(Math.floor(remaining / 3600)).padStart(2,'0');
+      const mm = String(Math.floor((remaining % 3600) / 60)).padStart(2,'0');
+      const ss = String(remaining % 60).padStart(2,'0');
+      document.getElementById('digits').textContent = `${hh}:${mm}:${ss}`;
+    }
+    updateDisplay();
+  </script>
+    <div class="ad-banner-bottom"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+</body>
+</html>

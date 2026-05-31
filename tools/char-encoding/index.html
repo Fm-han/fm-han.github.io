@@ -1,0 +1,166 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>字符编码检测器 - 在线文本编码格式识别工具</title>
+  <meta name="description" content="免费在线字符编码检测器，自动识别文本文件的编码格式（UTF-8/GBK/GB2312/ASCII等），支持批量检测，浏览器本地处理。">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://fm-han.github.io/char-encoding/">
+  <style>
+                /* 顶部横幅广告 - 透明样式 */ .ad-banner-top { border-bottom: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; } .ad-banner-bottom { border-top: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; margin-top: 40px; } .ad-container { max-width: 728px; margin: 0 auto; min-height: 38px; display: flex; align-items: center; justify-content: center; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; max-width: 700px; margin: 0 auto; padding: 20px; color: #333; line-height: 1.6; background: #fafafa; }
+    h1 { text-align: center; font-size: 1.8rem; color: #1a1a1a; }
+    h1 small { display: block; font-size: 0.85rem; color: #666; margin-top: 4px; font-weight: normal; }
+    .section { margin: 20px 0; padding: 16px; border: 1px solid #e0e0e0; border-radius: 8px; background: #fff; }
+    .section label { display: block; font-weight: 600; margin-bottom: 8px; }
+    textarea { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 0.9rem; box-sizing: border-box; font-family: monospace; resize: vertical; min-height: 150px; }
+    .drop-zone { border: 2px dashed #ccc; padding: 24px; text-align: center; border-radius: 8px; cursor: pointer; margin-top: 12px; }
+    .drop-zone:hover { border-color: #007bff; background: #f0f7ff; }
+    .result-badge { display: inline-block; padding: 6px 16px; background: #007bff; color: #fff; border-radius: 20px; font-weight: 700; font-size: 1.1rem; margin-top: 8px; }
+    .encoding-info { margin-top: 12px; padding: 12px; background: #f8f9fa; border-radius: 6px; }
+    .encoding-info .row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #eee; }
+    .encoding-info .row:last-child { border-bottom: none; }
+    .buttons { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+    button { padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-size: 0.95rem; }
+    .btn-primary { background: #007bff; color: #fff; }
+    .btn-copy { background: #28a745; color: #fff; }
+    .btn-clear { background: #6c757d; color: #fff; }
+    button:hover { opacity: 0.9; }
+    .footer { text-align: center; margin: 24px 0; padding: 12px; font-size: 0.85rem; color: #28a745; font-weight: 500; }
+  </style>
+</head>
+<body>
+    <div class="ad-banner-top"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+
+  <h1>字符编码检测器 <small>编码识别 / 文件检测 / 浏览器本地</small></h1>
+
+  <div class="section">
+    <label>输入文本</label>
+    <textarea id="textInput" placeholder="输入或粘贴需要检测编码的文本..."></textarea>
+    <div class="buttons">
+      <button class="btn-primary" onclick="detect()">检测编码</button>
+      <button class="btn-copy" onclick="copyAll()">复制分析结果</button>
+      <button class="btn-clear" onclick="document.getElementById('textInput').value='';document.getElementById('result').innerHTML=''">清空</button>
+    </div>
+  </div>
+
+  <div class="section">
+    <label>或上传文件</label>
+    <div class="drop-zone" onclick="document.getElementById('fileInput').click()">
+      <input type="file" id="fileInput" class="hidden" onchange="detectFile(this.files[0])">
+      <p>点击选择文件，或拖拽文件到此处</p>
+      <p style="color:#888;font-size:0.85rem;margin-top:8px;">支持 TXT, JSON, CSV, XML 等文本文件</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <label>检测结果</label>
+    <div id="result">
+      <div style="color:#999;text-align:center;padding:20px;">输入文本后点击检测...</div>
+    </div>
+  </div>
+
+  <div class="footer">100% 免费 · 数据不上传服务器 · 仅浏览器本地处理</div>
+
+  <script>
+    function detect() {
+      const text = document.getElementById('textInput').value;
+      if (!text) { alert('请输入文本'); return; }
+      const result = analyzeText(text);
+      renderResult(result);
+    }
+
+    function detectFile(file) {
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        document.getElementById('textInput').value = e.target.result;
+        const result = analyzeText(e.target.result);
+        result.fileName = file.name;
+        result.fileSize = formatSize(file.size);
+        renderResult(result);
+      };
+      reader.readAsText(file);
+    }
+
+    function analyzeText(text) {
+      const bytes = new TextEncoder().encode(text);
+      let utf8Valid = true, gbkRatio = 0, asciiCount = 0, utf8Multi = 0;
+      const byteLen = bytes.length;
+
+      for (let i = 0; i < byteLen; i++) {
+        const b = bytes[i];
+        if (b < 128) {
+          asciiCount++;
+        } else if ((b & 0xE0) === 0xC0 && i + 1 < byteLen && (bytes[i+1] & 0x80) === 0x80) {
+          utf8Multi++;
+          i++;
+        } else if ((b & 0xF0) === 0xE0 && i + 2 < byteLen) {
+          utf8Multi++;
+          i += 2;
+        } else if ((b & 0xF8) === 0xF0 && i + 3 < byteLen) {
+          utf8Multi++;
+          i += 3;
+        }
+      }
+
+      const nonAscii = byteLen - asciiCount;
+      const likelyGBK = nonAscii > 0 && utf8Multi < nonAscii * 0.5;
+      const likelyUTF8 = utf8Multi > nonAscii * 0.7;
+
+      let primary = 'UTF-8';
+      if (asciiCount === byteLen) primary = 'ASCII (UTF-8兼容)';
+      else if (likelyGBK && !likelyUTF8) primary = 'GBK / GB2312';
+
+      return {
+        primary,
+        byteLength: byteLen,
+        charCount: [...text].length,
+        asciiRatio: ((asciiCount / byteLen) * 100).toFixed(1),
+        hasMultiByte: utf8Multi > 0,
+        multiByteCount: utf8Multi,
+        gbkLike: likelyGBK,
+        suggestions: getSuggestions(primary, byteLen, asciiCount)
+      };
+    }
+
+    function getSuggestions(encoding, byteLen, asciiCount) {
+      const s = [];
+      if (encoding.includes('GBK')) s.push('建议使用GBK编码保存');
+      if (asciiCount === byteLen) s.push('纯ASCII内容，UTF-8/GBK均可');
+      if (byteLen > 1048576) s.push('大文件建议分批处理');
+      return s;
+    }
+
+    function renderResult(r) {
+      const suggestions = r.suggestions.map(s => `<li>${s}</li>`).join('');
+      document.getElementById('result').innerHTML = `
+        <div class="result-badge">${r.primary}</div>
+        ${r.fileName ? `<div style="margin-top:8px;color:#666;">文件: ${r.fileName} (${r.fileSize})</div>` : ''}
+        <div class="encoding-info">
+          <div class="row"><span>字节长度</span><span>${r.byteLength} 字节</span></div>
+          <div class="row"><span>字符数</span><span>${r.charCount} 个字符</span></div>
+          <div class="row"><span>ASCII占比</span><span>${r.asciiRatio}%</span></div>
+          <div class="row"><span>多字节字符</span><span>${r.multiByteCount} 个</span></div>
+          <div class="row"><span>检测结论</span><span>${r.primary}</span></div>
+        </div>
+        ${suggestions ? `<ul style="margin-top:12px;padding-left:20px;color:#666;font-size:0.9rem;">${suggestions}</ul>` : ''}
+      `;
+    }
+
+    function copyAll() {
+      const r = document.getElementById('result').innerText;
+      if (r.includes('输入文本')) { alert('无内容'); return; }
+      navigator.clipboard.writeText(r).then(() => alert('已复制!'));
+    }
+
+    function formatSize(bytes) {
+      if (bytes < 1024) return bytes + ' B';
+      if (bytes < 1048576) return (bytes/1024).toFixed(1) + ' KB';
+      return (bytes/1048576).toFixed(1) + ' MB';
+    }
+  </script>
+    <div class="ad-banner-bottom"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+</body>
+</html>

@@ -1,0 +1,140 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lorem Ipsum生成器 - 英文占位文本</title>
+  <meta name="description" content="免费在线Lorem Ipsum生成器，生成拉丁文占位文本用于设计和排版测试，支持指定段落数和单词数。">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://fm-han.github.io/lipsum-generator/">
+  <style>
+                /* 顶部横幅广告 - 透明样式 */ .ad-banner-top { border-bottom: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; } .ad-banner-bottom { border-top: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; margin-top: 40px; } .ad-container { max-width: 728px; margin: 0 auto; min-height: 38px; display: flex; align-items: center; justify-content: center; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; max-width: 700px; margin: 0 auto; padding: 20px; color: #333; line-height: 1.6; background: #fafafa; }
+    h1 { text-align: center; font-size: 1.8rem; color: #1a1a1a; }
+    h1 small { display: block; font-size: 0.85rem; color: #666; margin-top: 4px; font-weight: normal; }
+    .card { margin: 20px 0; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px; background: #fff; }
+    .options { display: flex; gap: 16px; margin-bottom: 16px; flex-wrap: wrap; }
+    .option { display: flex; align-items: center; gap: 6px; }
+    .option label { font-weight: 600; }
+    .option select, .option input { padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
+    .option input[type="number"] { width: 80px; }
+    .mode-btns { display: flex; gap: 8px; margin-bottom: 16px; }
+    .mode-btn { flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 6px; background: #fff; cursor: pointer; text-align: center; }
+    .mode-btn.active { background: #007bff; color: #fff; border-color: #007bff; }
+    textarea { width: 100%; min-height: 200px; padding: 12px; border: 1px solid #ccc; border-radius: 6px; font-family: Georgia, serif; font-size: 1rem; line-height: 1.8; resize: vertical; box-sizing: border-box; }
+    button { padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-size: 1rem; }
+    .btn-primary { background: #007bff; color: #fff; }
+    .btn-success { background: #28a745; color: #fff; }
+    button:hover { opacity: 0.9; }
+    .buttons { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-top: 16px; }
+    .footer { text-align: center; margin: 24px 0; padding: 12px; font-size: 0.85rem; color: #28a745; font-weight: 500; }
+  </style>
+</head>
+<body>
+    <div class="ad-banner-top"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+  <h1>Lorem Ipsum生成器 <small>英文占位文本 · 设计排版测试</small></h1>
+
+  <div class="card">
+    <div class="options">
+      <div class="option">
+        <label>生成模式：</label>
+        <select id="genMode">
+          <option value="paragraphs">段落</option>
+          <option value="sentences">句子</option>
+          <option value="words">单词</option>
+        </select>
+      </div>
+      <div class="option">
+        <label>数量：</label>
+        <input type="number" id="genCount" value="3" min="1" max="50">
+      </div>
+      <div class="option">
+        <label>起始：</label>
+        <select id="startWith"><option value="yes">以Lorem ipsum开头</option><option value="no">随机开始</option></select>
+      </div>
+    </div>
+    <div class="mode-btns">
+      <button class="mode-btn active" onclick="setHTML(false, this)">纯文本</button>
+      <button class="mode-btn" onclick="setHTML(true, this)">HTML标签</button>
+    </div>
+    <textarea id="outputText" readonly></textarea>
+    <div class="buttons">
+      <button class="btn-primary" onclick="generate()">生成文本</button>
+      <button class="btn-success" onclick="copyText()">复制文本</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>关于Lorem Ipsum</h3>
+    <p style="color:#666;">Lorem Ipsum是一种占位文本，起源于16世纪的排版工人。它使用拉丁词汇的随机组合，看起来像真实的文字，常用于网页和图形设计中的排版预览。</p>
+    <p style="color:#666;">优势：</p>
+    <ul style="color:#666;padding-left:20px;">
+      <li>不包含实际含义，不会分散阅读注意力</li>
+      <li>字母和单词频率接近真实英文</li>
+      <li>已成为设计和排版行业的标准</li>
+    </ul>
+  </div>
+
+  <div class="footer">100% 免费 · 数据不上传服务器 · 仅浏览器本地处理</div>
+
+  <script>
+    let useHTML = false;
+    const loremWords = ['lorem', 'ipsum', 'dolor', 'sit', 'amet', 'consectetur', 'adipiscing', 'elit', 'sed', 'do', 'eiusmod', 'tempor', 'incididunt', 'ut', 'labore', 'et', 'dolore', 'magna', 'aliqua', 'enim', 'ad', 'minim', 'veniam', 'quis', 'nostrud', 'exercitation', 'ullamco', 'laboris', 'nisi', 'aliquip', 'ex', 'ea', 'commodo', 'consequat', 'duis', 'aute', 'irure', 'in', 'reprehenderit', 'voluptate', 'velit', 'esse', 'cillum', 'fugiat', 'nulla', 'pariatur', 'excepteur', 'sint', 'occaecat', 'cupidatat', 'non', 'proident', 'sunt', 'culpa', 'qui', 'officia', 'deserunt', 'mollit', 'anim', 'id', 'est', 'laborum', 'neque', 'porro', 'quisquam', 'nihil', 'impedit', 'quo', 'minus', 'quod', 'maxime', 'placeat', 'facere', 'possimus', 'omnis', 'voluptas', 'assumenda', 'repellendus', 'temporibus', 'autem', 'quibusdam', 'officiis', 'debitis', 'aut', 'rerum', 'necessitatibus', 'saepe', 'eveniet', 'voluptates', 'repudiandae', 'sint', 'molestiae', 'recusandae', 'itaque', 'earum', 'hic', 'tenetur', 'sapiente', 'delectus', 'ut', 'aut', 'debitis', 'iusto', 'odit', 'fugit', 'facilis', 'expedita', 'distinctio', 'nam', 'libero', 'tempore', 'cum', 'soluta', 'nobis', 'est', 'eligendi', 'optio', 'cumque', 'nihil', 'impedit', 'quo', 'porro', 'omnis', 'est', 'qui', 'deleniti', 'explicabo'];
+    function setHTML(val, btn) {
+      useHTML = val;
+      document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    }
+    function generate() {
+      const mode = document.getElementById('genMode').value;
+      const count = parseInt(document.getElementById('genCount').value) || 1;
+      const startWithLorem = document.getElementById('startWith').value === 'yes';
+      let result = [];
+      if (mode === 'paragraphs') {
+        for (let p = 0; p < count; p++) {
+          result.push(generateParagraph(startWithLorem && p === 0));
+        }
+        document.getElementById('outputText').value = useHTML ? result.map(t => `<p>${t}</p>`).join('\n') : result.join('\n\n');
+      } else if (mode === 'sentences') {
+        for (let i = 0; i < count; i++) {
+          result.push(generateSentence(startWithLorem && i === 0));
+        }
+        document.getElementById('outputText').value = result.join(' ');
+      } else {
+        let words = [];
+        for (let i = 0; i < count; i++) {
+          words.push(loremWords[Math.floor(Math.random() * loremWords.length)]);
+        }
+        document.getElementById('outputText').value = words.join(' ');
+      }
+    }
+    function generateSentence(startWithLorem) {
+      const wordCount = 8 + Math.floor(Math.random() * 10);
+      let words = [];
+      if (startWithLorem && words.length === 0) {
+        words.push('Lorem', 'ipsum', 'dolor', 'sit', 'amet,', 'consectetur', 'adipiscing', 'elit.');
+      }
+      while (words.length < wordCount) {
+        words.push(loremWords[Math.floor(Math.random() * loremWords.length)]);
+      }
+      words[0] = words[0].charAt(0).toUpperCase() + words[0].slice(1);
+      return words.join(' ') + (words[words.length-1].endsWith('.') ? '' : '.');
+    }
+    function generateParagraph(startWithLorem) {
+      const sentenceCount = 4 + Math.floor(Math.random() * 4);
+      let sentences = [];
+      for (let i = 0; i < sentenceCount; i++) {
+        sentences.push(generateSentence(startWithLorem && i === 0));
+      }
+      return sentences.join(' ');
+    }
+    function copyText() {
+      const text = document.getElementById('outputText').value;
+      if (!text) { alert('请先生成文本'); return; }
+      navigator.clipboard.writeText(text).then(() => alert('已复制'));
+    }
+    generate();
+  </script>
+    <div class="ad-banner-bottom"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+</body>
+</html>

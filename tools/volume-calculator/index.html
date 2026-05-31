@@ -1,0 +1,152 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>体积计算器 - 几何体体积在线计算</title>
+  <meta name="description" content="免费在线体积计算器，计算立方体、球体、圆柱体、圆锥体等常见几何体的体积。">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://fm-han.github.io/volume-calculator/">
+  <style>
+                /* 顶部横幅广告 - 透明样式 */ .ad-banner-top { border-bottom: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; } .ad-banner-bottom { border-top: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; margin-top: 40px; } .ad-container { max-width: 728px; margin: 0 auto; min-height: 38px; display: flex; align-items: center; justify-content: center; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; max-width: 700px; margin: 0 auto; padding: 20px; color: #333; line-height: 1.6; background: #fafafa; }
+    h1 { text-align: center; font-size: 1.8rem; color: #1a1a1a; }
+    h1 small { display: block; font-size: 0.85rem; color: #666; margin-top: 4px; font-weight: normal; }
+    .card { margin: 20px 0; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px; background: #fff; }
+    .shape-btns { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 16px; }
+    .shape-btn { padding: 14px; border: 1px solid #ccc; border-radius: 8px; background: #fff; cursor: pointer; text-align: center; transition: all 0.2s; }
+    .shape-btn:hover { background: #f0f0f0; }
+    .shape-btn.active { background: #007bff; color: #fff; border-color: #007bff; }
+    .shape-btn .icon { font-size: 1.5rem; }
+    .shape-btn .name { font-size: 0.85rem; margin-top: 4px; }
+    .input-section { margin-bottom: 16px; }
+    .input-row { display: flex; gap: 12px; margin-bottom: 12px; }
+    .input-group { flex: 1; }
+    .input-group label { display: block; font-weight: 600; margin-bottom: 6px; font-size: 0.9rem; }
+    .input-group input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 1rem; box-sizing: border-box; }
+    .result-display { background: linear-gradient(135deg, #007bff, #0056b3); border-radius: 12px; padding: 24px; color: #fff; text-align: center; margin: 20px 0; }
+    .result-display .formula { font-size: 1rem; opacity: 0.9; }
+    .result-display .value { font-size: 2.5rem; font-weight: 700; }
+    button { padding: 12px 28px; border: none; border-radius: 6px; cursor: pointer; font-size: 1rem; }
+    .btn-primary { background: #007bff; color: #fff; }
+    button:hover { opacity: 0.9; }
+    .buttons { display: flex; gap: 12px; justify-content: center; }
+    .footer { text-align: center; margin: 24px 0; padding: 12px; font-size: 0.85rem; color: #28a745; font-weight: 500; }
+  </style>
+</head>
+<body>
+    <div class="ad-banner-top"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+  <h1>体积计算器 <small>立方体 · 球体 · 圆柱体 · 圆锥体</small></h1>
+
+  <div class="card">
+    <h3>选择几何体</h3>
+    <div class="shape-btns">
+      <button class="shape-btn active" onclick="selectShape('cube', this)">
+        <div class="icon">⬜</div>
+        <div class="name">立方体</div>
+      </button>
+      <button class="shape-btn" onclick="selectShape('sphere', this)">
+        <div class="icon">◯</div>
+        <div class="name">球体</div>
+      </button>
+      <button class="shape-btn" onclick="selectShape('cylinder', this)">
+        <div class="icon">⟮</div>
+        <div class="name">圆柱体</div>
+      </button>
+      <button class="shape-btn" onclick="selectShape('cone', this)">
+        <div class="icon">△</div>
+        <div class="name">圆锥体</div>
+      </button>
+      <button class="shape-btn" onclick="selectShape('pyramid', this)">
+        <div class="icon">▲</div>
+        <div class="name">四棱锥</div>
+      </button>
+      <button class="shape-btn" onclick="selectShape('torus', this)">
+        <div class="icon">◯◯</div>
+        <div class="name">圆环体</div>
+      </button>
+    </div>
+    <div class="input-section" id="inputSection">
+      <div class="input-row">
+        <div class="input-group"><label>边长 a</label><input type="number" id="valA" placeholder="边长" value="5"></div>
+        <div class="input-group"><label>边长 b</label><input type="number" id="valB" placeholder="边长" value="5"></div>
+        <div class="input-group"><label>边长 c</label><input type="number" id="valC" placeholder="边长" value="5"></div>
+      </div>
+    </div>
+    <div class="buttons">
+      <button class="btn-primary" onclick="calculate()">计算体积</button>
+    </div>
+  </div>
+
+  <div class="card" id="resultCard" style="display:none;">
+    <div class="result-display">
+      <div class="formula" id="formulaText">立方体体积公式</div>
+      <div class="value" id="resultValue">--</div>
+      <div style="margin-top:8px;font-size:0.9rem;">立方单位</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>体积公式速查</h3>
+    <table style="width:100%;border-collapse:collapse;">
+      <tr style="background:#f0f0f0;"><th style="padding:8px;border:1px solid #ddd;">几何体</th><th style="padding:8px;border:1px solid #ddd;">公式</th></tr>
+      <tr><td style="padding:8px;border:1px solid #ddd;">立方体</td><td style="padding:8px;border:1px solid #ddd;">V = a³</td></tr>
+      <tr><td style="padding:8px;border:1px solid #ddd;">长方体</td><td style="padding:8px;border:1px solid #ddd;">V = a × b × c</td></tr>
+      <tr><td style="padding:8px;border:1px solid #ddd;">球体</td><td style="padding:8px;border:1px solid #ddd;">V = (4/3)πr³</td></tr>
+      <tr><td style="padding:8px;border:1px solid #ddd;">圆柱体</td><td style="padding:8px;border:1px solid #ddd;">V = πr²h</td></tr>
+      <tr><td style="padding:8px;border:1px solid #ddd;">圆锥体</td><td style="padding:8px;border:1px solid #ddd;">V = (1/3)πr²h</td></tr>
+      <tr><td style="padding:8px;border:1px solid #ddd;">四棱锥</td><td style="padding:8px;border:1px solid #ddd;">V = (1/3)abh</td></tr>
+    </table>
+  </div>
+
+  <div class="footer">100% 免费 · 数据不上传服务器 · 仅浏览器本地处理</div>
+
+  <script>
+    let currentShape = 'cube';
+    function selectShape(shape, btn) {
+      currentShape = shape;
+      document.querySelectorAll('.shape-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const section = document.getElementById('inputSection');
+      switch (shape) {
+        case 'cube':
+          section.innerHTML = `<div class="input-row"><div class="input-group"><label>边长 a</label><input type="number" id="valA" placeholder="边长" value="5"></div></div>`;
+          break;
+        case 'sphere':
+          section.innerHTML = `<div class="input-row"><div class="input-group"><label>半径 r</label><input type="number" id="valA" placeholder="半径" value="5"></div></div>`;
+          break;
+        case 'cylinder':
+          section.innerHTML = `<div class="input-row"><div class="input-group"><label>半径 r</label><input type="number" id="valA" placeholder="半径" value="3"></div><div class="input-group"><label>高 h</label><input type="number" id="valB" placeholder="高" value="10"></div></div>`;
+          break;
+        case 'cone':
+          section.innerHTML = `<div class="input-row"><div class="input-group"><label>半径 r</label><input type="number" id="valA" placeholder="半径" value="3"></div><div class="input-group"><label>高 h</label><input type="number" id="valB" placeholder="高" value="10"></div></div>`;
+          break;
+        case 'pyramid':
+          section.innerHTML = `<div class="input-row"><div class="input-group"><label>底长 a</label><input type="number" id="valA" placeholder="底长" value="6"></div><div class="input-group"><label>底宽 b</label><input type="number" id="valB" placeholder="底宽" value="4"></div><div class="input-group"><label>高 h</label><input type="number" id="valC" placeholder="高" value="10"></div></div>`;
+          break;
+        case 'torus':
+          section.innerHTML = `<div class="input-row"><div class="input-group"><label>大半径 R</label><input type="number" id="valA" placeholder="大半径" value="8"></div><div class="input-group"><label>小半径 r</label><input type="number" id="valB" placeholder="小半径" value="3"></div></div>`;
+          break;
+      }
+    }
+    function calculate() {
+      let volume, formula;
+      const a = parseFloat(document.getElementById('valA')?.value) || 0;
+      const b = parseFloat(document.getElementById('valB')?.value) || 0;
+      const c = parseFloat(document.getElementById('valC')?.value) || 0;
+      switch (currentShape) {
+        case 'cube': volume = a * a * a; formula = `V = ${a}³`; break;
+        case 'sphere': volume = (4/3) * Math.PI * a * a * a; formula = `V = (4/3)π × ${a}³`; break;
+        case 'cylinder': volume = Math.PI * a * a * b; formula = `V = π × ${a}² × ${b}`; break;
+        case 'cone': volume = (1/3) * Math.PI * a * a * b; formula = `V = (1/3)π × ${a}² × ${b}`; break;
+        case 'pyramid': volume = (1/3) * a * b * c; formula = `V = (1/3) × ${a} × ${b} × ${c}`; break;
+        case 'torus': volume = 2 * Math.PI * Math.PI * a * b * b; formula = `V = 2π² × ${a} × ${b}²`; break;
+      }
+      document.getElementById('resultCard').style.display = 'block';
+      document.getElementById('formulaText').textContent = formula;
+      document.getElementById('resultValue').textContent = volume.toFixed(4);
+    }
+  </script>
+    <div class="ad-banner-bottom"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+</body>
+</html>

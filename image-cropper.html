@@ -1,0 +1,187 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>图片裁剪器 - 免费在线工具</title>
+<style>
+                /* 顶部横幅广告 - 透明样式 */ .ad-banner-top { border-bottom: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; } .ad-banner-bottom { border-top: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; margin-top: 40px; } .ad-container { max-width: 728px; margin: 0 auto; min-height: 38px; display: flex; align-items: center; justify-content: center; }
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #fafafa; color: #333; padding: 20px; }
+.container { max-width: 900px; margin: 0 auto; }
+h1 { font-size: 1.25rem; font-weight: 600; margin-bottom: 16px; color: #333; }
+.desc { color: #666; margin-bottom: 20px; line-height: 1.6; }
+.card { background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; padding: 24px; margin-bottom: 16px; }
+label { display: block; margin-bottom: 8px; font-weight: 500; }
+input[type="file"] { margin-bottom: 12px; font-size: 14px; }
+.btn-primary { background: #007bff; color: #fff; border: none; padding: 8px 20px; border-radius: 4px; cursor: pointer; font-size: 14px; }
+.btn-primary:hover { background: #0056b3; }
+.btn-secondary { background: #28a745; color: #fff; border: none; padding: 8px 20px; border-radius: 4px; cursor: pointer; font-size: 14px; margin-left: 8px; }
+.btn-secondary:hover { background: #1e7e34; }
+.btn-danger { background: #dc3545; color: #fff; border: none; padding: 8px 20px; border-radius: 4px; cursor: pointer; font-size: 14px; margin-left: 8px; }
+.btn-danger:hover { background: #c82333; }
+.status { margin-top: 12px; padding: 12px; border-radius: 4px; font-size: 14px; display: none; }
+.status.success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+.status.error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+.preview-area { position: relative; margin-top: 16px; display: none; text-align: center; }
+#imageContainer { position: relative; display: inline-block; max-width: 100%; }
+#sourceImage { max-width: 100%; display: block; }
+#cropBox { position: absolute; border: 2px dashed #007bff; background: rgba(0,123,255,0.1); cursor: move; }
+#cropBox::after { content: ''; position: absolute; width: 10px; height: 10px; background: #007bff; right: -5px; bottom: -5px; cursor: nwse-resize; }
+.info { margin-top: 12px; font-size: 14px; color: #666; }
+.canvas-hidden { display: none; }
+</style>
+</head>
+<body>
+    <div class="ad-banner-top"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+<div class="container">
+  <div class="card">
+    <h1>图片裁剪器</h1>
+    <p class="desc">上传图片，拖拽框选区域进行裁剪。</p>
+    <label for="fileInput">选择图片文件</label>
+    <input type="file" id="fileInput" accept="image/*" onchange="loadImage(event)">
+    <div class="preview-area" id="previewArea">
+      <div id="imageContainer">
+        <img id="sourceImage" src="" alt="图片">
+        <div id="cropBox" style="display:none"></div>
+      </div>
+      <div class="info" id="info"></div>
+      <div style="margin-top:12px">
+        <button class="btn-primary" onclick="cropImage()">裁剪图片</button>
+        <button class="btn-danger" onclick="resetCrop()">重置选区</button>
+      </div>
+    </div>
+    <canvas id="cropCanvas" class="canvas-hidden"></canvas>
+    <div class="result" id="result" style="margin-top:16px; text-align:center; display:none">
+      <h3 style="font-size:1rem;margin-bottom:8px">裁剪结果</h3>
+      <img id="resultImage" src="" alt="裁剪结果" style="max-width:100%;border:1px solid #e0e0e0;border-radius:4px">
+      <div style="margin-top:8px">
+        <button class="btn-secondary" onclick="downloadCropped()">下载裁剪图片</button>
+      </div>
+    </div>
+    <div class="status" id="status"></div>
+  </div>
+</div>
+<script>
+let img = null;
+let cropX = 0, cropY = 0, cropW = 0, cropH = 0;
+let dragging = false, resizing = false;
+let startX, startY;
+document.getElementById('fileInput').addEventListener('change', loadImage);
+function loadImage(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    img = new Image();
+    img.onload = function() {
+      const container = document.getElementById('imageContainer');
+      const srcImg = document.getElementById('sourceImage');
+      srcImg.src = e.target.result;
+      document.getElementById('previewArea').style.display = 'block';
+      initCropBox();
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+function initCropBox() {
+  const srcImg = document.getElementById('sourceImage');
+  const box = document.getElementById('cropBox');
+  cropW = srcImg.naturalWidth / 2;
+  cropH = srcImg.naturalHeight / 2;
+  cropX = (srcImg.naturalWidth - cropW) / 2;
+  cropY = (srcImg.naturalHeight - cropH) / 2;
+  updateCropBox();
+  box.style.display = 'block';
+  setupCropDrag();
+}
+function updateCropBox() {
+  const srcImg = document.getElementById('sourceImage');
+  const box = document.getElementById('cropBox');
+  const ratioX = srcImg.offsetWidth / srcImg.naturalWidth;
+  const ratioY = srcImg.offsetHeight / srcImg.naturalHeight;
+  box.style.left = (cropX * ratioX) + 'px';
+  box.style.top = (cropY * ratioY) + 'px';
+  box.style.width = (cropW * ratioX) + 'px';
+  box.style.height = (cropH * ratioY) + 'px';
+  document.getElementById('info').textContent = '选区: ' + Math.round(cropW) + ' × ' + Math.round(cropH);
+}
+function setupCropDrag() {
+  const box = document.getElementById('cropBox');
+  const container = document.getElementById('imageContainer');
+  box.addEventListener('mousedown', function(e) {
+    e.preventDefault();
+    const rect = box.getBoundingClientRect();
+    const boxRight = rect.left + rect.width;
+    const boxBottom = rect.top + rect.height;
+    if (e.clientX >= boxRight - 10 && e.clientY >= boxBottom - 10) {
+      resizing = true;
+    } else {
+      dragging = true;
+    }
+    startX = e.clientX;
+    startY = e.clientY;
+  });
+  document.addEventListener('mousemove', function(e) {
+    if (!dragging && !resizing) return;
+    const srcImg = document.getElementById('sourceImage');
+    const ratioX = srcImg.naturalWidth / srcImg.offsetWidth;
+    const ratioY = srcImg.naturalHeight / srcImg.offsetHeight;
+    const dx = (e.clientX - startX) * ratioX;
+    const dy = (e.clientY - startY) * ratioY;
+    if (dragging) {
+      cropX = Math.max(0, Math.min(srcImg.naturalWidth - cropW, cropX + dx));
+      cropY = Math.max(0, Math.min(srcImg.naturalHeight - cropH, cropY + dy));
+    }
+    if (resizing) {
+      cropW = Math.max(20, Math.min(srcImg.naturalWidth - cropX, cropW + dx));
+      cropH = Math.max(20, Math.min(srcImg.naturalHeight - cropY, cropH + dy));
+    }
+    startX = e.clientX;
+    startY = e.clientY;
+    updateCropBox();
+  });
+  document.addEventListener('mouseup', function() {
+    dragging = false;
+    resizing = false;
+  });
+}
+function cropImage() {
+  if (!img) return;
+  const canvas = document.getElementById('cropCanvas');
+  canvas.width = cropW;
+  canvas.height = cropH;
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(img, cropX, cropY, cropW, cropH, 0, 0, cropW, cropH);
+  const resultImg = document.getElementById('resultImage');
+  resultImg.src = canvas.toDataURL('image/png');
+  document.getElementById('result').style.display = 'block';
+  showStatus('裁剪完成', 'success');
+}
+function resetCrop() {
+  if (!img) return;
+  const srcImg = document.getElementById('sourceImage');
+  cropW = srcImg.naturalWidth / 2;
+  cropH = srcImg.naturalHeight / 2;
+  cropX = (srcImg.naturalWidth - cropW) / 2;
+  cropY = (srcImg.naturalHeight - cropH) / 2;
+  updateCropBox();
+}
+function downloadCropped() {
+  const canvas = document.getElementById('cropCanvas');
+  const a = document.createElement('a');
+  a.href = canvas.toDataURL('image/png');
+  a.download = 'cropped-image.png';
+  a.click();
+}
+function showStatus(msg, type) {
+  const el = document.getElementById('status');
+  el.textContent = msg;
+  el.className = 'status ' + type;
+  el.style.display = 'block';
+}
+</script>
+    <div class="ad-banner-bottom"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+</body>
+</html>

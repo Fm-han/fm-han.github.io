@@ -1,0 +1,213 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>质数判断器</title>
+    <style>
+                /* 顶部横幅广告 - 透明样式 */ .ad-banner-top { border-bottom: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; } .ad-banner-bottom { border-top: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; margin-top: 40px; } .ad-container { max-width: 728px; margin: 0 auto; min-height: 38px; display: flex; align-items: center; justify-content: center; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #fafafa; min-height: 100vh; padding: 20px; }
+        .container { max-width: 600px; margin: 0 auto; }
+        .card { background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; padding: 24px; margin-bottom: 20px; }
+        h1 { font-size: 1.5rem; font-weight: 600; margin-bottom: 20px; color: #333; text-align: center; }
+        .title { font-size: 1.25rem; font-weight: 600; margin-bottom: 16px; color: #333; }
+        label { display: block; margin-bottom: 8px; color: #555; font-weight: 500; }
+        input { border: 1px solid #ddd; border-radius: 4px; padding: 8px 12px; width: 100%; box-sizing: border-box; margin-bottom: 16px; }
+        button { background: #007bff; color: #fff; border: none; padding: 8px 20px; border-radius: 4px; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        button.calc-btn { background: #28a745; width: 100%; padding: 12px; font-size: 1.1rem; }
+        button.gen-btn { background: #6f42c1; width: 48%; }
+        button.gen-btn:hover { background: #5a32a3; }
+        .result { background: #f0f7ff; border: 1px solid #007bff; border-radius: 4px; padding: 16px; margin-top: 16px; }
+        .prime-badge { display: inline-block; padding: 8px 20px; border-radius: 20px; font-weight: 600; font-size: 1.1rem; }
+        .prime-badge.yes { background: #d4edda; color: #155724; }
+        .prime-badge.no { background: #f8d7da; color: #721c24; }
+        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
+        .info-item { background: #f8f9fa; padding: 12px; border-radius: 4px; }
+        .info-label { color: #666; font-size: 0.85rem; }
+        .info-value { color: #007bff; font-weight: 600; font-size: 1.1rem; margin-top: 4px; }
+        .factors { margin-top: 12px; }
+        .factors-label { color: #666; font-size: 0.9rem; margin-bottom: 8px; }
+        .factors-list { display: flex; flex-wrap: wrap; gap: 6px; }
+        .factor { background: #e7f3ff; color: #007bff; padding: 4px 10px; border-radius: 4px; font-size: 0.9rem; }
+        .error { color: #dc3545; margin-top: 8px; font-size: 0.9rem; }
+        .btn-row { display: flex; gap: 10px; }
+    </style>
+</head>
+<body>
+    <div class="ad-banner-top"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+    <div class="container">
+        <h1>质数判断器</h1>
+        <div class="card">
+            <label>输入要检查的数字</label>
+            <input type="number" id="numberInput" placeholder="请输入正整数 (最大 10 兆)" max="10000000000000">
+            
+            <div class="btn-row">
+                <button class="calc-btn" style="width:48%; margin:0;" onclick="checkPrime()">检查质数</button>
+                <button class="gen-btn" onclick="generatePrimes()">生成质数列表</button>
+            </div>
+            <button onclick="clearResult()" style="background:#6c757d; width:100%; margin-top:10px;">清除</button>
+            
+            <div id="result" class="result" style="display:none;">
+                <div style="text-align:center;">
+                    <span id="primeBadge" class="prime-badge"></span>
+                </div>
+                
+                <div id="infoGrid" class="info-grid">
+                    <div class="info-item">
+                        <div class="info-label">因数个数</div>
+                        <div id="factorCount" class="info-value"></div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">所有因数之和</div>
+                        <div id="factorSum" class="info-value"></div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">下一个质数</div>
+                        <div id="nextPrime" class="info-value"></div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">上一个质数</div>
+                        <div id="prevPrime" class="info-value"></div>
+                    </div>
+                </div>
+                
+                <div id="factorsSection" class="factors" style="display:none;">
+                    <div class="factors-label">所有因数:</div>
+                    <div id="factorsList" class="factors-list"></div>
+                </div>
+            </div>
+            <div id="error" class="error" style="display:none;"></div>
+        </div>
+        
+        <div class="card">
+            <div class="title">质数简介</div>
+            <p style="color:#666; font-size:0.9rem; line-height:1.6;">
+                质数（素数）是大于1的自然数，除了1和它本身外，不能被其他自然数整除。<br><br>
+                前20个质数: 2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71...
+            </p>
+        </div>
+    </div>
+
+    <script>
+        function isPrime(n) {
+            if (n < 2) return false;
+            if (n === 2) return true;
+            if (n % 2 === 0) return false;
+            for (let i = 3; i * i <= n; i += 2) {
+                if (n % i === 0) return false;
+            }
+            return true;
+        }
+
+        function getFactors(n) {
+            const factors = [];
+            for (let i = 1; i * i <= n; i++) {
+                if (n % i === 0) {
+                    factors.push(i);
+                    if (i !== n / i) {
+                        factors.push(n / i);
+                    }
+                }
+            }
+            return factors.sort((a, b) => a - b);
+        }
+
+        function findNextPrime(n) {
+            let num = n + 1;
+            while (!isPrime(num)) {
+                num++;
+            }
+            return num;
+        }
+
+        function findPrevPrime(n) {
+            if (n <= 2) return null;
+            let num = n - 1;
+            while (num >= 2 && !isPrime(num)) {
+                num--;
+            }
+            return num >= 2 ? num : null;
+        }
+
+        function checkPrime() {
+            const n = parseInt(document.getElementById('numberInput').value);
+            const resultDiv = document.getElementById('result');
+            const errorDiv = document.getElementById('error');
+            
+            resultDiv.style.display = 'none';
+            errorDiv.style.display = 'none';
+            
+            if (isNaN(n) || n < 0 || n > 10000000000000) {
+                errorDiv.textContent = '请输入 0 到 10 兆之间的正整数';
+                errorDiv.style.display = 'block';
+                return;
+            }
+            
+            const prime = isPrime(n);
+            const factors = getFactors(n);
+            const next = findNextPrime(n);
+            const prev = findPrevPrime(n);
+            
+            const badge = document.getElementById('primeBadge');
+            badge.textContent = prime ? '是质数' : '不是质数';
+            badge.className = 'prime-badge ' + (prime ? 'yes' : 'no');
+            
+            document.getElementById('factorCount').textContent = factors.length;
+            document.getElementById('factorSum').textContent = factors.reduce((a, b) => a + b, 0);
+            document.getElementById('nextPrime').textContent = next;
+            document.getElementById('prevPrime').textContent = prev || '-';
+            
+            const factorsSection = document.getElementById('factorsSection');
+            const factorsList = document.getElementById('factorsList');
+            factorsList.innerHTML = factors.map(f => `<span class="factor">${f}</span>`).join('');
+            factorsSection.style.display = factors.length <= 100 ? 'block' : 'none';
+            
+            resultDiv.style.display = 'block';
+        }
+
+        function generatePrimes() {
+            const n = parseInt(document.getElementById('numberInput').value);
+            if (isNaN(n) || n < 2) {
+                document.getElementById('error').textContent = '请先输入一个大于等于2的数字';
+                document.getElementById('error').style.display = 'block';
+                return;
+            }
+            
+            const count = Math.min(n, 100);
+            const primes = [];
+            let num = 2;
+            while (primes.length < count) {
+                if (isPrime(num)) {
+                    primes.push(num);
+                }
+                num++;
+            }
+            
+            const resultDiv = document.getElementById('result');
+            const badge = document.getElementById('primeBadge');
+            badge.textContent = `前 ${primes.length} 个质数`;
+            badge.className = 'prime-badge yes';
+            
+            document.getElementById('factorCount').textContent = primes.length;
+            document.getElementById('factorSum').textContent = primes.reduce((a, b) => a + b, 0);
+            document.getElementById('nextPrime').textContent = '-';
+            document.getElementById('prevPrime').textContent = '-';
+            
+            const factorsList = document.getElementById('factorsList');
+            factorsList.innerHTML = primes.map(p => `<span class="factor">${p}</span>`).join('');
+            document.getElementById('factorsSection').style.display = 'block';
+            
+            resultDiv.style.display = 'block';
+        }
+
+        function clearResult() {
+            document.getElementById('numberInput').value = '';
+            document.getElementById('result').style.display = 'none';
+            document.getElementById('error').style.display = 'none';
+        }
+    </script>
+    <div class="ad-banner-bottom"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+</body>
+</html>

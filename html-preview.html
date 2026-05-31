@@ -1,0 +1,107 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HTML预览器 - 免费在线工具</title>
+<style>
+                /* 顶部横幅广告 - 透明样式 */ .ad-banner-top { border-bottom: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; } .ad-banner-bottom { border-top: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; margin-top: 40px; } .ad-container { max-width: 728px; margin: 0 auto; min-height: 38px; display: flex; align-items: center; justify-content: center; }
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; background:#fafafa; color:#333; min-height:100vh; display:flex; flex-direction:column; height:100vh; }
+.header { background:#fff; border-bottom:1px solid #e0e0e0; padding:12px 24px; display:flex; align-items:center; justify-content:space-between; flex-shrink:0; }
+.header h1 { font-size:1.25rem; font-weight:600; }
+.back-link { color:#007bff; text-decoration:none; font-size:0.9rem; }
+.back-link:hover { text-decoration:underline; }
+.toolbar { display:flex; gap:8px; flex-shrink:0; }
+.btn-primary { background:#007bff; color:#fff; border:none; padding:8px 20px; border-radius:4px; cursor:pointer; font-size:0.95rem; }
+.btn-primary:hover { background:#0056b3; }
+.btn-secondary { background:#28a745; color:#fff; border:none; padding:8px 20px; border-radius:4px; cursor:pointer; font-size:0.95rem; }
+.btn-secondary:hover { background:#1e7e34; }
+.btn-danger { background:#dc3545; color:#fff; border:none; padding:8px 20px; border-radius:4px; cursor:pointer; font-size:0.95rem; }
+.btn-danger:hover { background:#c82333; }
+.main-area { display:flex; flex:1; overflow:hidden; }
+.editor-panel { flex:1; display:flex; flex-direction:column; border-right:1px solid #e0e0e0; min-width:0; }
+.panel-header { padding:12px 16px; background:#fff; border-bottom:1px solid #e0e0e0; font-size:0.95rem; font-weight:500; color:#555; display:flex; justify-content:space-between; align-items:center; }
+textarea { flex:1; border:none; padding:16px; font-family:'Consolas','Courier New',monospace; font-size:14px; resize:none; outline:none; background:#fafafa; }
+.preview-panel { flex:1; display:flex; flex-direction:column; min-width:0; }
+.preview-frame { flex:1; border:none; background:#fff; }
+label { font-size:0.9rem; color:#555; font-weight:500; }
+input[type="text"], textarea { border:1px solid #ddd; border-radius:4px; padding:8px 12px; width:100%; box-sizing:border-box; font-size:0.95rem; }
+.card { background:#fff; border:1px solid #e0e0e0; border-radius:8px; padding:24px; margin:32px auto; max-width:900px; }
+.card h2 { font-size:1.25rem; font-weight:600; margin-bottom:16px; color:#333; }
+.card p { color:#666; font-size:0.95rem; margin-bottom:16px; line-height:1.6; }
+.device-bar { padding:8px 16px; background:#fff; border-bottom:1px solid #e0e0e0; display:flex; gap:8px; align-items:center; }
+.device-btn { padding:4px 12px; border:1px solid #ddd; border-radius:4px; background:#fff; cursor:pointer; font-size:0.85rem; color:#555; }
+.device-btn.active { background:#007bff; color:#fff; border-color:#007bff; }
+</style>
+</head>
+<body>
+    <div class="ad-banner-top"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+<div class="header">
+  <h1>HTML预览器</h1>
+  <a href="https://fm-han.github.io" class="back-link">← 返回工具站</a>
+</div>
+<div class="main-area">
+  <div class="editor-panel">
+    <div class="panel-header">
+      <span>HTML 代码</span>
+      <div>
+        <button class="btn-secondary" onclick="loadExample()" style="padding:4px 12px;font-size:0.85rem;">加载示例</button>
+        <button class="btn-danger" onclick="clearEditor()" style="padding:4px 12px;font-size:0.85rem;margin-left:4px;">清空</button>
+      </div>
+    </div>
+    <textarea id="htmlEditor" placeholder="在此输入 HTML 代码..."></textarea>
+  </div>
+  <div class="preview-panel">
+    <div class="panel-header">
+      <span>实时预览</span>
+      <button class="btn-primary" onclick="updatePreview()" style="padding:4px 12px;font-size:0.85rem;">刷新预览</button>
+    </div>
+    <div class="device-bar">
+      <span style="font-size:0.85rem;color:#888;">视口：</span>
+      <button class="device-btn active" onclick="setViewport('full')">完整</button>
+      <button class="device-btn" onclick="setViewport('375')">手机</button>
+      <button class="device-btn" onclick="setViewport('768')">平板</button>
+    </div>
+    <iframe id="previewFrame" class="preview-frame"></iframe>
+  </div>
+</div>
+<script>
+const editor = document.getElementById('htmlEditor');
+const frame = document.getElementById('previewFrame');
+let updateTimer = null;
+
+editor.addEventListener('input', function() {
+  clearTimeout(updateTimer);
+  updateTimer = setTimeout(updatePreview, 500);
+});
+
+function updatePreview() {
+  const html = editor.value;
+  const blob = new Blob([html], {type:'text/html'});
+  frame.src = URL.createObjectURL(blob);
+}
+
+function loadExample() {
+  editor.value = '<!DOCTYPE html>\n<html>\n<head>\n  <style>
+                /* 顶部横幅广告 - 透明样式 */ .ad-banner-top { border-bottom: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; } .ad-banner-bottom { border-top: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; margin-top: 40px; } .ad-container { max-width: 728px; margin: 0 auto; min-height: 38px; display: flex; align-items: center; justify-content: center; }\n    body { font-family: sans-serif; padding: 40px; text-align: center; }\n    h1 { color: #007bff; }\n    .card { background: #f0f0f0; padding: 20px; border-radius: 8px; margin-top: 20px; }\n  </style>\n</head>\n<body>
+    <div class="ad-banner-top"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>\n  <h1>Hello World</h1>\n  <p>这是一个 HTML 预览示例</p>\n  <div class="card">\n    <p>实时编辑左侧代码，右侧即时预览效果</p>\n  </div>\n    <div class="ad-banner-bottom"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+</body>\n</html>';
+  updatePreview();
+}
+
+function clearEditor() { editor.value=''; updatePreview(); }
+
+function setViewport(mode) {
+  document.querySelectorAll('.device-btn').forEach(b=>b.classList.remove('active'));
+  event.target.classList.add('active');
+  if (mode==='full') { frame.style.width='100%'; frame.style.margin='0 auto'; }
+  else { frame.style.width=mode+'px'; frame.style.margin='0 auto'; }
+}
+
+// 初始加载示例
+loadExample();
+</script>
+    <div class="ad-banner-bottom"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+</body>
+</html>

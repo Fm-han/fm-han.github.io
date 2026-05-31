@@ -1,0 +1,122 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>最大公约数/最小公倍数计算器</title>
+  <meta name="description" content="免费在线最大公约数(GCD)和最小公倍数(LCM)计算器，使用欧几里得算法快速计算。">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://fm-han.github.io/lcg-hcf/">
+  <style>
+                /* 顶部横幅广告 - 透明样式 */ .ad-banner-top { border-bottom: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; } .ad-banner-bottom { border-top: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; margin-top: 40px; } .ad-container { max-width: 728px; margin: 0 auto; min-height: 38px; display: flex; align-items: center; justify-content: center; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; max-width: 700px; margin: 0 auto; padding: 20px; color: #333; line-height: 1.6; background: #fafafa; }
+    h1 { text-align: center; font-size: 1.8rem; color: #1a1a1a; }
+    h1 small { display: block; font-size: 0.85rem; color: #666; margin-top: 4px; font-weight: normal; }
+    .card { margin: 20px 0; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px; background: #fff; }
+    .input-row { display: flex; gap: 16px; margin-bottom: 16px; }
+    .input-group { flex: 1; }
+    .input-group label { display: block; font-weight: 600; margin-bottom: 6px; }
+    .input-group input { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 1.2rem; text-align: center; box-sizing: border-box; }
+    .result-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin: 20px 0; }
+    .result-item { background: linear-gradient(135deg, #007bff, #0056b3); border-radius: 12px; padding: 24px; color: #fff; text-align: center; }
+    .result-item.gcd { background: linear-gradient(135deg, #28a745, #218838); }
+    .result-item .label { font-size: 1rem; opacity: 0.9; }
+    .result-item .value { font-size: 3rem; font-weight: 700; }
+    button { padding: 12px 28px; border: none; border-radius: 6px; cursor: pointer; font-size: 1rem; }
+    .btn-primary { background: #007bff; color: #fff; }
+    .btn-secondary { background: #6c757d; color: #fff; }
+    button:hover { opacity: 0.9; }
+    .buttons { display: flex; gap: 12px; justify-content: center; }
+    .step-section { background: #f5f5f5; padding: 16px; border-radius: 8px; margin-top: 16px; }
+    .step-section h4 { margin: 0 0 8px 0; }
+    .step-section pre { margin: 0; font-family: monospace; font-size: 0.9rem; white-space: pre-wrap; }
+    .formula { background: #fff; padding: 12px; border-radius: 8px; margin-top: 12px; text-align: center; font-family: monospace; }
+    .footer { text-align: center; margin: 24px 0; padding: 12px; font-size: 0.85rem; color: #28a745; font-weight: 500; }
+  </style>
+</head>
+<body>
+    <div class="ad-banner-top"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+  <h1>最大公约数/最小公倍数 <small>GCD · LCM · 欧几里得算法</small></h1>
+
+  <div class="card">
+    <div class="input-row">
+      <div class="input-group"><label>数字 A</label><input type="number" id="numA" placeholder="例如：12" value="12"></div>
+      <div class="input-group"><label>数字 B</label><input type="number" id="numB" placeholder="例如：18" value="18"></div>
+    </div>
+    <div class="buttons">
+      <button class="btn-primary" onclick="calculate()">计算 GCD 和 LCM</button>
+      <button class="btn-secondary" onclick="clearAll()">重置</button>
+    </div>
+  </div>
+
+  <div class="card" id="resultCard" style="display:none;">
+    <div class="result-grid">
+      <div class="result-item gcd">
+        <div class="label">最大公约数 (GCD)</div>
+        <div class="value" id="gcdResult">--</div>
+      </div>
+      <div class="result-item">
+        <div class="label">最小公倍数 (LCM)</div>
+        <div class="value" id="lcmResult">--</div>
+      </div>
+    </div>
+    <div class="formula" id="formula"></div>
+    <div class="step-section" id="stepSection">
+      <h4>计算步骤（欧几里得算法）</h4>
+      <pre id="steps"></pre>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>公式说明</h3>
+    <ul style="padding-left:20px;color:#666;">
+      <li><strong>GCD（最大公约数）：</strong>两个或多个整数共有约数中最大的一个</li>
+      <li><strong>LCM（最小公倍数）：</strong>两个或多个整数共有倍数中最小的那个</li>
+      <li><strong>关系公式：</strong>GCD(A,B) × LCM(A,B) = A × B</li>
+    </ul>
+    <div class="formula" style="margin-top:12px;">
+      GCD × LCM = a × b
+    </div>
+  </div>
+
+  <div class="footer">100% 免费 · 数据不上传服务器 · 仅浏览器本地处理</div>
+
+  <script>
+    function gcd(a, b) {
+      const steps = [];
+      let x = Math.abs(a), y = Math.abs(b);
+      if (x === 0) return { gcd: y, steps: [`GCD(${a}, ${b}) = ${y}`] };
+      if (y === 0) return { gcd: x, steps: [`GCD(${a}, ${b}) = ${x}`] };
+      let step = 0;
+      while (y !== 0) {
+        const r = x % y;
+        steps.push(`${++step}. GCD(${x}, ${y}) → ${x} = ${y} × ${Math.floor(x/y)} + ${r}`);
+        x = y;
+        y = r;
+      }
+      steps.push(`\n结果：GCD(${a}, ${b}) = ${x}`);
+      return { gcd: x, steps };
+    }
+    function lcm(a, b) {
+      return Math.abs(a * b) / gcd(a, b).gcd;
+    }
+    function calculate() {
+      const a = parseInt(document.getElementById('numA').value);
+      const b = parseInt(document.getElementById('numB').value);
+      if (isNaN(a) || isNaN(b)) { alert('请输入有效数字'); return; }
+      const result = gcd(a, b);
+      const lcmResult = lcm(a, b);
+      document.getElementById('resultCard').style.display = 'block';
+      document.getElementById('gcdResult').textContent = result.gcd;
+      document.getElementById('lcmResult').textContent = lcmResult;
+      document.getElementById('steps').textContent = result.steps.join('\n');
+      document.getElementById('formula').textContent = `${result.gcd} × ${lcmResult} = ${a} × ${b} = ${Math.abs(a * b)}`;
+    }
+    function clearAll() {
+      document.querySelectorAll('input').forEach(i => i.value = '');
+      document.getElementById('resultCard').style.display = 'none';
+    }
+  </script>
+    <div class="ad-banner-bottom"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+</body>
+</html>

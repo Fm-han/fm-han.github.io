@@ -1,0 +1,138 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CSV转JSON - 免费在线工具</title>
+<style>
+                /* 顶部横幅广告 - 透明样式 */ .ad-banner-top { border-bottom: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; } .ad-banner-bottom { border-top: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; margin-top: 40px; } .ad-container { max-width: 728px; margin: 0 auto; min-height: 38px; display: flex; align-items: center; justify-content: center; }
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #fafafa; color: #333; padding: 20px; }
+.container { max-width: 900px; margin: 0 auto; }
+h1 { font-size: 1.25rem; font-weight: 600; margin-bottom: 16px; color: #333; }
+.desc { color: #666; margin-bottom: 20px; line-height: 1.6; }
+.card { background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; padding: 24px; margin-bottom: 16px; }
+label { display: block; margin-bottom: 8px; font-weight: 500; }
+textarea { border: 1px solid #ddd; border-radius: 4px; padding: 12px; width: 100%; min-height: 200px; box-sizing: border-box; font-family: monospace; font-size: 13px; resize: vertical; }
+textarea:focus { outline: none; border-color: #007bff; }
+input[type="file"] { margin-bottom: 12px; font-size: 14px; }
+.btn-primary { background: #007bff; color: #fff; border: none; padding: 8px 20px; border-radius: 4px; cursor: pointer; font-size: 14px; }
+.btn-primary:hover { background: #0056b3; }
+.btn-secondary { background: #28a745; color: #fff; border: none; padding: 8px 20px; border-radius: 4px; cursor: pointer; font-size: 14px; margin-left: 8px; }
+.btn-secondary:hover { background: #1e7e34; }
+.btn-danger { background: #dc3545; color: #fff; border: none; padding: 8px 20px; border-radius: 4px; cursor: pointer; font-size: 14px; margin-left: 8px; }
+.btn-danger:hover { background: #c82333; }
+.status { margin-top: 12px; padding: 12px; border-radius: 4px; font-size: 14px; display: none; }
+.status.success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+.status.error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+.result { margin-top: 16px; display: none; }
+.result textarea { background: #f8f9fa; }
+.preview { margin-top: 12px; max-height: 200px; overflow: auto; font-size: 12px; color: #666; font-family: monospace; white-space: pre-wrap; background: #f8f9fa; padding: 12px; border-radius: 4px; border: 1px solid #e0e0e0; }
+</style>
+</head>
+<body>
+    <div class="ad-banner-top"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+<div class="container">
+  <div class="card">
+    <h1>CSV转JSON</h1>
+    <p class="desc">上传CSV文件或粘贴CSV内容，转换为JSON格式。</p>
+    <label for="fileInput">上传CSV文件（可选）</label>
+    <input type="file" id="fileInput" accept=".csv,.txt" onchange="loadFile(event)">
+    <label for="csvInput">或直接粘贴CSV内容</label>
+    <textarea id="csvInput" placeholder="name,age&#10;张三,25&#10;李四,30"></textarea>
+    <button class="btn-primary" onclick="convert()">转换为JSON</button>
+    <button class="btn-danger" onclick="clearAll()">清空</button>
+    <div class="status" id="status"></div>
+    <div class="result" id="result">
+      <label>JSON输出</label>
+      <textarea id="jsonOutput" readonly></textarea>
+      <div class="preview" id="preview"></div>
+      <button class="btn-secondary" onclick="downloadJSON()" style="margin-top:12px">下载JSON文件</button>
+    </div>
+  </div>
+</div>
+<script>
+function loadFile(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    document.getElementById('csvInput').value = e.target.result;
+  };
+  reader.readAsText(file);
+}
+function parseCSV(text) {
+  const lines = text.split('\n').map(l => l.trim()).filter(l => l);
+  if (lines.length === 0) return [];
+  const headers = parseCSVLine(lines[0]);
+  const result = [];
+  for (let i = 1; i < lines.length; i++) {
+    const values = parseCSVLine(lines[i]);
+    const obj = {};
+    headers.forEach((h, j) => { obj[h] = values[j] || ''; });
+    result.push(obj);
+  }
+  return result;
+}
+function parseCSVLine(line) {
+  const result = [];
+  let current = '';
+  let inQuotes = false;
+  for (let i = 0; i < line.length; i++) {
+    const c = line[i];
+    if (c === '"') {
+      if (inQuotes && line[i+1] === '"') { current += '"'; i++; }
+      else inQuotes = !inQuotes;
+    } else if (c === ',' && !inQuotes) {
+      result.push(current);
+      current = '';
+    } else {
+      current += c;
+    }
+  }
+  result.push(current);
+  return result;
+}
+function convert() {
+  const input = document.getElementById('csvInput').value.trim();
+  const status = document.getElementById('status');
+  const result = document.getElementById('result');
+  if (!input) { showStatus('请输入CSV内容或上传文件', 'error'); return; }
+  try {
+    const data = parseCSV(input);
+    if (data.length === 0) throw new Error('没有解析到数据');
+    const json = JSON.stringify(data, null, 2);
+    document.getElementById('jsonOutput').value = json;
+    document.getElementById('preview').textContent = json.substring(0, 500) + (json.length > 500 ? '...' : '');
+    result.style.display = 'block';
+    showStatus('转换成功！共 ' + data.length + ' 条记录', 'success');
+  } catch (e) {
+    showStatus('错误: ' + e.message, 'error');
+    result.style.display = 'none';
+  }
+}
+function downloadJSON() {
+  const json = document.getElementById('jsonOutput').value;
+  const blob = new Blob([json], { type: 'application/json;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'data.json';
+  a.click();
+}
+function clearAll() {
+  document.getElementById('csvInput').value = '';
+  document.getElementById('jsonOutput').value = '';
+  document.getElementById('fileInput').value = '';
+  document.getElementById('result').style.display = 'none';
+  document.getElementById('status').style.display = 'none';
+}
+function showStatus(msg, type) {
+  const el = document.getElementById('status');
+  el.textContent = msg;
+  el.className = 'status ' + type;
+  el.style.display = 'block';
+}
+</script>
+    <div class="ad-banner-bottom"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+</body>
+</html>

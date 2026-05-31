@@ -1,0 +1,111 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>XML格式化器 - 在线XML格式化与压缩工具</title>
+  <meta name="description" content="免费在线XML格式化工具，支持XML代码美化、压缩、语法验证、高亮显示，浏览器本地处理无需上传。">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://fm-han.github.io/xml-formatter/">
+  <style>
+                /* 顶部横幅广告 - 透明样式 */ .ad-banner-top { border-bottom: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; } .ad-banner-bottom { border-top: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; margin-top: 40px; } .ad-container { max-width: 728px; margin: 0 auto; min-height: 38px; display: flex; align-items: center; justify-content: center; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 20px; color: #333; line-height: 1.6; background: #fafafa; }
+    h1 { text-align: center; font-size: 1.8rem; color: #1a1a1a; }
+    h1 small { display: block; font-size: 0.85rem; color: #666; margin-top: 4px; font-weight: normal; }
+    .section { margin: 20px 0; padding: 16px; border: 1px solid #e0e0e0; border-radius: 8px; background: #fff; }
+    .section label { display: block; font-weight: 600; margin-bottom: 8px; }
+    textarea { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 0.9rem; box-sizing: border-box; font-family: 'Consolas', monospace; resize: vertical; min-height: 200px; }
+    .status { padding: 8px 12px; border-radius: 6px; margin-top: 8px; font-size: 0.9rem; font-weight: 600; }
+    .status.ok { background: #d4edda; color: #155724; }
+    .status.error { background: #f8d7da; color: #721c24; }
+    .buttons { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+    button { padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-size: 0.95rem; }
+    .btn-primary { background: #007bff; color: #fff; }
+    .btn-copy { background: #28a745; color: #fff; }
+    .btn-clear { background: #6c757d; color: #fff; }
+    button:hover { opacity: 0.9; }
+    .footer { text-align: center; margin: 24px 0; padding: 12px; font-size: 0.85rem; color: #28a745; font-weight: 500; }
+  </style>
+</head>
+<body>
+    <div class="ad-banner-top"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+
+  <h1>XML格式化器 <small>格式化 / 压缩 / 验证 / 浏览器本地</small></h1>
+
+  <div class="section">
+    <label>输入 XML</label>
+    <textarea id="xmlInput" placeholder='<root><item name="test"><child>Hello</child></item></root>'></textarea>
+    <div class="buttons">
+      <button class="btn-primary" onclick="format()">格式化</button>
+      <button class="btn-primary" onclick="minify()">压缩</button>
+      <button class="btn-copy" onclick="copyResult()">复制结果</button>
+      <button class="btn-clear" onclick="document.getElementById('xmlInput').value='';document.getElementById('xmlOutput').value='';document.getElementById('status').style.display='none'">清空</button>
+    </div>
+    <div id="status" class="status" style="display:none;"></div>
+  </div>
+
+  <div class="section">
+    <label>输出结果</label>
+    <textarea id="xmlOutput" readonly style="background:#f8f9fa;min-height:200px;"></textarea>
+  </div>
+
+  <div class="footer">100% 免费 · 数据不上传服务器 · 仅浏览器本地处理</div>
+
+  <script>
+    function format() {
+      const input = document.getElementById('xmlInput').value.trim();
+      if (!input) { alert('请输入XML'); return; }
+      try {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(input, 'text/xml');
+        const err = doc.querySelector('parsererror');
+        if (err) throw new Error(err.textContent.split('\n')[0]);
+        const serializer = new XMLSerializer();
+        let str = serializer.serializeToString(doc);
+        str = prettyPrint(str, 0);
+        document.getElementById('xmlOutput').value = str;
+        showStatus('✓ XML格式正确', 'ok');
+      } catch(e) { showStatus('✗ XML错误: ' + e.message, 'error'); }
+    }
+    function prettyPrint(xml, indent) {
+      let formatted = '', reg = /(>)(<)(\/*)/g;
+      xml = xml.replace(reg, '$1\n$2$3');
+      let pad = 0;
+      xml.split('\n').forEach(node => {
+        let indentLevel = 0;
+        if (node.match(/<\/\w/)) pad--;
+        else if (node.match(/<[^!][^>]*[^/]>.*$/)) pad++;
+        formatted += '  '.repeat(Math.max(pad,0)) + node + '\n';
+      });
+      return formatted.trim();
+    }
+    function minify() {
+      const input = document.getElementById('xmlInput').value.trim();
+      if (!input) { alert('请输入XML'); return; }
+      try {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(input, 'text/xml');
+        const err = doc.querySelector('parsererror');
+        if (err) throw new Error(err.textContent.split('\n')[0]);
+        const serializer = new XMLSerializer();
+        let str = serializer.serializeToString(doc);
+        str = str.replace(/>\s+</g, '><').replace(/\s+/g, ' ').trim();
+        document.getElementById('xmlOutput').value = str;
+        showStatus('✓ XML压缩成功', 'ok');
+      } catch(e) { showStatus('✗ XML错误: ' + e.message, 'error'); }
+    }
+    function showStatus(msg, type) {
+      const el = document.getElementById('status');
+      el.textContent = msg;
+      el.className = 'status ' + type;
+      el.style.display = 'block';
+    }
+    function copyResult() {
+      const t = document.getElementById('xmlOutput').value;
+      if (!t) { alert('无内容'); return; }
+      navigator.clipboard.writeText(t).then(() => alert('已复制!'));
+    }
+  </script>
+    <div class="ad-banner-bottom"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+</body>
+</html>

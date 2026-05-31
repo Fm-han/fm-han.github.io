@@ -1,0 +1,176 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cron解析器 - 在线工具</title>
+    <link rel="canonical" href="https://fm-han.github.io/cron-parser/">
+    <style>
+                /* 顶部横幅广告 - 透明样式 */ .ad-banner-top { border-bottom: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; } .ad-banner-bottom { border-top: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; margin-top: 40px; } .ad-container { max-width: 728px; margin: 0 auto; min-height: 38px; display: flex; align-items: center; justify-content: center; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #fafafa; min-height: 100vh; display: flex; flex-direction: column; }
+        .container { max-width: 800px; margin: 0 auto; padding: 20px; flex: 1; }
+        h1 { text-align: center; color: #333; margin-bottom: 30px; font-size: 28px; }
+        .card { background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; padding: 24px; margin-bottom: 20px; }
+        .input-group { margin-bottom: 16px; }
+        label { display: block; margin-bottom: 8px; color: #555; font-weight: 500; }
+        input[type="text"] { width: 100%; padding: 12px 16px; border: 1px solid #ddd; border-radius: 6px; font-size: 16px; font-family: monospace; }
+        input[type="text"]:focus { outline: none; border-color: #007bff; }
+        input[type="number"] { width: 100px; padding: 12px 16px; border: 1px solid #ddd; border-radius: 6px; font-size: 16px; }
+        .btn-group { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
+        .btn { padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; transition: opacity 0.2s; }
+        .btn:hover { opacity: 0.85; }
+        .btn-primary { background: #007bff; color: #fff; }
+        .btn-secondary { background: #28a745; color: #fff; }
+        .btn-gray { background: #6c757d; color: #fff; }
+        .meaning { padding: 16px; background: #e7f3ff; border-radius: 6px; color: #004a99; font-size: 16px; margin-top: 16px; }
+        .times { margin-top: 16px; }
+        .times h3 { margin-bottom: 12px; color: #333; }
+        .time-item { padding: 10px 14px; background: #f5f5f5; border-radius: 4px; margin-bottom: 8px; font-family: monospace; color: #444; }
+        .examples { margin-top: 20px; }
+        .examples h3 { margin-bottom: 12px; color: #333; }
+        .example-btn { margin: 4px; }
+        footer { text-align: center; padding: 20px; color: #888; font-size: 14px; }
+    </style>
+</head>
+<body>
+    <div class="ad-banner-top"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+    <div class="container">
+        <h1>Cron 表达式解析器</h1>
+        <div class="card">
+            <div class="input-group">
+                <label for="cron">输入 Cron 表达式（5位或6位）</label>
+                <input type="text" id="cron" placeholder="* * * * *" value="0 9 * * 1-5">
+            </div>
+            <div class="btn-group">
+                <button class="btn btn-primary" onclick="parseCron()">解析</button>
+                <button class="btn btn-secondary" onclick="clearAll()">清空</button>
+            </div>
+            <div id="meaning" class="meaning" style="display:none;"></div>
+            <div id="times" class="times" style="display:none;">
+                <h3>接下来10次执行时间</h3>
+                <div id="timesList"></div>
+            </div>
+        </div>
+        <div class="card examples">
+            <h3>常用示例</h3>
+            <button class="btn btn-gray example-btn" onclick="setExample('* * * * *')">每分钟</button>
+            <button class="btn btn-gray example-btn" onclick="setExample('0 * * * *')">每小时</button>
+            <button class="btn btn-gray example-btn" onclick="setExample('0 9 * * *')">每天上午9点</button>
+            <button class="btn btn-gray example-btn" onclick="setExample('0 9 * * 1-5')">工作日上午9点</button>
+            <button class="btn btn-gray example-btn" onclick="setExample('0 0 1 * *')">每月1号午夜</button>
+            <button class="btn btn-gray example-btn" onclick="setExample('0 0 * * 0')">每周日午夜</button>
+            <button class="btn btn-gray example-btn" onclick="setExample('*/5 * * * *')">每5分钟</button>
+        </div>
+    </div>
+    <footer>100% 免费 · 数据不上传服务器 · 仅浏览器本地处理</footer>
+    <script>
+        const CRON_LABELS = ['分钟', '小时', '日', '月', '星期'];
+        const WEEK_MAP = { '0': '周日', '1': '周一', '2': '周二', '3': '周三', '4': '周四', '5': '周五', '6': '周六', '7': '周日' };
+        
+        function parseCron() {
+            const input = document.getElementById('cron').value.trim();
+            const parts = input.split(/\s+/);
+            
+            if (parts.length < 5 || parts.length > 6) {
+                alert('请输入有效的Cron表达式（5位或6位）');
+                return;
+            }
+            
+            const [min, hour, day, month, dow, ...rest] = parts;
+            const seconds = parts.length === 6 ? parts[0] : null;
+            const cronParts = seconds ? [parts[1], parts[2], parts[3], parts[4], parts[5]] : parts;
+            
+            const meaning = interpretCron(cronParts);
+            document.getElementById('meaning').textContent = meaning;
+            document.getElementById('meaning').style.display = 'block';
+            
+            const times = calculateNextRuns(cronParts, 10);
+            const timesList = document.getElementById('timesList');
+            timesList.innerHTML = times.map(t => `<div class="time-item">${t.toLocaleString('zh-CN', {year:'numeric', month:'2-digit', day:'2-digit', weekday:'long', hour:'2-digit', minute:'2-digit', second:'2-digit'})}</div>`).join('');
+            document.getElementById('times').style.display = 'block';
+        }
+        
+        function interpretCron(parts) {
+            const [min, hour, day, month, dow] = parts;
+            let desc = '';
+            
+            if (min === '*' && hour === '*' && day === '*' && month === '*' && dow === '*') {
+                return '每分钟执行';
+            }
+            if (min === '0' && hour === '*' && day === '*' && month === '*' && dow === '*') {
+                return '每小时整点执行';
+            }
+            if (min !== '*' && hour === '*' && day === '*' && month === '*' && dow === '*') {
+                return `每天 ${hour || min} 点${min}分执行`;
+            }
+            if (min !== '*' && hour !== '*' && day === '*' && month === '*' && dow === '*') {
+                return `每天 ${hour}:${min.padStart(2, '0')} 执行`;
+            }
+            if (dow !== '*' && day === '*' && month === '*') {
+                const days = dow.split(',').map(d => WEEK_MAP[d] || `周${d}`).join('、');
+                return `每周${days} ${hour || '09'}:${min || '00'} 执行`;
+            }
+            if (day !== '*' && dow === '*' && month === '*') {
+                return `每月第${day}天 ${hour || '00'}:${min || '00'} 执行`;
+            }
+            if (month !== '*' && day === '*' && dow === '*') {
+                return `每年${month}月 ${day || '1'}日 ${hour || '00'}:${min || '00'} 执行`;
+            }
+            
+            return `${min}分 ${hour}时 ${day}日 ${month}月 星期${dow}执行`;
+        }
+        
+        function calculateNextRuns(parts, count) {
+            const [min, hour, day, month, dow] = parts;
+            const runs = [];
+            const now = new Date();
+            let date = new Date(now);
+            
+            for (let i = 0; i < 1000 && runs.length < count; i++) {
+                date.setSeconds(0, 0);
+                date.setMinutes(date.getMinutes() + 1);
+                
+                if (matchesCronPart(min, date.getMinutes()) &&
+                    matchesCronPart(hour, date.getHours()) &&
+                    matchesCronPart(day, date.getDate()) &&
+                    matchesCronPart(month, date.getMonth() + 1) &&
+                    matchesCronPart(dow, date.getDay())) {
+                    runs.push(new Date(date));
+                }
+            }
+            return runs;
+        }
+        
+        function matchesCronPart(part, value) {
+            if (part === '*') return true;
+            if (part.includes('/')) {
+                const [base, step] = part.split('/');
+                return value % parseInt(step) === 0;
+            }
+            if (part.includes(',')) {
+                return part.split(',').map(p => parseInt(p)).includes(value);
+            }
+            if (part.includes('-')) {
+                const [start, end] = part.split('-').map(p => parseInt(p));
+                return value >= start && value <= end;
+            }
+            return parseInt(part) === value;
+        }
+        
+        function setExample(expr) {
+            document.getElementById('cron').value = expr;
+            parseCron();
+        }
+        
+        function clearAll() {
+            document.getElementById('cron').value = '';
+            document.getElementById('meaning').style.display = 'none';
+            document.getElementById('times').style.display = 'none';
+        }
+        
+        parseCron();
+    </script>
+    <div class="ad-banner-bottom"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+</body>
+</html>

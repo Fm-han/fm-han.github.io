@@ -1,0 +1,153 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>文件分割器 - 免费在线工具</title>
+<style>
+                /* 顶部横幅广告 - 透明样式 */ .ad-banner-top { border-bottom: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; } .ad-banner-bottom { border-top: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; margin-top: 40px; } .ad-container { max-width: 728px; margin: 0 auto; min-height: 38px; display: flex; align-items: center; justify-content: center; }
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; background:#fafafa; color:#333; min-height:100vh; }
+.header { background:#fff; border-bottom:1px solid #e0e0e0; padding:16px 24px; display:flex; align-items:center; justify-content:space-between; }
+.header h1 { font-size:1.25rem; font-weight:600; }
+.back-link { color:#007bff; text-decoration:none; font-size:0.9rem; }
+.back-link:hover { text-decoration:underline; }
+.container { max-width:900px; margin:32px auto; padding:0 16px; }
+.card { background:#fff; border:1px solid #e0e0e0; border-radius:8px; padding:24px; margin-bottom:20px; }
+.card h2 { font-size:1.25rem; font-weight:600; margin-bottom:16px; color:#333; }
+.card p { color:#666; font-size:0.95rem; margin-bottom:16px; line-height:1.6; }
+.btn-primary { background:#007bff; color:#fff; border:none; padding:8px 20px; border-radius:4px; cursor:pointer; font-size:0.95rem; }
+.btn-primary:hover { background:#0056b3; }
+.btn-secondary { background:#28a745; color:#fff; border:none; padding:8px 20px; border-radius:4px; cursor:pointer; font-size:0.95rem; }
+.btn-secondary:hover { background:#1e7e34; }
+.btn-danger { background:#dc3545; color:#fff; border:none; padding:8px 20px; border-radius:4px; cursor:pointer; font-size:0.95rem; }
+.btn-danger:hover { background:#c82333; }
+label { display:block; font-size:0.9rem; color:#555; margin-bottom:6px; font-weight:500; }
+input[type="file"], input[type="number"], select { border:1px solid #ddd; border-radius:4px; padding:8px 12px; width:100%; box-sizing:border-box; font-size:0.95rem; }
+input[type="file"] { padding:6px 12px; }
+.info { font-size:0.85rem; color:#888; margin-top:8px; }
+.result-list { margin-top:16px; }
+.result-item { display:flex; align-items:center; justify-content:space-between; padding:10px 12px; border:1px solid #e0e0e0; border-radius:4px; margin-bottom:8px; font-size:0.9rem; }
+.result-item .name { flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; margin-right:12px; }
+.result-item .size { color:#888; font-size:0.8rem; margin-right:12px; }
+</style>
+</head>
+<body>
+    <div class="ad-banner-top"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+<div class="header">
+  <h1>文件分割器</h1>
+  <a href="https://fm-han.github.io" class="back-link">← 返回工具站</a>
+</div>
+<div class="container">
+  <div class="card">
+    <h2>文件分割器</h2>
+    <p>上传大文件，按指定大小或份数分割成多个小文件。</p>
+    <label>选择文件</label>
+    <input type="file" id="fileInput">
+    <div style="margin-top:16px;">
+      <label>分割方式</label>
+      <select id="splitMode" style="margin-top:6px;">
+        <option value="size">按大小分割</option>
+        <option value="count">按份数分割</option>
+      </select>
+    </div>
+    <div style="margin-top:16px;" id="sizeMode">
+      <label>每份大小（KB）</label>
+      <input type="number" id="chunkSize" value="1024" min="1" style="margin-top:6px;">
+    </div>
+    <div style="margin-top:16px; display:none;" id="countMode">
+      <label>分割份数</label>
+      <input type="number" id="chunkCount" value="2" min="2" style="margin-top:6px;">
+    </div>
+    <div style="margin-top:16px;">
+      <button class="btn-primary" onclick="splitFile()">分割文件</button>
+      <button class="btn-danger" onclick="resetAll()" style="margin-left:8px;">重置</button>
+    </div>
+    <div class="info" id="fileInfo"></div>
+  </div>
+  <div class="card" id="resultCard" style="display:none;">
+    <h2>分割结果</h2>
+    <div class="info" id="resultInfo"></div>
+    <div class="result-list" id="resultList"></div>
+    <div style="margin-top:16px;">
+      <button class="btn-secondary" onclick="downloadAll()">下载全部</button>
+    </div>
+  </div>
+</div>
+<script>
+let sourceFile = null;
+let parts = [];
+document.getElementById('splitMode').addEventListener('change', function() {
+  document.getElementById('sizeMode').style.display = this.value==='size'?'block':'none';
+  document.getElementById('countMode').style.display = this.value==='count'?'block':'none';
+});
+document.getElementById('fileInput').addEventListener('change', function() {
+  sourceFile = this.files[0];
+  if (sourceFile) {
+    document.getElementById('fileInfo').textContent =
+      '文件：' + sourceFile.name + ' | 大小：' + (sourceFile.size/1024/1024).toFixed(2) + 'MB';
+  }
+});
+
+function splitFile() {
+  if (!sourceFile) { alert('请先选择文件'); return; }
+  const mode = document.getElementById('splitMode').value;
+  parts = [];
+  if (mode === 'size') {
+    const sizeKB = parseInt(document.getElementById('chunkSize').value) || 1024;
+    const chunkBytes = sizeKB * 1024;
+    const totalParts = Math.ceil(sourceFile.size / chunkBytes);
+    for (let i = 0; i < totalParts; i++) {
+      const start = i * chunkBytes;
+      const end = Math.min(start + chunkBytes, sourceFile.size);
+      parts.push({ blob: sourceFile.slice(start, end), name: sourceFile.name + '.part' + (i+1).toString().padStart(3,'0') });
+    }
+  } else {
+    const count = parseInt(document.getElementById('chunkCount').value) || 2;
+    const chunkBytes = Math.ceil(sourceFile.size / count);
+    for (let i = 0; i < count; i++) {
+      const start = i * chunkBytes;
+      const end = Math.min(start + chunkBytes, sourceFile.size);
+      parts.push({ blob: sourceFile.slice(start, end), name: sourceFile.name + '.part' + (i+1).toString().padStart(3,'0') });
+    }
+  }
+  showResults();
+}
+
+function showResults() {
+  document.getElementById('resultCard').style.display = 'block';
+  document.getElementById('resultInfo').textContent = '共分割为 ' + parts.length + ' 个文件';
+  const list = document.getElementById('resultList');
+  list.innerHTML = '';
+  parts.forEach((p, i) => {
+    const item = document.createElement('div');
+    item.className = 'result-item';
+    item.innerHTML = '<span class="name">' + p.name + '</span><span class="size">' + (p.blob.size/1024).toFixed(1) + 'KB</span><button class="btn-secondary" style="padding:4px 12px;font-size:0.85rem;" onclick="downloadOne(' + i + ')">下载</button>';
+    list.appendChild(item);
+  });
+}
+
+function downloadOne(i) {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(parts[i].blob);
+  a.download = parts[i].name;
+  a.click();
+}
+
+function downloadAll() {
+  parts.forEach((p, i) => {
+    setTimeout(() => downloadOne(i), i * 300);
+  });
+}
+
+function resetAll() {
+  sourceFile = null;
+  parts = [];
+  document.getElementById('fileInput').value = '';
+  document.getElementById('resultCard').style.display = 'none';
+  document.getElementById('fileInfo').textContent = '';
+}
+</script>
+    <div class="ad-banner-bottom"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+</body>
+</html>

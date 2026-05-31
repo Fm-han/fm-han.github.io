@@ -1,0 +1,177 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>图片尺寸查看器</title>
+    <style>
+                /* 顶部横幅广告 - 透明样式 */ .ad-banner-top { border-bottom: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; } .ad-banner-bottom { border-top: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; margin-top: 40px; } .ad-container { max-width: 728px; margin: 0 auto; min-height: 38px; display: flex; align-items: center; justify-content: center; }
+        * { margin:0; padding:0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #fafafa; min-height:100vh; padding:20px; }
+        .container { max-width: 600px; margin:0 auto; }
+        .card { background: #fff; border:1px solid #e0e0e0; border-radius:8px; padding:24px; margin-bottom:20px; }
+        h1 { font-size:1.5rem; font-weight:600; margin-bottom:20px; color:#333; text-align:center; }
+        .title { font-size:1.25rem; font-weight:600; margin-bottom:16px; color:#333; }
+        .upload-area { border:2px dashed #ddd; border-radius:8px; padding:40px 20px; text-align:center; cursor:pointer; transition: all 0.3s; }
+        .upload-area:hover { border-color: #007bff; background: #f8f9ff; }
+        .upload-area.dragover { border-color: #007bff; background: #e7f3ff; }
+        .upload-icon { font-size:3rem; margin-bottom:16px; }
+        .upload-text { color:#666; margin-bottom:8px; }
+        .upload-hint { color:#999; font-size:0.85rem; }
+        input[type="file"] { display:none; }
+        .preview { margin-top:16px; text-align:center; }
+        .preview img { max-width:100%; max-height:300px; border-radius:4px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .info-grid { display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-top:16px; }
+        .info-item { background: #f8f9fa; padding:16px; border-radius:8px; text-align:center; }
+        .info-label { color:#666; font-size:0.85rem; margin-bottom:4px; }
+        .info-value { color:#007bff; font-size:1.3rem; font-weight:700; }
+        .info-extra { color:#999; font-size:0.8rem; margin-top:4px; }
+        .details { margin-top:16px; }
+        .detail-row { display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #f0f0f0; }
+        .detail-row:last-child { border-bottom:none; }
+        .detail-label { color:#666; }
+        .detail-value { font-weight:500; color:#333; }
+        button { background:#007bff; color:#fff; border:none; padding:8px 20px; border-radius:4px; cursor:pointer; }
+        .btn-row { display:flex; gap:10px; margin-top:16px; }
+        button.clear-btn { background:#6c757d; flex:1; }
+        button.clear-btn:hover { background:#5a6268; }
+        .error { color:#dc3545; margin-top:8px; font-size:0.9rem; }
+    </style>
+</head>
+<body>
+    <div class="ad-banner-top"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+    <div class="container">
+        <h1>图片尺寸查看器</h1>
+        <div class="card">
+            <div class="upload-area" id="uploadArea">
+                <div class="upload-icon">📷</div>
+                <div class="upload-text">点击或拖拽上传图片</div>
+                <div class="upload-hint">支持 PNG、JPG、GIF、WebP、BMP</div>
+                <input type="file" id="fileInput" accept="image/*">
+            </div>
+            
+            <div id="preview" class="preview" style="display:none;">
+                <img id="previewImg" src="" alt="预览">
+            </div>
+            
+            <div id="info" style="display:none;">
+                <div class="info-grid">
+                    <div class="info-item">
+                        <div class="info-label">宽度</div>
+                        <div id="imgWidth" class="info-value"></div>
+                        <div class="info-extra">px</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">高度</div>
+                        <div id="imgHeight" class="info-value"></div>
+                        <div class="info-extra">px</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">文件大小</div>
+                        <div id="fileSize" class="info-value"></div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">格式</div>
+                        <div id="fileFormat" class="info-value"></div>
+                    </div>
+                </div>
+                
+                <div class="details">
+                    <div class="detail-row">
+                        <span class="detail-label">宽高比</span>
+                        <span id="aspectRatio" class="detail-value"></span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">百万像素</span>
+                        <span id="megapixels" class="detail-value"></span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">DPI</span>
+                        <span id="dpiInfo" class="detail-value">N/A</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="btn-row" id="btnRow" style="display:none;">
+                <button class="clear-btn" onclick="clearAll()">清除</button>
+            </div>
+            
+            <div id="error" class="error" style="display:none;"></div>
+        </div>
+    </div>
+
+    <script>
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        
+        uploadArea.addEventListener('click', () => fileInput.click());
+        uploadArea.addEventListener('dragover', (e) => { e.preventDefault(); uploadArea.classList.add('dragover'); });
+        uploadArea.addEventListener('dragleave', () => uploadArea.classList.remove('dragover'));
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const file = e.dataTransfer.files[0];
+            if (file) processFile(file);
+        });
+        
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) processFile(file);
+        });
+        
+        function processFile(file) {
+            const errorDiv = document.getElementById('error');
+            errorDiv.style.display = 'none';
+            
+            if (!file.type.startsWith('image/')) {
+                errorDiv.textContent = '请上传图片文件';
+                errorDiv.style.display = 'block';
+                return;
+            }
+            
+            const preview = document.getElementById('preview');
+            const previewImg = document.getElementById('previewImg');
+            preview.style.display = 'block';
+            previewImg.src = URL.createObjectURL(file);
+            
+            previewImg.onload = function() {
+                const width = this.naturalWidth;
+                const height = this.naturalHeight;
+                
+                document.getElementById('imgWidth').textContent = width;
+                document.getElementById('imgHeight').textContent = height;
+                
+                const size = file.size;
+                let sizeStr;
+                if (size < 1024) sizeStr = size + ' B';
+                else if (size < 1024*1024) sizeStr = (size/1024).toFixed(1) + ' KB';
+                else sizeStr = (size/(1024*1024)).toFixed(2) + ' MB';
+                document.getElementById('fileSize').textContent = sizeStr;
+                
+                const format = file.type.split('/')[1].toUpperCase();
+                document.getElementById('fileFormat').textContent = format;
+                
+                const g = gcd(width, height);
+                document.getElementById('aspectRatio').textContent = (width/g) + ':' + (height/g);
+                document.getElementById('megapixels').textContent = ((width*height)/1000000).toFixed(2) + ' MP';
+                
+                document.getElementById('info').style.display = 'block';
+                document.getElementById('btnRow').style.display = 'flex';
+            };
+        }
+        
+        function gcd(a, b) {
+            while (b) { [a, b] = [b, a % b]; }
+            return a;
+        }
+        
+        function clearAll() {
+            document.getElementById('preview').style.display = 'none';
+            document.getElementById('info').style.display = 'none';
+            document.getElementById('btnRow').style.display = 'none';
+            document.getElementById('fileInput').value = '';
+        }
+    </script>
+    <div class="ad-banner-bottom"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+</body>
+</html>

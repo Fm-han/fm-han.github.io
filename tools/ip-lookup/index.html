@@ -1,0 +1,123 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IP地址查询 - 在线工具</title>
+    <link rel="canonical" href="https://fm-han.github.io/ip-lookup/">
+    <style>
+                /* 顶部横幅广告 - 透明样式 */ .ad-banner-top { border-bottom: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; } .ad-banner-bottom { border-top: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; margin-top: 40px; } .ad-container { max-width: 728px; margin: 0 auto; min-height: 38px; display: flex; align-items: center; justify-content: center; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #fafafa; min-height: 100vh; display: flex; flex-direction: column; }
+        .container { max-width: 800px; margin: 0 auto; padding: 20px; flex: 1; }
+        h1 { text-align: center; color: #333; margin-bottom: 30px; font-size: 28px; }
+        .card { background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; padding: 24px; margin-bottom: 20px; }
+        .input-group { margin-bottom: 16px; }
+        label { display: block; margin-bottom: 8px; color: #555; font-weight: 500; }
+        input[type="text"] { width: 100%; padding: 12px 16px; border: 1px solid #ddd; border-radius: 6px; font-size: 16px; }
+        input[type="text"]:focus { outline: none; border-color: #007bff; }
+        .btn { padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; transition: opacity 0.2s; color: #fff; }
+        .btn:hover { opacity: 0.85; }
+        .btn-primary { background: #007bff; }
+        .btn-secondary { background: #28a745; }
+        .btn-gray { background: #6c757d; }
+        .info-box { padding: 16px; background: #e7f3ff; border-radius: 6px; margin-top: 16px; }
+        .info-box h3 { color: #004a99; margin-bottom: 12px; }
+        .info-row { display: flex; padding: 8px 0; border-bottom: 1px solid #d0e8ff; }
+        .info-row:last-child { border-bottom: none; }
+        .info-label { width: 100px; color: #666; font-weight: 500; }
+        .info-value { color: #333; flex: 1; }
+        .loading { text-align: center; padding: 20px; color: #666; }
+        .error { color: #dc3545; padding: 16px; background: #ffe7e7; border-radius: 6px; }
+        footer { text-align: center; padding: 20px; color: #888; font-size: 14px; }
+    </style>
+</head>
+<body>
+    <div class="ad-banner-top"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+    <div class="container">
+        <h1>IP 地址查询</h1>
+        <div class="card">
+            <h3 style="margin-bottom: 16px; color: #333;">您的公网IP地址</h3>
+            <div id="myIpBox" class="info-box">
+                <div class="loading">正在获取您的IP地址...</div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="input-group">
+                <label for="ipInput">查询任意IP地址归属地</label>
+                <input type="text" id="ipInput" placeholder="输入IP地址，例如 8.8.8.8">
+            </div>
+            <div class="btn-group" style="display: flex; gap: 10px;">
+                <button class="btn btn-primary" onclick="lookupIp()">查询</button>
+                <button class="btn btn-gray" onclick="clearLookup()">清空</button>
+            </div>
+            <div id="result" style="display:none; margin-top: 16px;"></div>
+        </div>
+    </div>
+    <footer>100% 免费 · 数据不上传服务器 · 仅浏览器本地处理</footer>
+    <script>
+        async function getMyIp() {
+            const box = document.getElementById('myIpBox');
+            try {
+                const res = await fetch('https://api.ipify.org?format=json');
+                const data = await res.json();
+                box.innerHTML = `
+                    <div style="font-size: 24px; font-weight: bold; color: #007bff; margin-bottom: 8px;">${data.ip}</div>
+                    <button class="btn btn-secondary" onclick="lookupSpecific('${data.ip}')" style="margin-top:8px;">查询此IP详情</button>
+                `;
+                document.getElementById('ipInput').value = data.ip;
+            } catch (e) {
+                box.innerHTML = '<div class="error">无法获取您的IP地址，请检查网络连接</div>';
+            }
+        }
+        
+        async function lookupIp() {
+            const ip = document.getElementById('ipInput').value.trim();
+            if (!ip) {
+                alert('请输入IP地址');
+                return;
+            }
+            await lookupSpecific(ip);
+        }
+        
+        async function lookupSpecific(ip) {
+            const result = document.getElementById('result');
+            result.style.display = 'block';
+            result.innerHTML = '<div class="loading">正在查询...</div>';
+            
+            try {
+                const res = await fetch(`http://ip-api.com/json/${ip}?fields=status,message,country,countryCode,region,regionName,city,zip,lat,lon,timezone,isp,org,as,query`);
+                const data = await res.json();
+                
+                if (data.status === 'fail') {
+                    result.innerHTML = `<div class="error">查询失败：${data.message}</div>`;
+                    return;
+                }
+                
+                result.innerHTML = `
+                    <div class="info-box">
+                        <h3>IP: ${data.query}</h3>
+                        <div class="info-row"><span class="info-label">国家</span><span class="info-value">${data.country} (${data.countryCode})</span></div>
+                        <div class="info-row"><span class="info-label">地区</span><span class="info-value">${data.regionName}</span></div>
+                        <div class="info-row"><span class="info-label">城市</span><span class="info-value">${data.city} ${data.zip || ''}</span></div>
+                        <div class="info-row"><span class="info-label">运营商</span><span class="info-value">${data.isp}</span></div>
+                        <div class="info-row"><span class="info-label">组织</span><span class="info-value">${data.org}</span></div>
+                        <div class="info-row"><span class="info-label">时区</span><span class="info-value">${data.timezone}</span></div>
+                        <div class="info-row"><span class="info-label">坐标</span><span class="info-value">${data.lat}, ${data.lon}</span></div>
+                    </div>
+                `;
+            } catch (e) {
+                result.innerHTML = `<div class="error">查询失败，请稍后重试</div>`;
+            }
+        }
+        
+        function clearLookup() {
+            document.getElementById('ipInput').value = '';
+            document.getElementById('result').style.display = 'none';
+        }
+        
+        getMyIp();
+    </script>
+    <div class="ad-banner-bottom"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+</body>
+</html>

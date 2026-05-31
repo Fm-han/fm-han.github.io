@@ -1,0 +1,118 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>哈希值类型识别 - MD5/SHA1/SHA256识别</title>
+  <meta name="description" content="免费在线哈希值类型识别工具，根据哈希值长度识别是MD5、SHA1还是其他哈希算法。">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://fm-han.github.io/hash-identify/">
+  <style>
+                /* 顶部横幅广告 - 透明样式 */ .ad-banner-top { border-bottom: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; } .ad-banner-bottom { border-top: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; margin-top: 40px; } .ad-container { max-width: 728px; margin: 0 auto; min-height: 38px; display: flex; align-items: center; justify-content: center; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; max-width: 700px; margin: 0 auto; padding: 20px; color: #333; line-height: 1.6; background: #fafafa; }
+    h1 { text-align: center; font-size: 1.8rem; color: #1a1a1a; }
+    h1 small { display: block; font-size: 0.85rem; color: #666; margin-top: 4px; font-weight: normal; }
+    .card { margin: 20px 0; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px; background: #fff; }
+    .input-group { margin-bottom: 16px; }
+    .input-group label { display: block; font-weight: 600; margin-bottom: 6px; }
+    .input-group textarea { width: 100%; min-height: 80px; padding: 12px; border: 1px solid #ccc; border-radius: 6px; font-family: monospace; font-size: 1rem; resize: vertical; box-sizing: border-box; }
+    .result-box { background: linear-gradient(135deg, #007bff, #0056b3); border-radius: 12px; padding: 24px; color: #fff; text-align: center; margin: 20px 0; }
+    .result-box .type { font-size: 2rem; font-weight: 700; }
+    .result-box .length { font-size: 1rem; opacity: 0.9; margin-top: 8px; }
+    .result-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+    .result-item { background: #f5f5f5; padding: 16px; border-radius: 8px; text-align: center; }
+    .result-item .label { font-size: 0.85rem; color: #666; }
+    .result-item .value { font-size: 1.5rem; font-weight: 700; color: #007bff; }
+    .matches { margin-top: 16px; }
+    .match-item { padding: 12px; background: #f5f5f5; border-radius: 6px; margin: 8px 0; display: flex; justify-content: space-between; }
+    .match-item .name { font-weight: 600; }
+    .match-item .confidence { color: #28a745; }
+    button { padding: 12px 28px; border: none; border-radius: 6px; cursor: pointer; font-size: 1rem; }
+    .btn-primary { background: #007bff; color: #fff; }
+    button:hover { opacity: 0.9; }
+    .buttons { display: flex; gap: 12px; justify-content: center; }
+    .footer { text-align: center; margin: 24px 0; padding: 12px; font-size: 0.85rem; color: #28a745; font-weight: 500; }
+  </style>
+</head>
+<body>
+    <div class="ad-banner-top"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+  <h1>哈希值类型识别 <small>长度识别 · MD5/SHA1/SHA256</small></h1>
+
+  <div class="card">
+    <div class="input-group">
+      <label>输入哈希值</label>
+      <textarea id="hashInput" placeholder="粘贴要识别的哈希值...">5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8</textarea>
+    </div>
+    <div class="buttons">
+      <button class="btn-primary" onclick="identify()">识别哈希类型</button>
+    </div>
+  </div>
+
+  <div class="card" id="resultCard" style="display:none;">
+    <div class="result-box">
+      <div class="type" id="hashType">--</div>
+      <div class="length" id="hashLength"></div>
+    </div>
+    <div class="result-grid">
+      <div class="result-item"><div class="label">字符长度</div><div class="value" id="charLength">--</div></div>
+      <div class="result-item"><div class="label">二进制位数</div><div class="value" id="bitLength">--</div></div>
+    </div>
+    <div class="matches">
+      <h3>可能的匹配</h3>
+      <div id="matchList"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>常见哈希算法对照</h3>
+    <table style="width:100%;border-collapse:collapse;">
+      <tr style="background:#f0f0f0;"><th style="padding:8px;border:1px solid #ddd;">算法</th><th style="padding:8px;border:1px solid #ddd;">长度(字符)</th><th style="padding:8px;border:1px solid #ddd;">说明</th></tr>
+      <tr><td style="padding:8px;border:1px solid #ddd;">MD5</td><td style="padding:8px;border:1px solid #ddd;">32</td><td style="padding:8px;border:1px solid #ddd;">128位</td></tr>
+      <tr><td style="padding:8px;border:1px solid #ddd;">SHA-1</td><td style="padding:8px;border:1px solid #ddd;">40</td><td style="padding:8px;border:1px solid #ddd;">160位</td></tr>
+      <tr><td style="padding:8px;border:1px solid #ddd;">SHA-256</td><td style="padding:8px;border:1px solid #ddd;">64</td><td style="padding:8px;border:1px solid #ddd;">256位</td></tr>
+      <tr><td style="padding:8px;border:1px solid #ddd;">SHA-512</td><td style="padding:8px;border:1px solid #ddd;">128</td><td style="padding:8px;border:1px solid #ddd;">512位</td></tr>
+      <tr><td style="padding:8px;border:1px solid #ddd;">bcrypt</td><td style="padding:8px;border:1px solid #ddd;">60</td><td style="padding:8px;border:1px solid #ddd;">密码哈希</td></tr>
+    </table>
+  </div>
+
+  <div class="footer">100% 免费 · 数据不上传服务器 · 仅浏览器本地处理</div>
+
+  <script>
+    const hashTypes = [
+      { name: 'MD5', length: 32, bits: 128 },
+      { name: 'SHA-1', length: 40, bits: 160 },
+      { name: 'SHA-256', length: 64, bits: 256 },
+      { name: 'SHA-384', length: 96, bits: 384 },
+      { name: 'SHA-512', length: 128, bits: 512 },
+      { name: 'RIPEMD-160', length: 40, bits: 160 },
+      { name: 'bcrypt', length: 60, bits: null, startsWith: '$2' },
+      { name: 'NTLM', length: 32, bits: 128 },
+      { name: 'MySQL5', length: 40, bits: 160 }
+    ];
+    function identify() {
+      const hash = document.getElementById('hashInput').value.trim().toLowerCase();
+      if (!hash) { alert('请输入哈希值'); return; }
+      const cleanHash = hash.replace(/[^a-f0-9]/g, '');
+      const len = cleanHash.length;
+      document.getElementById('resultCard').style.display = 'block';
+      document.getElementById('hashLength').textContent = cleanHash;
+      document.getElementById('charLength').textContent = len;
+      document.getElementById('bitLength').textContent = len * 4;
+      const matches = hashTypes.filter(t => {
+        if (t.length === len) return true;
+        if (t.startsWith && hash.startsWith(t.startsWith)) return true;
+        return false;
+      });
+      let resultType = '未知';
+      if (matches.length === 1) resultType = matches[0].name;
+      else if (matches.length > 1) resultType = matches.map(m => m.name).join(' 或 ');
+      else resultType = '长度 ' + len + ' 的哈希值';
+      document.getElementById('hashType').textContent = resultType;
+      document.getElementById('matchList').innerHTML = matches.map(m =>
+        `<div class="match-item"><span class="name">${m.name}</span><span class="confidence">${m.bits ? m.bits + '位' : '特殊格式'}</span></div>`
+      ).join('') || '<div style="color:#999;padding:12px;">无匹配的标准算法</div>';
+    }
+  </script>
+    <div class="ad-banner-bottom"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+</body>
+</html>

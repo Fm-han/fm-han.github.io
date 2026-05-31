@@ -1,0 +1,151 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>物理计算器 - 速度/距离/时间/力/功/功率</title>
+  <meta name="description" content="免费在线物理计算器，计算速度、距离、时间、力、功、功率等常见物理量。">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://fm-han.github.io/physics-calculator/">
+  <style>
+                /* 顶部横幅广告 - 透明样式 */ .ad-banner-top { border-bottom: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; } .ad-banner-bottom { border-top: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; margin-top: 40px; } .ad-container { max-width: 728px; margin: 0 auto; min-height: 38px; display: flex; align-items: center; justify-content: center; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; max-width: 700px; margin: 0 auto; padding: 20px; color: #333; line-height: 1.6; background: #fafafa; }
+    h1 { text-align: center; font-size: 1.8rem; color: #1a1a1a; }
+    h1 small { display: block; font-size: 0.85rem; color: #666; margin-top: 4px; font-weight: normal; }
+    .card { margin: 20px 0; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px; background: #fff; }
+    .calc-btns { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 16px; }
+    .calc-btn { padding: 14px; border: 1px solid #ccc; border-radius: 8px; background: #fff; cursor: pointer; text-align: center; transition: all 0.2s; }
+    .calc-btn:hover { background: #f0f0f0; }
+    .calc-btn.active { background: #007bff; color: #fff; border-color: #007bff; }
+    .calc-btn .icon { font-size: 1.5rem; }
+    .calc-btn .name { font-size: 0.85rem; margin-top: 4px; }
+    .input-section { margin-bottom: 16px; }
+    .input-row { display: flex; gap: 12px; margin-bottom: 12px; }
+    .input-group { flex: 1; }
+    .input-group label { display: block; font-weight: 600; margin-bottom: 6px; font-size: 0.9rem; }
+    .input-group input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 1rem; box-sizing: border-box; }
+    .result-display { background: linear-gradient(135deg, #007bff, #0056b3); border-radius: 12px; padding: 24px; color: #fff; text-align: center; margin: 20px 0; }
+    .result-display .formula { font-size: 1rem; opacity: 0.9; }
+    .result-display .value { font-size: 2.5rem; font-weight: 700; }
+    button { padding: 12px 28px; border: none; border-radius: 6px; cursor: pointer; font-size: 1rem; }
+    .btn-primary { background: #007bff; color: #fff; }
+    button:hover { opacity: 0.9; }
+    .buttons { display: flex; gap: 12px; justify-content: center; }
+    .footer { text-align: center; margin: 24px 0; padding: 12px; font-size: 0.85rem; color: #28a745; font-weight: 500; }
+  </style>
+</head>
+<body>
+    <div class="ad-banner-top"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+  <h1>物理计算器 <small>速度 · 距离 · 时间 · 力 · 功 · 功率</small></h1>
+
+  <div class="card">
+    <h3>选择计算类型</h3>
+    <div class="calc-btns">
+      <button class="calc-btn active" onclick="selectCalc('speed', this)">
+        <div class="icon">⚡</div>
+        <div class="name">速度</div>
+      </button>
+      <button class="calc-btn" onclick="selectCalc('distance', this)">
+        <div class="icon">📏</div>
+        <div class="name">距离</div>
+      </button>
+      <button class="calc-btn" onclick="selectCalc('time', this)">
+        <div class="icon">⏱</div>
+        <div class="name">时间</div>
+      </button>
+      <button class="calc-btn" onclick="selectCalc('force', this)">
+        <div class="icon">💪</div>
+        <div class="name">力</div>
+      </button>
+      <button class="calc-btn" onclick="selectCalc('work', this)">
+        <div class="icon">⚙</div>
+        <div class="name">功</div>
+      </button>
+      <button class="calc-btn" onclick="selectCalc('power', this)">
+        <div class="icon">🔋</div>
+        <div class="name">功率</div>
+      </button>
+    </div>
+    <div class="input-section" id="inputSection">
+      <div class="input-row">
+        <div class="input-group"><label>速度 v (m/s)</label><input type="number" id="valA" placeholder="速度" value="60"></div>
+        <div class="input-group"><label>时间 t (s)</label><input type="number" id="valB" placeholder="时间" value="10"></div>
+      </div>
+    </div>
+    <div class="buttons">
+      <button class="btn-primary" onclick="calculate()">计算</button>
+    </div>
+  </div>
+
+  <div class="card" id="resultCard" style="display:none;">
+    <div class="result-display">
+      <div class="formula" id="formulaText">速度公式</div>
+      <div class="value" id="resultValue">--</div>
+      <div style="margin-top:8px;font-size:0.9rem;" id="resultUnit">m/s</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>常用公式</h3>
+    <table style="width:100%;border-collapse:collapse;">
+      <tr style="background:#f0f0f0;"><th style="padding:8px;border:1px solid #ddd;">物理量</th><th style="padding:8px;border:1px solid #ddd;">公式</th></tr>
+      <tr><td style="padding:8px;border:1px solid #ddd;">速度</td><td style="padding:8px;border:1px solid #ddd;">v = s / t</td></tr>
+      <tr><td style="padding:8px;border:1px solid #ddd;">距离</td><td style="padding:8px;border:1px solid #ddd;">s = v × t</td></tr>
+      <tr><td style="padding:8px;border:1px solid #ddd;">时间</td><td style="padding:8px;border:1px solid #ddd;">t = s / v</td></tr>
+      <tr><td style="padding:8px;border:1px solid #ddd;">力</td><td style="padding:8px;border:1px solid #ddd;">F = m × a</td></tr>
+      <tr><td style="padding:8px;border:1px solid #ddd;">功</td><td style="padding:8px;border:1px solid #ddd;">W = F × s</td></tr>
+      <tr><td style="padding:8px;border:1px solid #ddd;">功率</td><td style="padding:8px;border:1px solid #ddd;">P = W / t</td></tr>
+    </table>
+  </div>
+
+  <div class="footer">100% 免费 · 数据不上传服务器 · 仅浏览器本地处理</div>
+
+  <script>
+    let currentCalc = 'speed';
+    function selectCalc(calc, btn) {
+      currentCalc = calc;
+      document.querySelectorAll('.calc-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const section = document.getElementById('inputSection');
+      switch (calc) {
+        case 'speed':
+          section.innerHTML = `<div class="input-row"><div class="input-group"><label>距离 s (m)</label><input type="number" id="valA" placeholder="距离" value="100"></div><div class="input-group"><label>时间 t (s)</label><input type="number" id="valB" placeholder="时间" value="5"></div></div>`;
+          break;
+        case 'distance':
+          section.innerHTML = `<div class="input-row"><div class="input-group"><label>速度 v (m/s)</label><input type="number" id="valA" placeholder="速度" value="60"></div><div class="input-group"><label>时间 t (s)</label><input type="number" id="valB" placeholder="时间" value="10"></div></div>`;
+          break;
+        case 'time':
+          section.innerHTML = `<div class="input-row"><div class="input-group"><label>距离 s (m)</label><input type="number" id="valA" placeholder="距离" value="100"></div><div class="input-group"><label>速度 v (m/s)</label><input type="number" id="valB" placeholder="速度" value="20"></div></div>`;
+          break;
+        case 'force':
+          section.innerHTML = `<div class="input-row"><div class="input-group"><label>质量 m (kg)</label><input type="number" id="valA" placeholder="质量" value="10"></div><div class="input-group"><label>加速度 a (m/s²)</label><input type="number" id="valB" placeholder="加速度" value="9.8"></div></div>`;
+          break;
+        case 'work':
+          section.innerHTML = `<div class="input-row"><div class="input-group"><label>力 F (N)</label><input type="number" id="valA" placeholder="力" value="100"></div><div class="input-group"><label>距离 s (m)</label><input type="number" id="valB" placeholder="距离" value="5"></div></div>`;
+          break;
+        case 'power':
+          section.innerHTML = `<div class="input-row"><div class="input-group"><label>功 W (J)</label><input type="number" id="valA" placeholder="功" value="500"></div><div class="input-group"><label>时间 t (s)</label><input type="number" id="valB" placeholder="时间" value="10"></div></div>`;
+          break;
+      }
+    }
+    function calculate() {
+      let result, formula, unit;
+      const a = parseFloat(document.getElementById('valA')?.value) || 0;
+      const b = parseFloat(document.getElementById('valB')?.value) || 0;
+      switch (currentCalc) {
+        case 'speed': result = a / b; formula = `v = s / t = ${a} / ${b}`; unit = 'm/s'; break;
+        case 'distance': result = a * b; formula = `s = v × t = ${a} × ${b}`; unit = 'm'; break;
+        case 'time': result = a / b; formula = `t = s / v = ${a} / ${b}`; unit = 's'; break;
+        case 'force': result = a * b; formula = `F = m × a = ${a} × ${b}`; unit = 'N'; break;
+        case 'work': result = a * b; formula = `W = F × s = ${a} × ${b}`; unit = 'J'; break;
+        case 'power': result = a / b; formula = `P = W / t = ${a} / ${b}`; unit = 'W'; break;
+      }
+      document.getElementById('resultCard').style.display = 'block';
+      document.getElementById('formulaText').textContent = formula;
+      document.getElementById('resultValue').textContent = result.toFixed(4);
+      document.getElementById('resultUnit').textContent = unit;
+    }
+  </script>
+    <div class="ad-banner-bottom"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+</body>
+</html>

@@ -1,0 +1,173 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>颜色转换工具 - HEX/RGB/HSL在线互转</title>
+  <meta name="description" content="免费在线颜色转换工具，支持HEX/RGB/HSL格式互相转换，滑块实时预览，浏览器本地处理。">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://fm-han.github.io/color-convert/">
+  <style>
+                /* 顶部横幅广告 - 透明样式 */ .ad-banner-top { border-bottom: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; } .ad-banner-bottom { border-top: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; margin-top: 40px; } .ad-container { max-width: 728px; margin: 0 auto; min-height: 38px; display: flex; align-items: center; justify-content: center; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; max-width: 700px; margin: 0 auto; padding: 20px; color: #333; line-height: 1.6; background: #fafafa; }
+    h1 { text-align: center; font-size: 1.8rem; color: #1a1a1a; }
+    h1 small { display: block; font-size: 0.85rem; color: #666; margin-top: 4px; font-weight: normal; }
+    .section { margin: 20px 0; padding: 16px; border: 1px solid #e0e0e0; border-radius: 8px; background: #fff; }
+    .section label { display: block; font-weight: 600; margin-bottom: 8px; }
+    .preview { width: 100%; height: 80px; border-radius: 8px; border: 1px solid #ccc; margin-bottom: 16px; }
+    .input-group { margin-bottom: 12px; }
+    .input-row { display: flex; gap: 8px; align-items: center; }
+    .input-row input[type="text"] { flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-family: monospace; font-size: 1rem; }
+    .input-row span { width: 60px; font-weight: 500; }
+    .slider-row { display: flex; align-items: center; gap: 12px; margin: 8px 0; }
+    .slider-row label { width: 20px; font-weight: 600; }
+    .slider-row input[type="range"] { flex: 1; }
+    .slider-row span { width: 40px; text-align: right; font-family: monospace; }
+    .color-values { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-top: 16px; }
+    .color-box { padding: 12px; background: #f8f9fa; border-radius: 6px; }
+    .color-box .label { font-size: 0.85rem; color: #666; margin-bottom: 4px; }
+    .color-box .value { font-family: monospace; font-size: 1rem; display: flex; justify-content: space-between; align-items: center; }
+    .color-box button { padding: 4px 12px; background: #007bff; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-size: 0.85rem; }
+    .buttons { display: flex; gap: 8px; margin-top: 12px; }
+    button { padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-size: 0.95rem; }
+    .btn-copy { background: #28a745; color: #fff; }
+    .btn-random { background: #6f42c1; color: #fff; }
+    .footer { text-align: center; margin: 24px 0; padding: 12px; font-size: 0.85rem; color: #28a745; font-weight: 500; }
+  </style>
+</head>
+<body>
+    <div class="ad-banner-top"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+
+  <h1>颜色转换工具 <small>HEX / RGB / HSL 互转 · 滑块实时预览</small></h1>
+
+  <div class="section">
+    <div id="preview" class="preview" style="background:#6366f1;"></div>
+    
+    <div class="input-group">
+      <label>HEX</label>
+      <div class="input-row">
+        <input type="text" id="hex" value="#6366f1" maxlength="7" oninput="fromHex()">
+        <button class="btn-copy" onclick="copyColor('hex')">复制</button>
+      </div>
+    </div>
+
+    <div class="slider-row">
+      <label>R</label>
+      <input type="range" id="r" min="0" max="255" value="99" oninput="fromRgb()">
+      <span id="rVal">99</span>
+    </div>
+    <div class="slider-row">
+      <label>G</label>
+      <input type="range" id="g" min="0" max="255" value="102" oninput="fromRgb()">
+      <span id="gVal">102</span>
+    </div>
+    <div class="slider-row">
+      <label>B</label>
+      <input type="range" id="b" min="0" max="255" value="241" oninput="fromRgb()">
+      <span id="bVal">241</span>
+    </div>
+
+    <div class="color-values">
+      <div class="color-box">
+        <div class="label">HEX</div>
+        <div class="value">
+          <span id="outHex">#6366f1</span>
+          <button onclick="copyColor('hex')">复制</button>
+        </div>
+      </div>
+      <div class="color-box">
+        <div class="label">RGB</div>
+        <div class="value">
+          <span id="outRgb">rgb(99, 102, 241)</span>
+          <button onclick="copyColor('rgb')">复制</button>
+        </div>
+      </div>
+      <div class="color-box">
+        <div class="label">HSL</div>
+        <div class="value">
+          <span id="outHsl">hsl(243, 84%, 67%)</span>
+          <button onclick="copyColor('hsl')">复制</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="buttons">
+      <button class="btn-random" onclick="randomColor()">随机颜色</button>
+    </div>
+  </div>
+
+  <div class="footer">100% 免费 · 数据不上传服务器 · 仅浏览器本地处理</div>
+
+  <script>
+    const r = document.getElementById('r'), g = document.getElementById('g'), b = document.getElementById('b');
+    const hex = document.getElementById('hex');
+
+    function fromRgb() {
+      const R = parseInt(r.value), G = parseInt(g.value), B = parseInt(b.value);
+      document.getElementById('rVal').textContent = R;
+      document.getElementById('gVal').textContent = G;
+      document.getElementById('bVal').textContent = B;
+      const h = '#' + [R, G, B].map(x => x.toString(16).padStart(2, '0')).join('');
+      hex.value = h;
+      updateAll(R, G, B);
+    }
+
+    function fromHex() {
+      let val = hex.value.replace('#', '');
+      if (val.length === 3) val = val.split('').map(c => c + c).join('');
+      if (val.length === 6 && /^[0-9a-fA-F]{6}$/.test(val)) {
+        const R = parseInt(val.substr(0, 2), 16);
+        const G = parseInt(val.substr(2, 2), 16);
+        const B = parseInt(val.substr(4, 2), 16);
+        r.value = R; g.value = G; b.value = B;
+        document.getElementById('rVal').textContent = R;
+        document.getElementById('gVal').textContent = G;
+        document.getElementById('bVal').textContent = B;
+        updateAll(R, G, B);
+      }
+    }
+
+    function updateAll(R, G, B) {
+      const h = '#' + [R, G, B].map(x => x.toString(16).padStart(2, '0')).join('');
+      document.getElementById('preview').style.background = h;
+      document.getElementById('outHex').textContent = h;
+      document.getElementById('outRgb').textContent = `rgb(${R}, ${G}, ${B})`;
+      const hsl = rgbToHsl(R, G, B);
+      document.getElementById('outHsl').textContent = `hsl(${hsl.h}, ${hsl.s}%, ${hsl.l}%)`;
+    }
+
+    function rgbToHsl(r, g, b) {
+      r /= 255; g /= 255; b /= 255;
+      const max = Math.max(r, g, b), min = Math.min(r, g, b);
+      let h, s, l = (max + min) / 2;
+      if (max === min) { h = s = 0; }
+      else {
+        const d = max - min;
+        s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+        switch (max) {
+          case r: h = ((g - b) / d + (g < b ? 6 : 0)) / 6; break;
+          case g: h = ((b - r) / d + 2) / 6; break;
+          case b: h = ((r - g) / d + 4) / 6; break;
+        }
+      }
+      return { h: Math.round(h * 360), s: Math.round(s * 100), l: Math.round(l * 100) };
+    }
+
+    function randomColor() {
+      r.value = Math.floor(Math.random() * 256);
+      g.value = Math.floor(Math.random() * 256);
+      b.value = Math.floor(Math.random() * 256);
+      fromRgb();
+    }
+
+    function copyColor(type) {
+      let text;
+      if (type === 'hex') text = document.getElementById('outHex').textContent;
+      else if (type === 'rgb') text = document.getElementById('outRgb').textContent;
+      else text = document.getElementById('outHsl').textContent;
+      navigator.clipboard.writeText(text).then(() => alert('已复制: ' + text));
+    }
+  </script>
+    <div class="ad-banner-bottom"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+</body>
+</html>

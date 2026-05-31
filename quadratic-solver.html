@@ -1,0 +1,211 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>一元二次方程求解器</title>
+    <style>
+                /* 顶部横幅广告 - 透明样式 */ .ad-banner-top { border-bottom: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; } .ad-banner-bottom { border-top: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; margin-top: 40px; } .ad-container { max-width: 728px; margin: 0 auto; min-height: 38px; display: flex; align-items: center; justify-content: center; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #fafafa; min-height: 100vh; padding: 20px; }
+        .container { max-width: 600px; margin: 0 auto; }
+        .card { background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; padding: 24px; margin-bottom: 20px; }
+        h1 { font-size: 1.5rem; font-weight: 600; margin-bottom: 20px; color: #333; text-align: center; }
+        .title { font-size: 1.25rem; font-weight: 600; margin-bottom: 16px; color: #333; }
+        label { display: block; margin-bottom: 8px; color: #555; font-weight: 500; }
+        input { border: 1px solid #ddd; border-radius: 4px; padding: 8px 12px; width: 100%; box-sizing: border-box; margin-bottom: 16px; }
+        button { background: #007bff; color: #fff; border: none; padding: 8px 20px; border-radius: 4px; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        button.calc-btn { background: #28a745; width: 100%; padding: 12px; font-size: 1.1rem; }
+        .equation-display { text-align: center; font-size: 1.5rem; padding: 20px; background: #f8f9fa; border-radius: 4px; margin-bottom: 16px; font-family: monospace; }
+        .result { background: #f0f7ff; border: 1px solid #007bff; border-radius: 4px; padding: 16px; margin-top: 16px; }
+        .result-section { margin-bottom: 16px; }
+        .result-section:last-child { margin-bottom: 0; }
+        .result-label { color: #666; font-size: 0.9rem; margin-bottom: 8px; }
+        .result-value { font-size: 1.2rem; font-weight: 600; color: #007bff; }
+        .discriminant { display: inline-block; padding: 8px 16px; background: #fff; border-radius: 4px; margin: 8px 0; }
+        .solutions { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .solution-box { background: #fff; padding: 16px; border-radius: 8px; text-align: center; }
+        .solution-label { color: #666; font-size: 0.85rem; }
+        .solution-value { color: #28a745; font-size: 1.3rem; font-weight: 700; margin-top: 4px; }
+        .no-solution { color: #dc3545; font-size: 1.1rem; font-weight: 600; text-align: center; padding: 20px; }
+        .formula { background: #f8f9fa; padding: 12px; border-radius: 4px; font-family: monospace; font-size: 0.9rem; }
+        .error { color: #dc3545; margin-top: 8px; font-size: 0.9rem; }
+        .graph-placeholder { background: #f8f9fa; padding: 40px; text-align: center; border-radius: 4px; color: #999; margin-top: 16px; }
+    </style>
+</head>
+<body>
+    <div class="ad-banner-top"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+    <div class="container">
+        <h1>一元二次方程求解器</h1>
+        <div class="card">
+            <div class="equation-display" id="equationDisplay">
+                ax² + bx + c = 0
+            </div>
+            
+            <label>系数 a (二次项系数)</label>
+            <input type="number" id="coefA" placeholder="输入 a 的值" value="1" step="any">
+            
+            <label>系数 b (一次项系数)</label>
+            <input type="number" id="coefB" placeholder="输入 b 的值" value="-3" step="any">
+            
+            <label>系数 c (常数项)</label>
+            <input type="number" id="coefC" placeholder="输入 c 的值" value="2" step="any">
+            
+            <button class="calc-btn" onclick="solve()">求解方程</button>
+            <button onclick="clearResult()" style="background:#6c757d; width:100%; margin-top:10px;">清除</button>
+            
+            <div id="result" class="result" style="display:none;">
+                <div class="result-section">
+                    <div class="result-label">判别式 Δ = b² - 4ac</div>
+                    <div id="discriminant" class="discriminant"></div>
+                </div>
+                
+                <div id="solutionsSection">
+                    <div class="result-label">解</div>
+                    <div id="solutions" class="solutions"></div>
+                </div>
+                
+                <div class="graph-placeholder">
+                    方程曲线可在完整的图表工具中查看
+                </div>
+            </div>
+            <div id="error" class="error" style="display:none;"></div>
+        </div>
+        
+        <div class="card">
+            <div class="title">求根公式</div>
+            <div class="formula">
+                Δ = b² - 4ac<br><br>
+                Δ > 0: 两个不相等的实根<br>
+                Δ = 0: 两个相等的实根<br>
+                Δ < 0: 两个共轭复根
+            </div>
+            <p style="color:#666; font-size:0.9rem; margin-top:12px;">
+                x = (-b ± √Δ) / 2a
+            </p>
+        </div>
+    </div>
+
+    <script>
+        function updateDisplay() {
+            const a = parseFloat(document.getElementById('coefA').value) || 0;
+            const b = parseFloat(document.getElementById('coefB').value) || 0;
+            const c = parseFloat(document.getElementById('coefC').value) || 0;
+            
+            let terms = [];
+            
+            if (a !== 0) {
+                if (a === 1) terms.push('x²');
+                else if (a === -1) terms.push('-x²');
+                else terms.push(`${a}x²`);
+            }
+            
+            if (b !== 0) {
+                if (b === 1) terms.push('+ x');
+                else if (b === -1) terms.push('- x');
+                else if (b > 0) terms.push(`+ ${b}x`);
+                else terms.push(`- ${Math.abs(b)}x`);
+            }
+            
+            if (c !== 0) {
+                if (c > 0) terms.push(`+ ${c}`);
+                else terms.push(`- ${Math.abs(c)}`);
+            }
+            
+            const eq = terms.length > 0 ? terms.join(' ') : '0';
+            document.getElementById('equationDisplay').textContent = `${eq} = 0`;
+        }
+
+        document.getElementById('coefA').addEventListener('input', updateDisplay);
+        document.getElementById('coefB').addEventListener('input', updateDisplay);
+        document.getElementById('coefC').addEventListener('input', updateDisplay);
+
+        function solve() {
+            const a = parseFloat(document.getElementById('coefA').value);
+            const b = parseFloat(document.getElementById('coefB').value);
+            const c = parseFloat(document.getElementById('coefC').value);
+            
+            const resultDiv = document.getElementById('result');
+            const errorDiv = document.getElementById('error');
+            
+            resultDiv.style.display = 'none';
+            errorDiv.style.display = 'none';
+            
+            if (isNaN(a) || isNaN(b) || isNaN(c)) {
+                errorDiv.textContent = '请输入有效的数字';
+                errorDiv.style.display = 'block';
+                return;
+            }
+            
+            if (a === 0) {
+                errorDiv.textContent = 'a 不能为零（这是一元二次方程）';
+                errorDiv.style.display = 'block';
+                return;
+            }
+            
+            const discriminant = b * b - 4 * a * c;
+            const discriminantEl = document.getElementById('discriminant');
+            const solutionsEl = document.getElementById('solutions');
+            
+            discriminantEl.textContent = `Δ = ${b}² - 4×${a}×${c} = ${discriminant}`;
+            
+            if (discriminant > 0) {
+                const sqrtD = Math.sqrt(discriminant);
+                const x1 = (-b + sqrtD) / (2 * a);
+                const x2 = (-b - sqrtD) / (2 * a);
+                
+                solutionsEl.innerHTML = `
+                    <div class="solution-box">
+                        <div class="solution-label">x₁</div>
+                        <div class="solution-value">${formatNumber(x1)}</div>
+                    </div>
+                    <div class="solution-box">
+                        <div class="solution-label">x₂</div>
+                        <div class="solution-value">${formatNumber(x2)}</div>
+                    </div>
+                `;
+            } else if (discriminant === 0) {
+                const x = -b / (2 * a);
+                solutionsEl.innerHTML = `
+                    <div class="solution-box" style="grid-column: span 2;">
+                        <div class="solution-label">重根 x₁ = x₂</div>
+                        <div class="solution-value">${formatNumber(x)}</div>
+                    </div>
+                `;
+            } else {
+                const realPart = -b / (2 * a);
+                const imagPart = Math.sqrt(-discriminant) / (2 * a);
+                
+                solutionsEl.innerHTML = `
+                    <div class="solution-box">
+                        <div class="solution-label">x₁</div>
+                        <div class="solution-value" style="color:#6f42c1;">${formatNumber(realPart)} + ${formatNumber(imagPart)}i</div>
+                    </div>
+                    <div class="solution-box">
+                        <div class="solution-label">x₂</div>
+                        <div class="solution-value" style="color:#6f42c1;">${formatNumber(realPart)} - ${formatNumber(imagPart)}i</div>
+                    </div>
+                `;
+            }
+            
+            resultDiv.style.display = 'block';
+        }
+
+        function formatNumber(n) {
+            if (Number.isInteger(n)) return n.toString();
+            return n.toFixed(4).replace(/\.?0+$/, '');
+        }
+
+        function clearResult() {
+            document.getElementById('coefA').value = '';
+            document.getElementById('coefB').value = '';
+            document.getElementById('coefC').value = '';
+            document.getElementById('equationDisplay').textContent = 'ax² + bx + c = 0';
+            document.getElementById('result').style.display = 'none';
+            document.getElementById('error').style.display = 'none';
+        }
+    </script>
+    <div class="ad-banner-bottom"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+</body>
+</html>

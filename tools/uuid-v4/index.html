@@ -1,0 +1,142 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UUID v4生成器 - 批量生成唯一标识符</title>
+  <meta name="description" content="免费在线UUID v4生成器，一键批量生成符合RFC4122标准的通用唯一标识符，支持复制和下载。">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://fm-han.github.io/uuid-v4/">
+  <style>
+                /* 顶部横幅广告 - 透明样式 */ .ad-banner-top { border-bottom: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; } .ad-banner-bottom { border-top: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; margin-top: 40px; } .ad-container { max-width: 728px; margin: 0 auto; min-height: 38px; display: flex; align-items: center; justify-content: center; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; max-width: 700px; margin: 0 auto; padding: 20px; color: #333; line-height: 1.6; background: #fafafa; }
+    h1 { text-align: center; font-size: 1.8rem; color: #1a1a1a; }
+    h1 small { display: block; font-size: 0.85rem; color: #666; margin-top: 4px; font-weight: normal; }
+    .card { margin: 20px 0; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px; background: #fff; }
+    .input-row { display: flex; gap: 16px; margin-bottom: 16px; align-items: flex-end; }
+    .input-group { flex: 1; }
+    .input-group label { display: block; font-weight: 600; margin-bottom: 6px; }
+    .input-group input { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 1rem; box-sizing: border-box; }
+    .uuid-display { background: #f5f5f5; border-radius: 8px; padding: 16px; max-height: 400px; overflow-y: auto; font-family: monospace; font-size: 0.95rem; line-height: 2; }
+    .uuid-item { padding: 4px 0; display: flex; align-items: center; gap: 8px; }
+    .uuid-item .num { color: #999; width: 30px; }
+    .uuid-item .value { flex: 1; word-break: break-all; }
+    .uuid-item .copy { padding: 2px 8px; border: 1px solid #ccc; border-radius: 4px; background: #fff; cursor: pointer; font-size: 0.8rem; white-space: nowrap; }
+    .uuid-item .copy:hover { background: #f0f0f0; }
+    .single-uuid { text-align: center; padding: 24px; background: linear-gradient(135deg, #007bff, #0056b3); border-radius: 12px; color: #fff; margin: 16px 0; }
+    .single-uuid .uuid { font-family: monospace; font-size: 1.5rem; font-weight: 600; word-break: break-all; }
+    button { padding: 12px 28px; border: none; border-radius: 6px; cursor: pointer; font-size: 1rem; }
+    .btn-primary { background: #007bff; color: #fff; }
+    .btn-success { background: #28a745; color: #fff; }
+    .btn-secondary { background: #6c757d; color: #fff; }
+    button:hover { opacity: 0.9; }
+    .buttons { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+    .footer { text-align: center; margin: 24px 0; padding: 12px; font-size: 0.85rem; color: #28a745; font-weight: 500; }
+  </style>
+</head>
+<body>
+    <div class="ad-banner-top"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+  <h1>UUID v4生成器 <small>批量生成 · 一键复制 · RFC4122标准</small></h1>
+
+  <div class="card">
+    <div class="single-uuid">
+      <div class="uuid" id="singleUuid">点击按钮生成</div>
+    </div>
+    <div class="buttons">
+      <button class="btn-primary" onclick="generateSingle()">生成UUID</button>
+      <button class="btn-success" onclick="copySingle()">复制</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="input-row">
+      <div class="input-group"><label>生成数量</label><input type="number" id="count" value="10" min="1" max="1000"></div>
+    </div>
+    <div class="buttons">
+      <button class="btn-primary" onclick="generateBatch()">批量生成</button>
+      <button class="btn-success" onclick="copyAll()">复制全部</button>
+      <button class="btn-secondary" onclick="downloadAll()">下载TXT</button>
+      <button class="btn-secondary" onclick="downloadJson()">下载JSON</button>
+    </div>
+    <div class="uuid-display" id="uuidList">
+      <div style="text-align:center;color:#999;padding:40px;">点击"批量生成"按钮生成UUID</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>UUID版本说明</h3>
+    <ul style="padding-left:20px;color:#666;">
+      <li><strong>v1：</strong>基于时间戳和MAC地址生成</li>
+      <li><strong>v4：</strong>随机生成（最常用）</li>
+      <li><strong>v5：</strong>基于命名空间和SHA-1哈希</li>
+    </ul>
+    <p style="font-size:0.9rem;color:#999;margin-top:12px;">注：UUID是128位数字，可生成约340万亿个不重复的标识符。</p>
+  </div>
+
+  <div class="footer">100% 免费 · 数据不上传服务器 · 仅浏览器本地处理</div>
+
+  <script>
+    let currentUuids = [];
+    function generateUuid() {
+      return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        const r = Math.random() * 16 | 0;
+        const v = c === 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+      });
+    }
+    function generateSingle() {
+      const uuid = generateUuid();
+      document.getElementById('singleUuid').textContent = uuid;
+      currentUuids = [uuid];
+    }
+    function copySingle() {
+      const uuid = document.getElementById('singleUuid').textContent;
+      if (uuid && uuid !== '点击按钮生成') {
+        navigator.clipboard.writeText(uuid).then(() => alert('已复制: ' + uuid));
+      }
+    }
+    function generateBatch() {
+      const count = parseInt(document.getElementById('count').value) || 10;
+      currentUuids = [];
+      for (let i = 0; i < count; i++) {
+        currentUuids.push(generateUuid());
+      }
+      renderList();
+    }
+    function renderList() {
+      document.getElementById('uuidList').innerHTML = currentUuids.map((uuid, i) =>
+        `<div class="uuid-item"><span class="num">${i + 1}.</span><span class="value">${uuid}</span><button class="copy" onclick="copyOne(${i})">复制</button></div>`
+      ).join('');
+    }
+    function copyOne(index) {
+      navigator.clipboard.writeText(currentUuids[index]).then(() => alert('已复制'));
+    }
+    function copyAll() {
+      if (currentUuids.length === 0) { alert('请先生成UUID'); return; }
+      navigator.clipboard.writeText(currentUuids.join('\n')).then(() => alert('已复制 ' + currentUuids.length + ' 个UUID'));
+    }
+    function downloadAll() {
+      if (currentUuids.length === 0) { alert('请先生成UUID'); return; }
+      const blob = new Blob([currentUuids.join('\n')], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'uuids.txt';
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+    function downloadJson() {
+      if (currentUuids.length === 0) { alert('请先生成UUID'); return; }
+      const json = JSON.stringify(currentUuids.map((uuid, i) => ({ id: i + 1, uuid })), null, 2);
+      const blob = new Blob([json], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'uuids.json';
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+  </script>
+    <div class="ad-banner-bottom"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+</body>
+</html>

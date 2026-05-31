@@ -1,0 +1,146 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>秒表 - 在线计时器工具</title>
+  <meta name="description" content="免费在线秒表工具，支持毫秒精度计时、计次、暂停、重置功能，适用于运动计时、考试计时、比赛计时等场景。">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://fm-han.github.io/stopwatch/">
+  <style>
+                /* 顶部横幅广告 - 透明样式 */ .ad-banner-top { border-bottom: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; } .ad-banner-bottom { border-top: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; margin-top: 40px; } .ad-container { max-width: 728px; margin: 0 auto; min-height: 38px; display: flex; align-items: center; justify-content: center; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; max-width: 700px; margin: 0 auto; padding: 20px; color: #333; line-height: 1.6; background: #fafafa; }
+    h1 { text-align: center; font-size: 1.8rem; color: #1a1a1a; }
+    h1 small { display: block; font-size: 0.85rem; color: #666; margin-top: 4px; font-weight: normal; }
+    .card { margin: 20px 0; padding: 16px; border: 1px solid #e0e0e0; border-radius: 8px; background: #fff; }
+    .display { text-align: center; padding: 40px; background: linear-gradient(135deg, #007bff, #0056b3); border-radius: 12px; color: #fff; margin: 16px 0; }
+    .display .time { font-size: 4rem; font-weight: 700; font-family: monospace; letter-spacing: 2px; }
+    .display .ms { font-size: 2rem; opacity: 0.8; }
+    .display .label { font-size: 1rem; opacity: 0.9; margin-top: 8px; }
+    .buttons { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin: 20px 0; }
+    button { padding: 12px 28px; border: none; border-radius: 6px; cursor: pointer; font-size: 1rem; }
+    .btn-start { background: #007bff; color: #fff; }
+    .btn-stop { background: #dc3545; color: #fff; }
+    .btn-lap { background: #28a745; color: #fff; }
+    .btn-reset { background: #6c757d; color: #fff; }
+    button:hover { opacity: 0.9; }
+    .lap-list { max-height: 300px; overflow-y: auto; }
+    .lap-item { display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid #eee; }
+    .lap-item:nth-child(odd) { background: #f9f9f9; }
+    .lap-item .num { color: #007bff; font-weight: 600; }
+    .lap-item .time { font-family: monospace; }
+    .lap-item .diff { color: #28a745; font-size: 0.9rem; }
+    .footer { text-align: center; margin: 24px 0; padding: 12px; font-size: 0.85rem; color: #28a745; font-weight: 500; }
+  </style>
+</head>
+<body>
+    <div class="ad-banner-top"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+  <h1>秒表 <small>毫秒精度 · 启动/停止/计次 · 浏览器本地运行</small></h1>
+
+  <div class="card">
+    <div class="display">
+      <div class="time" id="mainTime">00:00:00</div>
+      <div class="ms" id="msTime">.00</div>
+      <div class="label" id="statusLabel">准备就绪</div>
+    </div>
+    <div class="buttons">
+      <button class="btn-start" id="startBtn" onclick="startStop()">▶ 开始</button>
+      <button class="btn-lap" id="lapBtn" onclick="recordLap()" disabled>⏱ 计次</button>
+      <button class="btn-reset" onclick="reset()">↺ 重置</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3 style="text-align:center;">计次记录</h3>
+    <div class="lap-list" id="lapList">
+      <div style="text-align:center;color:#999;padding:20px;">暂无计次记录</div>
+    </div>
+  </div>
+
+  <div class="footer">100% 免费 · 数据不上传服务器 · 仅浏览器本地处理</div>
+
+  <script>
+    let startTime = 0, elapsed = 0, running = false, timer = null;
+    let laps = [];
+    const startBtn = document.getElementById('startBtn');
+    const lapBtn = document.getElementById('lapBtn');
+
+    function startStop() {
+      if (!running) {
+        startTime = Date.now() - elapsed;
+        running = true;
+        startBtn.textContent = '⏸ 暂停';
+        startBtn.className = 'btn-stop';
+        lapBtn.disabled = false;
+        document.getElementById('statusLabel').textContent = '计时中...';
+        timer = setInterval(update, 10);
+      } else {
+        elapsed = Date.now() - startTime;
+        running = false;
+        startBtn.textContent = '▶ 继续';
+        startBtn.className = 'btn-start';
+        lapBtn.disabled = true;
+        document.getElementById('statusLabel').textContent = '已暂停';
+        clearInterval(timer);
+      }
+    }
+
+    function update() {
+      elapsed = Date.now() - startTime;
+      const ms = elapsed % 100;
+      const totalSec = Math.floor(elapsed / 1000);
+      const h = Math.floor(totalSec / 3600);
+      const m = Math.floor((totalSec % 3600) / 60);
+      const s = totalSec % 60;
+      document.getElementById('mainTime').textContent = 
+        String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+      document.getElementById('msTime').textContent = '.' + String(ms).padStart(2,'0');
+    }
+
+    function recordLap() {
+      laps.push(elapsed);
+      renderLaps();
+    }
+
+    function renderLaps() {
+      if (laps.length === 0) {
+        document.getElementById('lapList').innerHTML = '<div style="text-align:center;color:#999;padding:20px;">暂无计次记录</div>';
+        return;
+      }
+      let html = '';
+      for (let i = laps.length - 1; i >= 0; i--) {
+        const t = laps[i];
+        const diff = i > 0 ? laps[i] - laps[i-1] : laps[i];
+        const h = Math.floor(t / 3600000);
+        const m = Math.floor((t % 3600000) / 60000);
+        const s = Math.floor((t % 60000) / 1000);
+        const ms = t % 1000;
+        const dh = Math.floor(diff / 3600000);
+        const dm = Math.floor((diff % 3600000) / 60000);
+        const ds = Math.floor((diff % 60000) / 1000);
+        html += `<div class="lap-item">
+          <span class="num">第${laps.length - i}次</span>
+          <span class="time">${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}.${String(ms).padStart(3,'0')}</span>
+          <span class="diff">+${String(dh).padStart(2,'0')}:${String(dm).padStart(2,'0')}:${String(ds).padStart(2,'0')}</span>
+        </div>`;
+      }
+      document.getElementById('lapList').innerHTML = html;
+    }
+
+    function reset() {
+      running = false;
+      elapsed = 0;
+      laps = [];
+      clearInterval(timer);
+      startBtn.textContent = '▶ 开始';
+      startBtn.className = 'btn-start';
+      lapBtn.disabled = true;
+      document.getElementById('mainTime').textContent = '00:00:00';
+      document.getElementById('msTime').textContent = '.00';
+      document.getElementById('statusLabel').textContent = '准备就绪';
+      renderLaps();
+    }
+  </script>
+    <div class="ad-banner-bottom"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+</body>
+</html>

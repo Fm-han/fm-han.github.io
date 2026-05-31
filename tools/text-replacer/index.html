@@ -1,0 +1,150 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>批量文本替换 - 查找替换工具</title>
+  <meta name="description" content="免费在线批量文本替换工具，支持多组查找替换、正则表达式匹配、区分大小写等高级功能。">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://fm-han.github.io/text-replacer/">
+  <style>
+                /* 顶部横幅广告 - 透明样式 */ .ad-banner-top { border-bottom: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; } .ad-banner-bottom { border-top: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; margin-top: 40px; } .ad-container { max-width: 728px; margin: 0 auto; min-height: 38px; display: flex; align-items: center; justify-content: center; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 20px; color: #333; line-height: 1.6; background: #fafafa; }
+    h1 { text-align: center; font-size: 1.8rem; color: #1a1a1a; }
+    h1 small { display: block; font-size: 0.85rem; color: #666; margin-top: 4px; font-weight: normal; }
+    .card { margin: 20px 0; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px; background: #fff; }
+    .input-section textarea { width: 100%; min-height: 200px; padding: 12px; border: 1px solid #ccc; border-radius: 6px; font-family: monospace; font-size: 0.9rem; resize: vertical; box-sizing: border-box; }
+    .replace-rules { margin: 16px 0; }
+    .rule-item { display: flex; gap: 8px; margin-bottom: 8px; align-items: center; }
+    .rule-item input { flex: 1; padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-family: monospace; }
+    .rule-item .arrow { color: #007bff; font-weight: bold; }
+    .rule-item .del { color: #dc3545; cursor: pointer; padding: 6px; }
+    .options { display: flex; gap: 16px; flex-wrap: wrap; margin: 12px 0; }
+    .option { display: flex; align-items: center; gap: 6px; }
+    button { padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-size: 1rem; }
+    .btn-primary { background: #007bff; color: #fff; }
+    .btn-success { background: #28a745; color: #fff; }
+    .btn-warning { background: #ffc107; color: #333; }
+    .btn-danger { background: #dc3545; color: #fff; }
+    button:hover { opacity: 0.9; }
+    .buttons { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+    .result-section { margin-top: 20px; }
+    .output-textarea { width: 100%; min-height: 200px; padding: 12px; border: 1px solid #ccc; border-radius: 6px; font-family: monospace; font-size: 0.9rem; resize: vertical; background: #f5f5f5; box-sizing: border-box; }
+    .stats { text-align: center; padding: 12px; background: #f5f5f5; border-radius: 8px; margin-top: 12px; }
+    .footer { text-align: center; margin: 24px 0; padding: 12px; font-size: 0.85rem; color: #28a745; font-weight: 500; }
+  </style>
+</head>
+<body>
+    <div class="ad-banner-top"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+  <h1>批量文本替换 <small>多组替换 · 正则支持 · 查找替换</small></h1>
+
+  <div class="card">
+    <div class="replace-rules">
+      <h3>替换规则（可添加多条）</h3>
+      <div id="rulesList">
+        <div class="rule-item">
+          <input type="text" placeholder="查找内容" value="旧文本" class="find-input">
+          <span class="arrow">→</span>
+          <input type="text" placeholder="替换为" value="新文本" class="replace-input">
+          <span class="del" onclick="removeRule(this)">✕</span>
+        </div>
+      </div>
+      <button style="padding:8px 16px;background:#28a745;color:#fff;border:none;border-radius:6px;cursor:pointer;" onclick="addRule()">+ 添加规则</button>
+    </div>
+    <div class="options">
+      <div class="option">
+        <input type="checkbox" id="caseSensitive">
+        <label for="caseSensitive">区分大小写</label>
+      </div>
+      <div class="option">
+        <input type="checkbox" id="useRegex">
+        <label for="useRegex">使用正则表达式</label>
+      </div>
+      <div class="option">
+        <input type="checkbox" id="globalReplace" checked>
+        <label for="globalReplace">全部替换</label>
+      </div>
+    </div>
+    <div class="input-section">
+      <label><strong>输入文本</strong></label>
+      <textarea id="inputText" placeholder="输入要处理的文本...">这是一段包含旧文本的内容，旧文本出现了多次。
+替换旧文本为新文本，演示批量替换功能。
+旧文本的替换非常方便快捷。</textarea>
+    </div>
+    <div class="buttons" style="margin-top:16px;">
+      <button class="btn-primary" onclick="replaceAll()">执行替换</button>
+      <button class="btn-success" onclick="copyResult()">复制结果</button>
+      <button class="btn-warning" onclick="clearRules()">清空规则</button>
+      <button class="btn-danger" onclick="clearAll()">清空全部</button>
+    </div>
+  </div>
+
+  <div class="card result-section">
+    <h3>替换结果</h3>
+    <textarea class="output-textarea" id="outputText" readonly></textarea>
+    <div class="stats" id="stats"></div>
+  </div>
+
+  <div class="footer">100% 免费 · 数据不上传服务器 · 仅浏览器本地处理</div>
+
+  <script>
+    let totalReplacements = 0;
+    function addRule() {
+      const div = document.createElement('div');
+      div.className = 'rule-item';
+      div.innerHTML = `<input type="text" placeholder="查找内容" class="find-input">
+        <span class="arrow">→</span>
+        <input type="text" placeholder="替换为" class="replace-input">
+        <span class="del" onclick="removeRule(this)">✕</span>`;
+      document.getElementById('rulesList').appendChild(div);
+    }
+    function removeRule(el) {
+      const rules = document.querySelectorAll('.rule-item');
+      if (rules.length > 1) el.parentElement.remove();
+    }
+    function replaceAll() {
+      let text = document.getElementById('inputText').value;
+      const useRegex = document.getElementById('useRegex').checked;
+      const caseSensitive = document.getElementById('caseSensitive').checked;
+      const global = document.getElementById('globalReplace').checked;
+      const rules = document.querySelectorAll('.rule-item');
+      totalReplacements = 0;
+      rules.forEach(rule => {
+        const find = rule.querySelector('.find-input').value;
+        const replace = rule.querySelector('.replace-input').value;
+        if (!find) return;
+        if (useRegex) {
+          try {
+            const flags = (caseSensitive ? '' : 'i') + (global ? 'g' : '');
+            const regex = new RegExp(find, flags);
+            const matches = text.match(regex);
+            if (matches) totalReplacements += matches.length;
+            text = text.replace(regex, replace);
+          } catch (e) { alert('正则表达式错误: ' + e.message); }
+        } else {
+          if (global) {
+            const regex = new RegExp(escapeRegex(find), caseSensitive ? 'g' : 'gi');
+            const matches = text.match(regex);
+            if (matches) totalReplacements += matches.length;
+            text = text.replace(regex, replace);
+          } else {
+            const idx = caseSensitive ? text.indexOf(find) : text.toLowerCase().indexOf(find.toLowerCase());
+            if (idx !== -1) { totalReplacements++; text = text.substring(0, idx) + replace + text.substring(idx + find.length); }
+          }
+        }
+      });
+      document.getElementById('outputText').value = text;
+      document.getElementById('stats').textContent = `共替换 ${totalReplacements} 处`;
+    }
+    function escapeRegex(str) { return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
+    function copyResult() {
+      const text = document.getElementById('outputText').value;
+      if (!text) { alert('请先执行替换'); return; }
+      navigator.clipboard.writeText(text).then(() => alert('已复制'));
+    }
+    function clearRules() { document.getElementById('rulesList').innerHTML = '<div class="rule-item"><input type="text" placeholder="查找内容" class="find-input"><span class="arrow">→</span><input type="text" placeholder="替换为" class="replace-input"><span class="del" onclick="removeRule(this)">✕</span></div>'; }
+    function clearAll() { document.getElementById('inputText').value = ''; document.getElementById('outputText').value = ''; document.getElementById('stats').textContent = ''; }
+  </script>
+    <div class="ad-banner-bottom"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+</body>
+</html>

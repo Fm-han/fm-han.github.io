@@ -1,0 +1,130 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Slug生成器 - 在线URL友好别名/缩写生成工具</title>
+  <meta name="description" content="免费在线Slug生成器，将中文标题或任意文本转换为URL友好的Slug格式（URL别名），支持SEO优化的连字符分隔。">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://fm-han.github.io/slug-generator/">
+  <style>
+                /* 顶部横幅广告 - 透明样式 */ .ad-banner-top { border-bottom: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; } .ad-banner-bottom { border-top: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; margin-top: 40px; } .ad-container { max-width: 728px; margin: 0 auto; min-height: 38px; display: flex; align-items: center; justify-content: center; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; max-width: 700px; margin: 0 auto; padding: 20px; color: #333; line-height: 1.6; background: #fafafa; }
+    h1 { text-align: center; font-size: 1.8rem; color: #1a1a1a; }
+    h1 small { display: block; font-size: 0.85rem; color: #666; margin-top: 4px; font-weight: normal; }
+    .section { margin: 20px 0; padding: 16px; border: 1px solid #e0e0e0; border-radius: 8px; background: #fff; }
+    .section label { display: block; font-weight: 600; margin-bottom: 8px; }
+    textarea { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 1rem; box-sizing: border-box; resize: vertical; min-height: 80px; }
+    input[type="text"] { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 1rem; box-sizing: border-box; font-family: monospace; }
+    .result-display { padding: 16px; background: #f0f7ff; border-radius: 8px; text-align: center; margin-top: 12px; }
+    .result-display .slug { font-size: 1.3rem; font-weight: 700; color: #007bff; font-family: monospace; word-break: break-all; }
+    .options { display: flex; gap: 16px; margin-top: 12px; flex-wrap: wrap; }
+    .options label { display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 0.9rem; }
+    .options input[type="checkbox"] { width: auto; }
+    .history { margin-top: 12px; }
+    .history-item { padding: 8px 12px; background: #f8f9fa; border-radius: 6px; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+    .history-item:hover { background: #eee; }
+    .history-item .text { font-size: 0.85rem; color: #666; }
+    .history-item .slug-res { font-size: 0.85rem; font-family: monospace; color: #007bff; }
+    .buttons { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+    button { padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-size: 0.95rem; }
+    .btn-primary { background: #007bff; color: #fff; }
+    .btn-copy { background: #28a745; color: #fff; }
+    .btn-clear { background: #6c757d; color: #fff; }
+    button:hover { opacity: 0.9; }
+    .footer { text-align: center; margin: 24px 0; padding: 12px; font-size: 0.85rem; color: #28a745; font-weight: 500; }
+  </style>
+</head>
+<body>
+    <div class="ad-banner-top"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+
+  <h1>Slug生成器 <small>URL别名 / SEO优化 / 浏览器本地</small></h1>
+
+  <div class="section">
+    <label>输入标题或文本</label>
+    <textarea id="inputText" placeholder="输入需要转换为Slug的文本，如: Python编程入门教程"></textarea>
+    <div class="options">
+      <label><input type="checkbox" id="optLower" checked> 转小写</label>
+      <label><input type="checkbox" id="optTrim" checked> 去除多余空格</label>
+      <label><input type="checkbox" id="optNum" checked> 保留数字</label>
+    </div>
+    <div class="result-display">
+      <div class="slug" id="slugResult">等待输入...</div>
+    </div>
+    <div class="buttons">
+      <button class="btn-primary" onclick="generate()">生成Slug</button>
+      <button class="btn-copy" onclick="copySlug()">复制</button>
+      <button class="btn-clear" onclick="document.getElementById('inputText').value='';document.getElementById('slugResult').textContent='等待输入...'">清空</button>
+    </div>
+  </div>
+
+  <div class="section">
+    <label>历史记录</label>
+    <div class="history" id="historyList">
+      <div style="color:#999;text-align:center;padding:12px;font-size:0.9rem;">暂无历史记录</div>
+    </div>
+    <div class="buttons">
+      <button class="btn-clear" onclick="clearHistory()">清除历史</button>
+    </div>
+  </div>
+
+  <div class="footer">100% 免费 · 数据不上传服务器 · 仅浏览器本地处理</div>
+
+  <script>
+    let history = [];
+    function generate() {
+      let text = document.getElementById('inputText').value.trim();
+      if (!text) { alert('请输入文本'); return; }
+
+      if (document.getElementById('optTrim').checked) text = text.replace(/\s+/g, ' ').trim();
+      if (document.getElementById('optLower').checked) text = text.toLowerCase();
+
+      // Replace Chinese with pinyin approximation and special chars
+      text = text.replace(/[^\w\s-]/g, '')
+                 .replace(/[·～—]/g, '-')
+                 .replace(/\s+/g, '-')
+                 .replace(/-+/g, '-')
+                 .replace(/^-|-$/g, '');
+
+      if (!document.getElementById('optNum').checked) text = text.replace(/[0-9]/g, '');
+
+      document.getElementById('slugResult').textContent = text;
+
+      if (text && !history.find(h => h.input === document.getElementById('inputText').value.trim())) {
+        history.unshift({input: document.getElementById('inputText').value.trim(), slug: text});
+        if (history.length > 20) history.pop();
+        renderHistory();
+      }
+    }
+
+    function renderHistory() {
+      if (history.length === 0) {
+        document.getElementById('historyList').innerHTML = '<div style="color:#999;text-align:center;padding:12px;font-size:0.9rem;">暂无历史记录</div>';
+        return;
+      }
+      document.getElementById('historyList').innerHTML = history.map((h, i) => `
+        <div class="history-item" onclick="loadHistory(${i})">
+          <span class="text">${h.input.substring(0, 30)}${h.input.length > 30 ? '...' : ''}</span>
+          <span class="slug-res">${h.slug}</span>
+        </div>
+      `).join('');
+    }
+
+    function loadHistory(i) {
+      document.getElementById('inputText').value = history[i].input;
+      document.getElementById('slugResult').textContent = history[i].slug;
+    }
+
+    function clearHistory() { history = []; renderHistory(); }
+
+    function copySlug() {
+      const t = document.getElementById('slugResult').textContent;
+      if (t.includes('等待')) { alert('无内容'); return; }
+      navigator.clipboard.writeText(t).then(() => alert('已复制: ' + t));
+    }
+
+    document.getElementById('inputText').addEventListener('input', generate);
+  </script>
+    <div class="ad-banner-bottom"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+</body>
+</html>

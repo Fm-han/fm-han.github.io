@@ -1,0 +1,112 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>文件下载器 - 免费在线工具</title>
+<style>
+                /* 顶部横幅广告 - 透明样式 */ .ad-banner-top { border-bottom: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; } .ad-banner-bottom { border-top: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; margin-top: 40px; } .ad-container { max-width: 728px; margin: 0 auto; min-height: 38px; display: flex; align-items: center; justify-content: center; }
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #fafafa; color: #333; padding: 20px; }
+.container { max-width: 800px; margin: 0 auto; }
+h1 { font-size: 1.25rem; font-weight: 600; margin-bottom: 16px; color: #333; }
+.desc { color: #666; margin-bottom: 20px; line-height: 1.6; }
+.card { background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; padding: 24px; margin-bottom: 16px; }
+label { display: block; margin-bottom: 8px; font-weight: 500; }
+input[type="text"] { border: 1px solid #ddd; border-radius: 4px; padding: 8px 12px; width: 100%; box-sizing: border-box; margin-bottom: 12px; font-size: 14px; }
+input[type="text"]:focus { outline: none; border-color: #007bff; }
+.btn-primary { background: #007bff; color: #fff; border: none; padding: 8px 20px; border-radius: 4px; cursor: pointer; font-size: 14px; }
+.btn-primary:hover { background: #0056b3; }
+.btn-primary:disabled { background: #ccc; cursor: not-allowed; }
+.progress-container { margin-top: 16px; display: none; }
+.progress-bar { width: 100%; height: 20px; background: #e0e0e0; border-radius: 10px; overflow: hidden; }
+.progress-fill { height: 100%; background: #007bff; transition: width 0.3s; width: 0%; }
+.progress-text { text-align: center; margin-top: 8px; font-size: 14px; color: #666; }
+.status { margin-top: 12px; padding: 12px; border-radius: 4px; font-size: 14px; display: none; }
+.status.success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+.status.error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+.result { margin-top: 16px; display: none; }
+.result a { color: #007bff; text-decoration: none; }
+.result a:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+    <div class="ad-banner-top"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+<div class="container">
+  <div class="card">
+    <h1>文件下载器</h1>
+    <p class="desc">输入文件URL，下载文件到本地，支持显示下载进度。</p>
+    <label for="url">文件URL地址</label>
+    <input type="text" id="url" placeholder="https://example.com/file.zip">
+    <button class="btn-primary" id="downloadBtn" onclick="startDownload()">下载文件</button>
+    <div class="progress-container" id="progressContainer">
+      <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+      <div class="progress-text" id="progressText">0%</div>
+    </div>
+    <div class="status" id="status"></div>
+    <div class="result" id="result">
+      <p>下载完成！<a id="downloadLink" href="#" download>点击保存文件</a></p>
+    </div>
+  </div>
+</div>
+<script>
+async function startDownload() {
+  const url = document.getElementById('url').value.trim();
+  if (!url) { showStatus('请输入文件URL地址', 'error'); return; }
+  const btn = document.getElementById('downloadBtn');
+  const progressContainer = document.getElementById('progressContainer');
+  const progressFill = document.getElementById('progressFill');
+  const progressText = document.getElementById('progressText');
+  const result = document.getElementById('result');
+  const status = document.getElementById('status');
+  btn.disabled = true;
+  progressContainer.style.display = 'block';
+  result.style.display = 'none';
+  status.style.display = 'none';
+  progressFill.style.width = '0%';
+  progressText.textContent = '0%';
+  try {
+    const response = await fetch(url, { mode: 'cors' });
+    if (!response.ok) throw new Error('下载失败: ' + response.status);
+    const contentLength = response.headers.get('content-length');
+    const total = contentLength ? parseInt(contentLength) : 0;
+    let loaded = 0;
+    const reader = response.body.getReader();
+    const chunks = [];
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      chunks.push(value);
+      loaded += value.length;
+      if (total > 0) {
+        const pct = Math.round((loaded / total) * 100);
+        progressFill.style.width = pct + '%';
+        progressText.textContent = pct + '%';
+      }
+    }
+    const blob = new Blob(chunks);
+    const downloadUrl = URL.createObjectURL(blob);
+    const a = document.getElementById('downloadLink');
+    a.href = downloadUrl;
+    const fileName = url.split('/').pop() || 'download';
+    a.download = fileName;
+    result.style.display = 'block';
+    progressFill.style.width = '100%';
+    progressText.textContent = '100%';
+  } catch (e) {
+    showStatus(e.message, 'error');
+    progressContainer.style.display = 'none';
+  } finally {
+    btn.disabled = false;
+  }
+}
+function showStatus(msg, type) {
+  const el = document.getElementById('status');
+  el.textContent = msg;
+  el.className = 'status ' + type;
+  el.style.display = 'block';
+}
+</script>
+    <div class="ad-banner-bottom"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+</body>
+</html>

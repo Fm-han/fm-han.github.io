@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Data URI编码器</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#fafafa;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;padding:20px;min-height:100vh}
+.container{max-width:700px;margin:0 auto}
+h1{text-align:center;color:#333;margin-bottom:24px;font-size:22px}
+.card{background:#fff;border:1px solid #e0e0e0;border-radius:8px;padding:24px;margin-bottom:16px}
+label{display:block;font-weight:600;margin-bottom:6px;color:#555;font-size:14px}
+textarea{width:100%;padding:10px;border:1px solid #ddd;border-radius:4px;font-size:13px;box-sizing:border-box;resize:vertical;font-family:monospace;height:120px}
+.btn{background:#007bff;color:#fff;border:none;padding:8px 20px;border-radius:4px;cursor:pointer;font-size:14px;margin-top:8px}
+.btn:hover{background:#0056b3}
+.btn-green{background:#28a745}
+.btn-green:hover{background:#218838}
+.upload-area{border:2px dashed #ccc;border-radius:8px;padding:30px;text-align:center;cursor:pointer;color:#888;margin:12px 0;transition:border-color .2s}
+.upload-area:hover,.upload-area.dragover{border-color:#007bff;color:#007bff}
+.result{background:#f5f5f5;padding:12px;border-radius:4px;font-family:monospace;font-size:12px;margin-top:12px;min-height:60px;word-break:break-all;max-height:200px;overflow-y:auto}
+.info{background:#e7f3ff;padding:10px;border-radius:4px;font-size:13px;color:#0066cc;margin-top:8px}
+.tabs{display:flex;gap:0;margin-bottom:16px}
+.tab{padding:8px 16px;background:#e9ecef;cursor:pointer;border:1px solid #ccc;border-bottom:none;border-radius:6px 6px 0 0;font-size:14px}
+.tab.active{background:#fff;border-bottom:1px solid #fff;position:relative;top:1px}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>Data URI编码器</h1>
+<div class="tabs">
+<div class="tab active" onclick="switchTab('encode')">文件 → Data URI</div>
+<div class="tab" onclick="switchTab('decode')">Data URI → 文件</div>
+</div>
+<div class="card" id="encodePanel">
+<label>上传文件</label>
+<div class="upload-area" id="dropZone">
+<p>点击或拖拽文件到此处</p>
+<p style="font-size:12px;margin-top:4px">支持任何文件类型（图片、文本、字体等）</p>
+<input type="file" id="fileInput" style="display:none">
+</div>
+<div class="info" id="fileInfo"></div>
+<label>Data URI结果</label>
+<textarea id="resultUri" readonly placeholder="编码结果..."></textarea>
+<div style="display:flex;gap:8px;margin-top:8px">
+<button class="btn" onclick="copyResult()">复制Data URI</button>
+<button class="btn btn-green" onclick="downloadResult()">下载结果为文本</button>
+</div>
+</div>
+<div class="card" id="decodePanel" style="display:none">
+<label>粘贴Data URI</label>
+<textarea id="decodeInput" placeholder="data:image/png;base64,iVBORw0KGgo..."></textarea>
+<button class="btn" onclick="decodeUri()">解码并下载</button>
+<div class="info" id="decodeInfo"></div>
+</div>
+</div>
+<script>
+function switchTab(t){
+document.querySelectorAll('.tab').forEach((el,i)=>el.classList.toggle('active',i===(t==='encode'?0:1)));
+document.getElementById('encodePanel').style.display=t==='encode'?'block':'none';
+document.getElementById('decodePanel').style.display=t==='decode'?'block':'none';
+}
+const dropZone=document.getElementById('dropZone');
+const fileInput=document.getElementById('fileInput');
+dropZone.onclick=()=>fileInput.click();
+dropZone.addEventListener('dragover',e=>{e.preventDefault();dropZone.classList.add('dragover')});
+dropZone.addEventListener('dragleave',()=>dropZone.classList.remove('dragover'));
+dropZone.addEventListener('drop',e=>{e.preventDefault();dropZone.classList.remove('dragover');encodeFile(e.dataTransfer.files[0])});
+fileInput.addEventListener('change',e=>encodeFile(e.target.files[0]));
+function encodeFile(file){
+if(!file)return;
+const reader=new FileReader();
+reader.onload=e=>{
+const dataUri=e.target.result;
+document.getElementById('resultUri').value=dataUri;
+document.getElementById('fileInfo').textContent=`文件: ${file.name} | 大小: ${(file.size/1024).toFixed(1)} KB | MIME: ${file.type||'未知'}`;
+};
+reader.readAsDataURL(file);
+}
+function copyResult(){
+navigator.clipboard.writeText(document.getElementById('resultUri').value);
+alert('已复制Data URI!');
+}
+function downloadResult(){
+const b=new Blob([document.getElementById('resultUri').value],{type:'text/plain'});
+const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='data-uri.txt';a.click();
+}
+function decodeUri(){
+const input=document.getElementById('decodeInput').value.trim();
+if(!input.startsWith('data:')){alert('无效的Data URI格式');return}
+const match=input.match(/^data:([^;]+);([^,]+),(.+)$/);
+if(!match){alert('无法解析Data URI');return}
+const mime=match[1];const encoding=match[2];const data=match[3];
+const isBase64=encoding==='base64';
+let blob;
+if(isBase64){
+const binary=atob(data);
+const bytes=new Uint8Array(binary.length);
+for(let i=0;i<binary.length;i++)bytes[i]=binary.charCodeAt(i);
+blob=new Blob([bytes],{type:mime});
+}else{
+blob=new Blob([decodeURIComponent(data)],{type:mime});
+}
+const ext=mime.split('/')[1]||'bin';
+const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`decoded.${ext}`;a.click();
+document.getElementById('decodeInfo').textContent=`MIME: ${mime} | 编码: ${encoding}`;
+}
+</script>
+</body>
+</html>

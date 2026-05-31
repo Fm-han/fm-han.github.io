@@ -1,0 +1,114 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Markdown编辑器 - 在线Markdown写作与实时预览</title>
+  <meta name="description" content="免费在线Markdown编辑器，支持实时预览、语法高亮、常用快捷键、一键复制HTML源码，适合写文档和博客。">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://fm-han.github.io/markdown-editor/">
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <style>
+                /* 顶部横幅广告 - 透明样式 */ .ad-banner-top { border-bottom: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; } .ad-banner-bottom { border-top: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; margin-top: 40px; } .ad-container { max-width: 728px; margin: 0 auto; min-height: 38px; display: flex; align-items: center; justify-content: center; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; max-width: 1100px; margin: 0 auto; padding: 20px; color: #333; line-height: 1.6; background: #fafafa; }
+    h1 { text-align: center; font-size: 1.8rem; color: #1a1a1a; }
+    h1 small { display: block; font-size: 0.85rem; color: #666; margin-top: 4px; font-weight: normal; }
+    .section { margin: 20px 0; padding: 16px; border: 1px solid #e0e0e0; border-radius: 8px; background: #fff; }
+    .section label { display: block; font-weight: 600; margin-bottom: 8px; }
+    .editor-wrap { display: grid; grid-template-columns: 1fr 1fr; gap: 0; }
+    .editor-pane { border: 1px solid #ccc; border-radius: 6px; overflow: hidden; }
+    .pane-header { padding: 8px 12px; background: #f8f9fa; border-bottom: 1px solid #e0e0e0; font-weight: 600; font-size: 0.85rem; color: #666; }
+    textarea { width: 100%; padding: 12px; border: none; font-size: 0.9rem; box-sizing: border-box; font-family: 'Consolas', 'Monaco', monospace; resize: none; min-height: 400px; outline: none; }
+    .preview { padding: 16px; overflow-y: auto; min-height: 400px; max-height: 600px; }
+    .preview h1,.preview h2,.preview h3 { color: #1a1a1a; margin-top: 1em; }
+    .preview h1 { font-size: 1.5rem; border-bottom: 2px solid #007bff; padding-bottom: 8px; }
+    .preview h2 { font-size: 1.25rem; border-bottom: 1px solid #e0e0e0; padding-bottom: 6px; }
+    .preview code { background: #f0f0f0; padding: 2px 6px; border-radius: 4px; font-family: monospace; }
+    .preview pre { background: #f5f5f5; padding: 12px; border-radius: 6px; overflow-x: auto; }
+    .preview pre code { background: none; padding: 0; }
+    .preview blockquote { border-left: 4px solid #007bff; margin: 12px 0; padding: 8px 16px; background: #f0f7ff; color: #555; }
+    .preview table { border-collapse: collapse; width: 100%; }
+    .preview table td,.preview table th { border: 1px solid #e0e0e0; padding: 8px 12px; }
+    .preview table th { background: #f8f9fa; font-weight: 600; }
+    .preview a { color: #007bff; }
+    .toolbar { display: flex; gap: 6px; margin-bottom: 8px; flex-wrap: wrap; }
+    .toolbar button { padding: 6px 12px; border: 1px solid #ccc; border-radius: 6px; background: #fff; cursor: pointer; font-size: 0.85rem; }
+    .toolbar button:hover { background: #f0f0f0; }
+    .buttons { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+    button { padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-size: 0.95rem; }
+    .btn-primary { background: #007bff; color: #fff; }
+    .btn-copy { background: #28a745; color: #fff; }
+    .btn-clear { background: #6c757d; color: #fff; }
+    button:hover { opacity: 0.9; }
+    .footer { text-align: center; margin: 24px 0; padding: 12px; font-size: 0.85rem; color: #28a745; font-weight: 500; }
+    @media (max-width: 700px) { .editor-wrap { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+    <div class="ad-banner-top"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+
+  <h1>Markdown编辑器 <small>实时预览 / 快捷工具 / 一键复制HTML · 浏览器本地</small></h1>
+
+  <div class="section">
+    <label>工具栏</label>
+    <div class="toolbar">
+      <button onclick="insertMd('**','**')">粗体 B</button>
+      <button onclick="insertMd('*','*')">斜体 I</button>
+      <button onclick="insertMd('~~','~~')">删除线</button>
+      <button onclick="insertMd('`','`')">行内代码</button>
+      <button onclick="insertMd('\n```\n','\n```\n')">代码块</button>
+      <button onclick="insertMd('\n> ','\n')">引用</button>
+      <button onclick="insertMd('\n- ','\n')">无序列表</button>
+      <button onclick="insertMd('\n1. ','\n')">有序列表</button>
+      <button onclick="insertMd('[','](url)')">链接</button>
+      <button onclick="insertMd('![alt](','url)')">图片</button>
+      <button onclick="insertMd('\n## ','\n')">二级标题</button>
+      <button onclick="insertMd('\n### ','\n')">三级标题</button>
+    </div>
+    <div class="editor-wrap">
+      <div>
+        <div class="pane-header">📝 Markdown 源码</div>
+        <textarea id="mdInput" placeholder="# 标题&#10;&#10;正文内容..." oninput="renderMd()"></textarea>
+      </div>
+      <div>
+        <div class="pane-header">👁 实时预览</div>
+        <div class="preview" id="mdPreview"></div>
+      </div>
+    </div>
+    <div class="buttons">
+      <button class="btn-copy" onclick="copyHtml()">复制HTML源码</button>
+      <button class="btn-copy" onclick="copyMd()">复制Markdown</button>
+      <button class="btn-clear" onclick="document.getElementById('mdInput').value='';document.getElementById('mdPreview').innerHTML=''">清空</button>
+    </div>
+  </div>
+
+  <div class="footer">100% 免费 · 数据不上传服务器 · 仅浏览器本地处理</div>
+
+  <script>
+    marked.setOptions({ breaks: true, gfm: true });
+    function renderMd() {
+      const text = document.getElementById('mdInput').value;
+      document.getElementById('mdPreview').innerHTML = marked.parse(text);
+    }
+    function insertMd(before, after) {
+      const ta = document.getElementById('mdInput');
+      const s = ta.selectionStart, e = ta.selectionEnd;
+      const text = ta.value;
+      ta.value = text.slice(0, s) + before + text.slice(s, e) + after + text.slice(e);
+      ta.selectionStart = s + before.length;
+      ta.selectionEnd = s + before.length + (e - s);
+      ta.focus();
+      renderMd();
+    }
+    function copyHtml() {
+      navigator.clipboard.writeText(document.getElementById('mdPreview').innerHTML).then(() => alert('HTML已复制!'));
+    }
+    function copyMd() {
+      navigator.clipboard.writeText(document.getElementById('mdInput').value).then(() => alert('Markdown已复制!'));
+    }
+    document.getElementById('mdInput').value = '# 欢迎使用Markdown编辑器\n\n这是一个**实时预览**的Markdown编辑器。\n\n## 功能特点\n\n- 实时预览渲染效果\n- 支持GFM语法\n- 一键复制HTML源码\n- 快捷工具栏\n\n## 代码示例\n\n```javascript\nconst greeting = "Hello, World!";\nconsole.log(greeting);\n```\n\n> 这是一段引用文本\n\n[访问示例链接](https://example.com)\n';
+    renderMd();
+  </script>
+    <div class="ad-banner-bottom"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+</body>
+</html>

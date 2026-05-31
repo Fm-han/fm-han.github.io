@@ -1,0 +1,112 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>密码生成器 - 在线随机密码/强密码生成</title>
+  <meta name="description" content="免费在线密码生成器，可自定义长度、字符类型，实时显示密码强度，浏览器本地处理。">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://fm-han.github.io/password-generator/">
+  <style>
+                /* 顶部横幅广告 - 透明样式 */ .ad-banner-top { border-bottom: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; } .ad-banner-bottom { border-top: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; margin-top: 40px; } .ad-container { max-width: 728px; margin: 0 auto; min-height: 38px; display: flex; align-items: center; justify-content: center; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; color: #333; line-height: 1.6; background: #fafafa; }
+    h1 { text-align: center; font-size: 1.8rem; color: #1a1a1a; }
+    h1 small { display: block; font-size: 0.85rem; color: #666; margin-top: 4px; font-weight: normal; }
+    .section { margin: 20px 0; padding: 16px; border: 1px solid #e0e0e0; border-radius: 8px; background: #fff; }
+    .password-display { font-family: monospace; font-size: 1.4rem; padding: 16px; background: #f8f9fa; border-radius: 6px; text-align: center; word-break: break-all; min-height: 60px; display: flex; align-items: center; justify-content: center; }
+    .strength-bar { height: 8px; border-radius: 4px; margin-top: 12px; transition: all 0.3s; }
+    .strength-text { text-align: center; margin-top: 8px; font-weight: 600; }
+    .slider-row { display: flex; align-items: center; gap: 12px; margin: 16px 0; }
+    .slider-row label { width: 60px; font-weight: 500; }
+    .slider-row input[type="range"] { flex: 1; }
+    .slider-row span { width: 40px; text-align: right; font-weight: 600; }
+    .checkbox-group { display: flex; flex-direction: column; gap: 10px; margin: 16px 0; }
+    .checkbox-item { display: flex; align-items: center; gap: 8px; }
+    .buttons { display: flex; gap: 8px; margin-top: 16px; }
+    button { padding: 12px 24px; border: none; border-radius: 6px; cursor: pointer; font-size: 1rem; }
+    .btn-generate { background: #007bff; color: #fff; flex: 1; }
+    .btn-copy { background: #28a745; color: #fff; }
+    button:hover { opacity: 0.9; }
+    .footer { text-align: center; margin: 24px 0; padding: 12px; font-size: 0.85rem; color: #28a745; font-weight: 500; }
+  </style>
+</head>
+<body>
+    <div class="ad-banner-top"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+
+  <h1>密码生成器 <small>随机强密码 · 长度自由 · 浏览器本地处理</small></h1>
+
+  <div class="section">
+    <label>生成的密码</label>
+    <div id="password" class="password-display">点击"生成密码"开始</div>
+    <div id="strengthBar" class="strength-bar" style="background:#e0e0e0;"></div>
+    <div id="strengthText" class="strength-text" style="color:#666;">-</div>
+
+    <div class="slider-row">
+      <label>长度</label>
+      <input type="range" id="length" min="6" max="64" value="16" oninput="document.getElementById('lenVal').textContent = this.value">
+      <span id="lenVal">16</span>
+    </div>
+
+    <div class="checkbox-group">
+      <label class="checkbox-item"><input type="checkbox" id="upper" checked onchange="generate()"> 大写字母 (A-Z)</label>
+      <label class="checkbox-item"><input type="checkbox" id="lower" checked onchange="generate()"> 小写字母 (a-z)</label>
+      <label class="checkbox-item"><input type="checkbox" id="number" checked onchange="generate()"> 数字 (0-9)</label>
+      <label class="checkbox-item"><input type="checkbox" id="symbol" checked onchange="generate()"> 特殊符号 (!@#$%^&*)</label>
+    </div>
+
+    <div class="buttons">
+      <button class="btn-generate" onclick="generate()">生成密码</button>
+      <button class="btn-copy" onclick="copyPassword()">复制</button>
+    </div>
+  </div>
+
+  <div class="footer">100% 免费 · 数据不上传服务器 · 仅浏览器本地处理</div>
+
+  <script>
+    const chars = { upper: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', lower: 'abcdefghijklmnopqrstuvwxyz', number: '0123456789', symbol: '!@#$%^&*()_+-=[]{}|;:,.<>?' };
+
+    function generate() {
+      let pool = '';
+      if (document.getElementById('upper').checked) pool += chars.upper;
+      if (document.getElementById('lower').checked) pool += chars.lower;
+      if (document.getElementById('number').checked) pool += chars.number;
+      if (document.getElementById('symbol').checked) pool += chars.symbol;
+      
+      if (!pool) { alert('请至少选择一种字符类型'); return; }
+      
+      const len = parseInt(document.getElementById('length').value);
+      let pwd = '';
+      for (let i = 0; i < len; i++) pwd += pool[Math.floor(Math.random() * pool.length)];
+      
+      document.getElementById('password').textContent = pwd;
+      updateStrength(pwd);
+    }
+
+    function updateStrength(pwd) {
+      let score = 0;
+      if (pwd.length >= 8) score++;
+      if (pwd.length >= 12) score++;
+      if (pwd.length >= 16) score++;
+      if (/[A-Z]/.test(pwd) && /[a-z]/.test(pwd)) score++;
+      if (/[0-9]/.test(pwd) && /[^A-Za-z0-9]/.test(pwd)) score++;
+
+      const bar = document.getElementById('strengthBar');
+      const text = document.getElementById('strengthText');
+      
+      if (score <= 2) { bar.style.background = '#dc3545'; bar.style.width = '30%'; text.textContent = '弱密码'; text.style.color = '#dc3545'; }
+      else if (score <= 3) { bar.style.background = '#ffc107'; bar.style.width = '60%'; text.textContent = '中等强度'; text.style.color = '#ffc107'; }
+      else { bar.style.background = '#28a745'; bar.style.width = '100%'; text.textContent = '强密码'; text.style.color = '#28a745'; }
+    }
+
+    function copyPassword() {
+      const pwd = document.getElementById('password').textContent;
+      if (pwd && pwd !== '点击"生成密码"开始') {
+        navigator.clipboard.writeText(pwd).then(() => alert('密码已复制!'));
+      }
+    }
+
+    generate();
+  </script>
+    <div class="ad-banner-bottom"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+</body>
+</html>

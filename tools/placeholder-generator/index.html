@@ -1,0 +1,125 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>图片占位符 - SVG纯色占位图生成器</title>
+  <meta name="description" content="免费在线图片占位符生成器，生成SVG格式的占位图片，支持自定义尺寸、背景色、文字，可用于UI设计和开发预览。">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://fm-han.github.io/placeholder-generator/">
+  <style>
+                /* 顶部横幅广告 - 透明样式 */ .ad-banner-top { border-bottom: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; } .ad-banner-bottom { border-top: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; margin-top: 40px; } .ad-container { max-width: 728px; margin: 0 auto; min-height: 38px; display: flex; align-items: center; justify-content: center; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; max-width: 700px; margin: 0 auto; padding: 20px; color: #333; line-height: 1.6; background: #fafafa; }
+    h1 { text-align: center; font-size: 1.8rem; color: #1a1a1a; }
+    h1 small { display: block; font-size: 0.85rem; color: #666; margin-top: 4px; font-weight: normal; }
+    .card { margin: 20px 0; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px; background: #fff; }
+    .input-row { display: flex; gap: 12px; margin-bottom: 16px; }
+    .input-group { flex: 1; }
+    .input-group label { display: block; font-weight: 600; margin-bottom: 6px; font-size: 0.9rem; }
+    .input-group input, .input-group select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 1rem; box-sizing: border-box; }
+    .preview-area { text-align: center; padding: 24px; background: repeating-conic-gradient(#f0f0f0 0% 25%, #fff 0% 50%) 50% / 20px 20px; border-radius: 8px; margin: 16px 0; min-height: 200px; display: flex; align-items: center; justify-content: center; }
+    .preview-area img, .preview-area svg { max-width: 100%; max-height: 400px; border-radius: 4px; }
+    button { padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-size: 1rem; }
+    .btn-primary { background: #007bff; color: #fff; }
+    .btn-success { background: #28a745; color: #fff; }
+    .btn-secondary { background: #6c757d; color: #fff; }
+    button:hover { opacity: 0.9; }
+    .buttons { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+    .code-box { background: #1e1e1e; border-radius: 8px; padding: 16px; color: #d4d4d4; font-family: monospace; position: relative; margin: 16px 0; }
+    .code-box pre { margin: 0; white-space: pre-wrap; word-break: break-all; }
+    .copy-btn { position: absolute; top: 8px; right: 8px; padding: 6px 12px; background: #007bff; color: #fff; border: none; border-radius: 4px; cursor: pointer; }
+    .preset-sizes { display: flex; gap: 8px; flex-wrap: wrap; }
+    .preset-size { padding: 6px 12px; border: 1px solid #ccc; border-radius: 20px; background: #fff; cursor: pointer; font-size: 0.85rem; }
+    .preset-size:hover { background: #f0f0f0; }
+    .footer { text-align: center; margin: 24px 0; padding: 12px; font-size: 0.85rem; color: #28a745; font-weight: 500; }
+  </style>
+</head>
+<body>
+    <div class="ad-banner-top"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+  <h1>图片占位符 <small>SVG占位图 · 自定义尺寸文字</small></h1>
+
+  <div class="card">
+    <div class="input-row">
+      <div class="input-group"><label>宽度 (px)</label><input type="number" id="width" value="640" min="50" max="2000"></div>
+      <div class="input-group"><label>高度 (px)</label><input type="number" id="height" value="360" min="50" max="2000"></div>
+    </div>
+    <div class="input-row">
+      <div class="input-group"><label>背景色</label><input type="color" id="bgColor" value="#e0e0e0"></div>
+      <div class="input-group"><label>文字颜色</label><input type="color" id="textColor" value="#999999"></div>
+    </div>
+    <div class="input-group"><label>显示文字</label><input type="text" id="placeholderText" value="640 x 360"></div>
+    <div class="preset-sizes" style="margin:12px 0;">
+      <span style="font-weight:600;">常用尺寸：</span>
+      <button class="preset-size" onclick="setSize(300,250)">300×250</button>
+      <button class="preset-size" onclick="setSize(320,50)">320×50</button>
+      <button class="preset-size" onclick="setSize(320,100)">320×100</button>
+      <button class="preset-size" onclick="setSize(336,280)">336×280</button>
+      <button class="preset-size" onclick="setSize(728,90)">728×90</button>
+      <button class="preset-size" onclick="setSize(970,250)">970×250</button>
+    </div>
+    <div class="buttons">
+      <button class="btn-primary" onclick="generate()">生成</button>
+      <button class="btn-success" onclick="downloadSvg()">下载SVG</button>
+      <button class="btn-secondary" onclick="copyHtml()">复制HTML</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>预览</h3>
+    <div class="preview-area" id="previewArea">
+      <svg id="placeholderSvg" xmlns="http://www.w3.org/2000/svg" width="640" height="360">
+        <rect fill="#e0e0e0" width="640" height="360"/>
+        <text fill="#999999" font-family="Arial, sans-serif" font-size="24" text-anchor="middle" x="320" y="185">640 x 360</text>
+      </svg>
+    </div>
+    <div class="code-box">
+      <button class="copy-btn" onclick="copySvgCode()">复制代码</button>
+      <pre id="svgCode"></pre>
+    </div>
+  </div>
+
+  <div class="footer">100% 免费 · 数据不上传服务器 · 仅浏览器本地处理</div>
+
+  <script>
+    function setSize(w, h) {
+      document.getElementById('width').value = w;
+      document.getElementById('height').value = h;
+      document.getElementById('placeholderText').value = w + ' x ' + h;
+      generate();
+    }
+    function generate() {
+      const w = document.getElementById('width').value;
+      const h = document.getElementById('height').value;
+      const bg = document.getElementById('bgColor').value;
+      const text = document.getElementById('placeholderText').value || w + ' x ' + h;
+      const fontSize = Math.max(14, Math.min(w, h) / 10);
+      const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}">
+  <rect fill="${bg}" width="${w}" height="${h}"/>
+  <text fill="#666" font-family="Arial, sans-serif" font-size="${fontSize}" text-anchor="middle" x="${w/2}" y="${h/2}" dominant-baseline="middle">${text}</text>
+</svg>`;
+      document.getElementById('previewArea').innerHTML = svg;
+      document.getElementById('svgCode').textContent = svg;
+    }
+    function downloadSvg() {
+      const svg = document.getElementById('previewArea').innerHTML;
+      const blob = new Blob([svg], { type: 'image/svg+xml' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'placeholder.svg';
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+    function copySvgCode() {
+      const code = document.getElementById('svgCode').textContent;
+      navigator.clipboard.writeText(code).then(() => alert('SVG代码已复制'));
+    }
+    function copyHtml() {
+      const code = '<img src="data:image/svg+xml,' + encodeURIComponent(document.getElementById('previewArea').innerHTML) + '" />';
+      navigator.clipboard.writeText(code).then(() => alert('HTML代码已复制'));
+    }
+    generate();
+  </script>
+    <div class="ad-banner-bottom"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+</body>
+</html>

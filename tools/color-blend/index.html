@@ -1,0 +1,156 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>颜色混合器 - 两种颜色混合生成中间色</title>
+  <meta name="description" content="免费在线颜色混合器，两种颜色按不同比例混合生成中间色，支持多种配色方案。">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://fm-han.github.io/color-blend/">
+  <style>
+                /* 顶部横幅广告 - 透明样式 */ .ad-banner-top { border-bottom: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; } .ad-banner-bottom { border-top: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; margin-top: 40px; } .ad-container { max-width: 728px; margin: 0 auto; min-height: 38px; display: flex; align-items: center; justify-content: center; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; max-width: 700px; margin: 0 auto; padding: 20px; color: #333; line-height: 1.6; background: #fafafa; }
+    h1 { text-align: center; font-size: 1.8rem; color: #1a1a1a; }
+    h1 small { display: block; font-size: 0.85rem; color: #666; margin-top: 4px; font-weight: normal; }
+    .card { margin: 20px 0; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px; background: #fff; }
+    .color-inputs { display: flex; gap: 16px; margin-bottom: 16px; }
+    .color-input { flex: 1; }
+    .color-input label { display: block; font-weight: 600; margin-bottom: 6px; }
+    .color-input input[type="color"] { width: 100%; height: 60px; border: 1px solid #ccc; border-radius: 6px; cursor: pointer; }
+    .color-input input[type="text"] { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 6px; font-family: monospace; margin-top: 8px; }
+    .blend-slider { margin: 20px 0; }
+    .blend-slider label { display: block; font-weight: 600; margin-bottom: 8px; }
+    .blend-slider input[type="range"] { width: 100%; }
+    .blend-slider .values { display: flex; justify-content: space-between; color: #666; font-size: 0.85rem; }
+    .gradient-preview { height: 80px; border-radius: 12px; margin: 20px 0; position: relative; overflow: hidden; }
+    .gradient-preview .blend-point { position: absolute; top: 0; bottom: 0; width: 4px; background: rgba(0,0,0,0.3); cursor: ew-resize; }
+    .result-preview { display: flex; gap: 16px; justify-content: center; margin: 16px 0; }
+    .result-item { text-align: center; }
+    .result-item .color-box { width: 80px; height: 80px; border-radius: 8px; border: 1px solid #eee; }
+    .result-item .label { font-size: 0.85rem; color: #666; margin-top: 4px; }
+    .result-item .value { font-family: monospace; font-size: 0.8rem; margin-top: 2px; }
+    .blend-results { display: grid; grid-template-columns: repeat(10, 1fr); gap: 4px; margin: 20px 0; }
+    .blend-color { height: 40px; border-radius: 4px; cursor: pointer; }
+    .blend-color:hover { transform: scaleY(1.2); }
+    button { padding: 12px 28px; border: none; border-radius: 6px; cursor: pointer; font-size: 1rem; }
+    .btn-primary { background: #007bff; color: #fff; }
+    .btn-success { background: #28a745; color: #fff; }
+    button:hover { opacity: 0.9; }
+    .buttons { display: flex; gap: 12px; justify-content: center; }
+    .footer { text-align: center; margin: 24px 0; padding: 12px; font-size: 0.85rem; color: #28a745; font-weight: 500; }
+  </style>
+</head>
+<body>
+    <div class="ad-banner-top"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+  <h1>颜色混合器 <small>两色渐变 · 配色方案</small></h1>
+
+  <div class="card">
+    <div class="color-inputs">
+      <div class="color-input">
+        <label>颜色1</label>
+        <input type="color" id="color1" value="#ff0000" oninput="blendColors()">
+        <input type="text" id="color1Text" value="#ff0000" oninput="updateFromText(1)">
+      </div>
+      <div class="color-input">
+        <label>颜色2</label>
+        <input type="color" id="color2" value="#0000ff" oninput="blendColors()">
+        <input type="text" id="color2Text" value="#0000ff" oninput="updateFromText(2)">
+      </div>
+    </div>
+    <div class="blend-slider">
+      <label>混合比例</label>
+      <input type="range" id="blendRatio" min="0" max="100" value="50" oninput="blendColors()">
+      <div class="values"><span>100% 颜色1</span><span>0% 颜色1</span></div>
+    </div>
+    <div class="gradient-preview" id="gradientPreview"></div>
+    <div class="result-preview">
+      <div class="result-item"><div class="color-box" id="color1Preview"></div><div class="label">颜色1</div><div class="value" id="color1Hex"></div></div>
+      <div class="result-item"><div class="color-box" id="blendResult"></div><div class="label">混合结果</div><div class="value" id="blendHex"></div></div>
+      <div class="result-item"><div class="color-box" id="color2Preview"></div><div class="label">颜色2</div><div class="value" id="color2Hex"></div></div>
+    </div>
+    <div class="buttons">
+      <button class="btn-primary" onclick="swapColors()">交换颜色</button>
+      <button class="btn-success" onclick="copyResult()">复制结果色值</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>渐变色阶预览</h3>
+    <div class="blend-results" id="blendResults"></div>
+  </div>
+
+  <div class="footer">100% 免费 · 数据不上传服务器 · 仅浏览器本地处理</div>
+
+  <script>
+    function hexToRgb(hex) {
+      const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+      return result ? { r: parseInt(result[1], 16), g: parseInt(result[2], 16), b: parseInt(result[3], 16) } : null;
+    }
+    function rgbToHex(r, g, b) {
+      return '#' + [r, g, b].map(x => Math.round(Math.max(0, Math.min(255, x))).toString(16).padStart(2, '0')).join('');
+    }
+    function blend(c1, c2, ratio) {
+      return {
+        r: c1.r * ratio / 100 + c2.r * (100 - ratio) / 100,
+        g: c1.g * ratio / 100 + c2.g * (100 - ratio) / 100,
+        b: c1.b * ratio / 100 + c2.b * (100 - ratio) / 100
+      };
+    }
+    function updateFromText(num) {
+      const val = document.getElementById('color' + num + 'Text').value;
+      if (/^#[0-9a-fA-F]{6}$/.test(val)) {
+        document.getElementById('color' + num).value = val;
+        blendColors();
+      }
+    }
+    function blendColors() {
+      const c1 = hexToRgb(document.getElementById('color1').value);
+      const c2 = hexToRgb(document.getElementById('color2').value);
+      const ratio = parseInt(document.getElementById('blendRatio').value);
+      const blended = blend(c1, c2, ratio);
+      const hex1 = document.getElementById('color1').value.toUpperCase();
+      const hex2 = document.getElementById('color2').value.toUpperCase();
+      const blendHex = rgbToHex(blended.r, blended.g, blended.b).toUpperCase();
+      document.getElementById('color1Preview').style.background = hex1;
+      document.getElementById('color2Preview').style.background = hex2;
+      document.getElementById('blendResult').style.background = blendHex;
+      document.getElementById('color1Hex').textContent = hex1;
+      document.getElementById('color2Hex').textContent = hex2;
+      document.getElementById('blendHex').textContent = blendHex;
+      document.getElementById('gradientPreview').style.background = `linear-gradient(to right, ${hex1}, ${blendHex}, ${hex2})`;
+      renderGradient();
+    }
+    function renderGradient() {
+      const c1 = hexToRgb(document.getElementById('color1').value);
+      const c2 = hexToRgb(document.getElementById('color2').value);
+      const steps = 10;
+      let html = '';
+      for (let i = 0; i <= steps; i++) {
+        const ratio = (i / steps) * 100;
+        const blended = blend(c1, c2, ratio);
+        const hex = rgbToHex(blended.r, blended.g, blended.b);
+        html += `<div class="blend-color" style="background:${hex}" title="${hex}" onclick="copyColor('${hex}')"></div>`;
+      }
+      document.getElementById('blendResults').innerHTML = html;
+    }
+    function swapColors() {
+      const c1 = document.getElementById('color1').value;
+      const c2 = document.getElementById('color2').value;
+      document.getElementById('color1').value = c2;
+      document.getElementById('color2').value = c1;
+      document.getElementById('color1Text').value = c2;
+      document.getElementById('color2Text').value = c1;
+      blendColors();
+    }
+    function copyColor(hex) {
+      navigator.clipboard.writeText(hex).then(() => alert('已复制: ' + hex));
+    }
+    function copyResult() {
+      const hex = document.getElementById('blendHex').textContent;
+      navigator.clipboard.writeText(hex).then(() => alert('已复制: ' + hex));
+    }
+    blendColors();
+  </script>
+    <div class="ad-banner-bottom"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+</body>
+</html>

@@ -1,0 +1,114 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>图片压缩工具 - 免费在线图片压缩器</title>
+  <meta name="description" content="免费在线图片压缩工具，拖拽上传，滑块调节压缩质量，支持PNG/JPG/WEBP，浏览器本地处理不上传。">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://fm-han.github.io/img-compress/">
+  <style>
+                /* 顶部横幅广告 - 透明样式 */ .ad-banner-top { border-bottom: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; } .ad-banner-bottom { border-top: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; margin-top: 40px; } .ad-container { max-width: 728px; margin: 0 auto; min-height: 38px; display: flex; align-items: center; justify-content: center; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; color: #333; line-height: 1.6; background: #fafafa; }
+    h1 { text-align: center; font-size: 1.8rem; color: #1a1a1a; }
+    h1 small { display: block; font-size: 0.85rem; color: #666; margin-top: 4px; font-weight: normal; }
+    .section { margin: 20px 0; padding: 16px; border: 1px solid #e0e0e0; border-radius: 8px; background: #fff; }
+    .section label { display: block; font-weight: 600; margin-bottom: 8px; }
+    .drop-zone { border: 2px dashed #ccc; padding: 24px; text-align: center; border-radius: 8px; cursor: pointer; margin-bottom: 12px; }
+    .drop-zone:hover { border-color: #007bff; background: #f0f7ff; }
+    input[type="range"] { -webkit-appearance: none; width: 100%; height: 6px; border-radius: 3px; background: #ddd; outline: none; }
+    input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%; background: #007bff; cursor: pointer; }
+    button { padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-size: 0.95rem; }
+    .btn-primary { background: #007bff; color: #fff; }
+    .btn-download { background: #28a745; color: #fff; }
+    button:hover { opacity: 0.9; }
+    .preview-card { padding: 12px; background: #f8f9fa; border-radius: 6px; margin-bottom: 12px; }
+    .preview-card img { max-height: 120px; max-width: 100%; border-radius: 4px; }
+    .footer { text-align: center; margin: 24px 0; padding: 12px; font-size: 0.85rem; color: #28a745; font-weight: 500; }
+  </style>
+</head>
+<body>
+    <div class="ad-banner-top"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+
+  <h1>图片压缩工具 <small>拖拽上传 / 滑块调质量 / 浏览器本地处理</small></h1>
+
+  <div class="section">
+    <label>上传图片</label>
+    <div class="drop-zone" onclick="document.getElementById('fileInput').click()">
+      <input type="file" id="fileInput" accept="image/*" multiple class="hidden" onchange="handleFiles(this.files)">
+      <p>点击选择图片，或拖拽图片到此处</p>
+      <p style="color:#888;font-size:0.85rem;margin-top:8px;">支持 PNG / JPG / WEBP</p>
+    </div>
+  </div>
+
+  <div class="section" id="compressPanel" style="display:none;">
+    <label>压缩质量</label>
+    <input type="range" id="qualitySlider" min="10" max="100" value="80" oninput="document.getElementById('qualityLabel').textContent=this.value+'%'">
+    <div style="display:flex;justify-content:space-between;font-size:0.85rem;color:#888;margin-top:4px;">
+      <span>小体积</span><span id="qualityLabel">80%</span><span>高画质</span>
+    </div>
+    <button class="btn-primary" style="width:100%;margin-top:12px;" onclick="compressImages()">开始压缩</button>
+  </div>
+
+  <div id="resultPanel"></div>
+
+  <div class="footer">100% 免费 · 数据不上传服务器 · 仅浏览器本地处理</div>
+
+  <script>
+    let files = [];
+
+    const dropZone = document.querySelector('.drop-zone');
+    ['dragenter','dragover'].forEach(e => dropZone.addEventListener(e, ev => { ev.preventDefault(); dropZone.style.borderColor='#007bff'; dropZone.style.background='#f0f7ff'; }));
+    ['dragleave','drop'].forEach(e => dropZone.addEventListener(e, ev => { ev.preventDefault(); dropZone.style.borderColor='#ccc'; dropZone.style.background=''; }));
+    dropZone.addEventListener('drop', e => handleFiles(e.dataTransfer.files));
+
+    function handleFiles(fList) {
+      files = Array.from(fList).filter(f => f.type.startsWith('image/'));
+      if (files.length) document.getElementById('compressPanel').style.display = 'block';
+    }
+
+    async function compressImages() {
+      const panel = document.getElementById('resultPanel');
+      panel.innerHTML = '<p style="text-align:center;color:#666;">压缩中...</p>';
+      const quality = parseInt(document.getElementById('qualitySlider').value) / 100;
+
+      let html = '';
+      for (const file of files) {
+        const img = await loadImage(file);
+        const canvas = document.createElement('canvas');
+        canvas.width = img.width; canvas.height = img.height;
+        canvas.getContext('2d').drawImage(img, 0, 0);
+        const dataUrl = canvas.toDataURL('image/jpeg', quality);
+        const origKB = (file.size / 1024).toFixed(1);
+        const compKB = (dataUrl.length * 0.75 / 1024).toFixed(1);
+        const pct = Math.round((1 - compKB / origKB) * 100);
+        const color = pct > 50 ? '#28a745' : pct > 20 ? '#ffc107' : '#6c757d';
+        html += `
+          <div class="section">
+            <div class="preview-card" style="text-align:center;">
+              <img src="${dataUrl}">
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:0.9rem;">
+              <span>原图: <b>${origKB} KB</b></span>
+              <span>压缩后: <b>${compKB} KB</b></span>
+              <span style="color:${color};font-weight:bold;">-${pct}%</span>
+            </div>
+            <a href="${dataUrl}" download="${file.name.replace(/\.\w+$/, '_compressed.jpg')}" style="text-decoration:none;">
+              <button class="btn-download" style="width:100%;margin-top:8px;">下载压缩图</button>
+            </a>
+          </div>`;
+      }
+      panel.innerHTML = html;
+    }
+
+    function loadImage(file) {
+      return new Promise(resolve => {
+        const img = new Image();
+        img.onload = () => resolve(img);
+        img.src = URL.createObjectURL(file);
+      });
+    }
+  </script>
+    <div class="ad-banner-bottom"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+</body>
+</html>

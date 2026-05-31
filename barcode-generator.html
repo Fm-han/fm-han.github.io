@@ -1,0 +1,204 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>条形码生成器</title>
+    <style>
+                /* 顶部横幅广告 - 透明样式 */ .ad-banner-top { border-bottom: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; } .ad-banner-bottom { border-top: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; margin-top: 40px; } .ad-container { max-width: 728px; margin: 0 auto; min-height: 38px; display: flex; align-items: center; justify-content: center; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #fafafa; min-height: 100vh; padding: 20px; }
+        .container { max-width: 600px; margin: 0 auto; }
+        .card { background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; padding: 24px; margin-bottom: 20px; }
+        h1 { font-size: 1.5rem; font-weight: 600; margin-bottom: 20px; color: #333; text-align: center; }
+        .title { font-size: 1.25rem; font-weight: 600; margin-bottom: 16px; color: #333; }
+        label { display: block; margin-bottom: 8px; color: #555; font-weight: 500; }
+        input, select { border: 1px solid #ddd; border-radius: 4px; padding: 8px 12px; width: 100%; box-sizing: border-box; margin-bottom: 16px; }
+        button { background: #007bff; color: #fff; border: none; padding: 8px 20px; border-radius: 4px; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        button.generate-btn { background: #28a745; width: 100%; padding: 12px; font-size: 1.1rem; }
+        button.generate-btn:hover { background: #218838; }
+        .barcode-type { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 16px; }
+        .type-btn { padding: 12px; text-align: center; background: #f0f0f0; border: 2px solid transparent; border-radius: 8px; cursor: pointer; font-size: 0.9rem; }
+        .type-btn.active { background: #e7f3ff; border-color: #007bff; color: #007bff; }
+        .barcode-display { text-align: center; padding: 30px; margin-top: 16px; min-height: 200px; }
+        canvas { max-width: 100%; }
+        .barcode-text { font-family: monospace; font-size: 1.1rem; margin-top: 12px; letter-spacing: 2px; }
+        .btn-row { display: flex; gap: 10px; margin-top: 16px; }
+        button.download-btn { flex: 1; background: #17a2b8; }
+        button.download-btn:hover { background: #138496; }
+        button.clear-btn { flex: 1; background: #6c757d; }
+        button.clear-btn:hover { background: #5a6268; }
+        .error { color: #dc3545; margin-top: 8px; font-size: 0.9rem; }
+    </style>
+</head>
+<body>
+    <div class="ad-banner-top"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+    <div class="container">
+        <h1>条形码生成器</h1>
+        <div class="card">
+            <div class="title">条码设置</div>
+            
+            <label>条码类型</label>
+            <div class="barcode-type">
+                <div class="type-btn active" onclick="selectType('code128', this)">Code 128</div>
+                <div class="type-btn" onclick="selectType('ean13', this)">EAN-13</div>
+                <div class="type-btn" onclick="selectType('ean8', this)">EAN-8</div>
+                <div class="type-btn" onclick="selectType('upc', this)">UPC-A</div>
+            </div>
+            
+            <label id="contentLabel">条码内容 (字母/数字)</label>
+            <input type="text" id="barcodeContent" placeholder="输入条形码内容">
+            <div id="contentHint" style="color:#999; font-size:0.85rem; margin-top:-12px; margin-bottom:12px;">Code 128: 支持所有ASCII字符</div>
+            
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-bottom:16px;">
+                <div>
+                    <label>宽度 (px)</label>
+                    <input type="number" id="barWidth" value="2" min="1" max="5">
+                </div>
+                <div>
+                    <label>高度 (px)</label>
+                    <input type="number" id="barHeight" value="100" min="50" max="300">
+                </div>
+            </div>
+            
+            <label style="display:flex; align-items:center; gap:8px;">
+                <input type="checkbox" id="showText" checked> 显示文字
+            </label>
+            
+            <button class="generate-btn" onclick="generateBarcode()">生成条形码</button>
+            
+            <div id="barcodeDisplay" class="barcode-display" style="display:none;">
+                <canvas id="barcodeCanvas"></canvas>
+                <div id="barcodeText" class="barcode-text" style="display:none;"></div>
+            </div>
+            
+            <div class="btn-row" id="btnRow" style="display:none;">
+                <button class="download-btn" onclick="downloadBarcode()">下载PNG</button>
+                <button class="clear-btn" onclick="clearBarcode()">清除</button>
+            </div>
+            
+            <div id="error" class="error" style="display:none;"></div>
+        </div>
+        
+        <div class="card">
+            <div class="title">条码类型说明</div>
+            <p style="color:#666; font-size:0.9rem; line-height:1.6;">
+                <strong>Code 128</strong>: 通用条形码，支持所有ASCII字符<br>
+                <strong>EAN-13</strong>: 国际商品条码（13位数字）<br>
+                <strong>EAN-8</strong>: 短商品条码（8位数字）<br>
+                <strong>UPC-A</strong>: 美国商品条码（12位数字）
+            </p>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+    <script>
+        let currentType = 'code128';
+
+        function selectType(type, btn) {
+            currentType = type;
+            document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            
+            const label = document.getElementById('contentLabel');
+            const hint = document.getElementById('contentHint');
+            const input = document.getElementById('barcodeContent');
+            
+            switch(type) {
+                case 'code128':
+                    label.textContent = '条码内容 (字母/数字)';
+                    hint.textContent = 'Code 128: 支持所有ASCII字符';
+                    input.placeholder = '如: ABC-abc-1234';
+                    break;
+                case 'ean13':
+                    label.textContent = 'EAN-13 数字 (13位)';
+                    hint.textContent = 'EAN-13: 需要13位数字（自动计算校验位）';
+                    input.placeholder = '如: 590123412345';
+                    break;
+                case 'ean8':
+                    label.textContent = 'EAN-8 数字 (8位)';
+                    hint.textContent = 'EAN-8: 需要8位数字（自动计算校验位）';
+                    input.placeholder = '如: 9638507';
+                    break;
+                case 'upc':
+                    label.textContent = 'UPC-A 数字 (12位)';
+                    hint.textContent = 'UPC-A: 需要12位数字（自动计算校验位）';
+                    input.placeholder = '如: 12345678901';
+                    break;
+            }
+            
+            document.getElementById('error').style.display = 'none';
+        }
+
+        function generateBarcode() {
+            const content = document.getElementById('barcodeContent').value.trim();
+            const barWidth = parseInt(document.getElementById('barWidth').value);
+            const barHeight = parseInt(document.getElementById('barHeight').value);
+            const showText = document.getElementById('showText').checked;
+            
+            const errorDiv = document.getElementById('error');
+            const displayDiv = document.getElementById('barcodeDisplay');
+            const btnRow = document.getElementById('btnRow');
+            const canvas = document.getElementById('barcodeCanvas');
+            const textDiv = document.getElementById('barcodeText');
+            
+            errorDiv.style.display = 'none';
+            
+            if (!content) {
+                errorDiv.textContent = '请输入条形码内容';
+                errorDiv.style.display = 'block';
+                return;
+            }
+            
+            if (currentType !== 'code128' && !/^\d+$/.test(content)) {
+                errorDiv.textContent = '该条码类型只支持数字';
+                errorDiv.style.display = 'block';
+                return;
+            }
+            
+            try {
+                JsBarcode("#barcodeCanvas", content, {
+                    format: currentType.toUpperCase(),
+                    width: barWidth,
+                    height: barHeight,
+                    displayValue: showText,
+                    font: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+                    fontSize: 16,
+                    lineColor: '#000',
+                    background: '#fff'
+                });
+                
+                if (showText) {
+                    textDiv.textContent = content;
+                    textDiv.style.display = 'block';
+                } else {
+                    textDiv.style.display = 'none';
+                }
+                
+                displayDiv.style.display = 'block';
+                btnRow.style.display = 'flex';
+            } catch (e) {
+                errorDiv.textContent = '生成失败: ' + e.message;
+                errorDiv.style.display = 'block';
+            }
+        }
+
+        function downloadBarcode() {
+            const canvas = document.getElementById('barcodeCanvas');
+            const link = document.createElement('a');
+            link.download = 'barcode.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+
+        function clearBarcode() {
+            document.getElementById('barcodeContent').value = '';
+            document.getElementById('barcodeDisplay').style.display = 'none';
+            document.getElementById('btnRow').style.display = 'none';
+            document.getElementById('error').style.display = 'none';
+        }
+    </script>
+    <div class="ad-banner-bottom"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+</body>
+</html>

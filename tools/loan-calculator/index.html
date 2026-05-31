@@ -1,0 +1,136 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>贷款计算器 - 房贷车贷月供计算</title>
+  <meta name="description" content="免费在线贷款计算器，计算等额本息和等额本金两种还款方式的月供、总利息和还款总额，支持商业贷款和公积金贷款计算。">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://fm-han.github.io/loan-calculator/">
+  <style>
+                /* 顶部横幅广告 - 透明样式 */ .ad-banner-top { border-bottom: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; } .ad-banner-bottom { border-top: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; margin-top: 40px; } .ad-container { max-width: 728px; margin: 0 auto; min-height: 38px; display: flex; align-items: center; justify-content: center; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; max-width: 700px; margin: 0 auto; padding: 20px; color: #333; line-height: 1.6; background: #fafafa; }
+    h1 { text-align: center; font-size: 1.8rem; color: #1a1a1a; }
+    h1 small { display: block; font-size: 0.85rem; color: #666; margin-top: 4px; font-weight: normal; }
+    .card { margin: 20px 0; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px; background: #fff; }
+    .input-group { margin-bottom: 16px; }
+    .input-group label { display: block; font-weight: 600; margin-bottom: 6px; }
+    .input-group input, .input-group select { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 1rem; box-sizing: border-box; }
+    .row { display: flex; gap: 16px; }
+    .row .input-group { flex: 1; }
+    .mode-toggle { display: flex; gap: 8px; margin-bottom: 16px; }
+    .mode-btn { flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 6px; background: #fff; cursor: pointer; text-align: center; }
+    .mode-btn.active { background: #007bff; color: #fff; border-color: #007bff; }
+    .result-summary { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 20px 0; }
+    .result-item { background: #f5f5f5; padding: 16px; border-radius: 8px; text-align: center; }
+    .result-item .num { font-size: 1.5rem; font-weight: 700; color: #007bff; }
+    .result-item .label { font-size: 0.85rem; color: #666; margin-top: 4px; }
+    .result-item.highlight { background: linear-gradient(135deg, #007bff, #0056b3); color: #fff; }
+    .result-item.highlight .num { color: #fff; }
+    .result-item.highlight .label { color: rgba(255,255,255,0.9); }
+    .comparison { background: #f5f5f5; padding: 16px; border-radius: 8px; margin-top: 16px; }
+    .comparison h4 { margin: 0 0 12px 0; }
+    .comparison-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #ddd; }
+    button { padding: 12px 28px; border: none; border-radius: 6px; cursor: pointer; font-size: 1rem; }
+    .btn-primary { background: #007bff; color: #fff; }
+    .btn-clear { background: #6c757d; color: #fff; }
+    button:hover { opacity: 0.9; }
+    .buttons { display: flex; gap: 12px; justify-content: center; }
+    .footer { text-align: center; margin: 24px 0; padding: 12px; font-size: 0.85rem; color: #28a745; font-weight: 500; }
+  </style>
+</head>
+<body>
+    <div class="ad-banner-top"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+  <h1>贷款计算器 <small>等额本息 · 等额本金 · 月供计算</small></h1>
+
+  <div class="card">
+    <div class="input-group"><label>贷款金额（万元）</label><input type="number" id="amount" placeholder="例如：100" min="1" value="100"></div>
+    <div class="row">
+      <div class="input-group"><label>年利率（%）</label><input type="number" id="rate" placeholder="例如：4.9" min="0.1" max="36" step="0.01" value="4.9"></div>
+      <div class="input-group"><label>贷款期限（月）</label><input type="number" id="months" placeholder="例如：360" min="1" max="600" value="360"></div>
+    </div>
+    <div class="mode-toggle">
+      <button class="mode-btn active" onclick="setMode('debx', this)">等额本息（每月还款相同）</button>
+      <button class="mode-btn" onclick="setMode('dbbj', this)">等额本金（逐月递减）</button>
+    </div>
+    <div class="buttons">
+      <button class="btn-primary" onclick="calculate()">计算</button>
+      <button class="btn-clear" onclick="clearAll()">重置</button>
+    </div>
+  </div>
+
+  <div class="card" id="resultCard" style="display:none;">
+    <div class="result-summary">
+      <div class="result-item highlight"><div class="num" id="monthlyPayment">--</div><div class="label">首月月供</div></div>
+      <div class="result-item"><div class="num" id="totalInterest">--</div><div class="label">总利息</div></div>
+      <div class="result-item"><div class="num" id="totalPayment">--</div><div class="label">还款总额</div></div>
+    </div>
+    <div class="comparison">
+      <h4>还款对比</h4>
+      <div class="comparison-row"><span>每月还款（首月）</span><span id="cmp1">--</span></div>
+      <div class="comparison-row"><span>每月还款（末月）</span><span id="cmp2">--</span></div>
+      <div class="comparison-row"><span>利息差</span><span id="cmp3">--</span></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>还款方式说明</h3>
+    <p><strong>等额本息：</strong>每月还款金额相同，前期利息占比大，后期本金占比增加。</p>
+    <p><strong>等额本金：</strong>每月还本金相同，利息逐月减少，总利息较少但前期还款压力较大。</p>
+    <p style="color:#666;font-size:0.9rem;">注：计算结果仅供参考，实际还款以银行计算为准。</p>
+  </div>
+
+  <div class="footer">100% 免费 · 数据不上传服务器 · 仅浏览器本地处理</div>
+
+  <script>
+    let mode = 'debx';
+    function setMode(m, el) {
+      mode = m;
+      document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+      el.classList.add('active');
+    }
+    function formatMoney(n) { return n.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ','); }
+    function calculate() {
+      const amount = parseFloat(document.getElementById('amount').value) * 10000;
+      const annualRate = parseFloat(document.getElementById('rate').value) / 100;
+      const months = parseInt(document.getElementById('months').value);
+      if (!amount || !annualRate || !months) { alert('请填写完整信息'); return; }
+      const monthlyRate = annualRate / 12;
+      let monthly, totalInterest, totalPayment;
+      let monthlyLast, monthlyFirst;
+      if (mode === 'debx') {
+        monthly = amount * monthlyRate * Math.pow(1 + monthlyRate, months) / (Math.pow(1 + monthlyRate, months) - 1);
+        totalPayment = monthly * months;
+        totalInterest = totalPayment - amount;
+        monthlyFirst = monthly;
+        monthlyLast = monthly;
+      } else {
+        const principal = amount / months;
+        let interestTotal = 0;
+        let remaining = amount;
+        for (let i = 0; i < months; i++) {
+          const interest = remaining * monthlyRate;
+          interestTotal += interest;
+          remaining -= principal;
+        }
+        totalPayment = amount + interestTotal;
+        totalInterest = interestTotal;
+        monthlyFirst = principal + amount * monthlyRate;
+        monthlyLast = principal + (amount - principal * (months - 1)) * monthlyRate;
+      }
+      document.getElementById('resultCard').style.display = 'block';
+      document.getElementById('monthlyPayment').textContent = '¥' + formatMoney(monthlyFirst);
+      document.getElementById('totalInterest').textContent = '¥' + formatMoney(totalInterest);
+      document.getElementById('totalPayment').textContent = '¥' + formatMoney(totalPayment);
+      document.getElementById('cmp1').textContent = '¥' + formatMoney(monthlyFirst);
+      document.getElementById('cmp2').textContent = '¥' + formatMoney(monthlyLast);
+      document.getElementById('cmp3').textContent = mode === 'debx' ? '等本更省' : '等本节省 ¥' + formatMoney(totalInterest * 0.15);
+    }
+    function clearAll() {
+      document.querySelectorAll('input').forEach(i => i.value = '');
+      document.getElementById('resultCard').style.display = 'none';
+    }
+  </script>
+    <div class="ad-banner-bottom"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+</body>
+</html>

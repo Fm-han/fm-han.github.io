@@ -1,0 +1,130 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JSON 转 XML - 免费在线工具</title>
+<style>
+                /* 顶部横幅广告 - 透明样式 */ .ad-banner-top { border-bottom: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; } .ad-banner-bottom { border-top: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; margin-top: 40px; } .ad-container { max-width: 728px; margin: 0 auto; min-height: 38px; display: flex; align-items: center; justify-content: center; }
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; background:#fafafa; color:#333; min-height:100vh; display:flex; flex-direction:column; height:100vh; }
+.header { background:#fff; border-bottom:1px solid #e0e0e0; padding:12px 24px; display:flex; align-items:center; justify-content:space-between; flex-shrink:0; }
+.header h1 { font-size:1.25rem; font-weight:600; }
+.back-link { color:#007bff; text-decoration:none; font-size:0.9rem; }
+.back-link:hover { text-decoration:underline; }
+.toolbar { display:flex; gap:8px; }
+.btn-primary { background:#007bff; color:#fff; border:none; padding:8px 20px; border-radius:4px; cursor:pointer; font-size:0.95rem; }
+.btn-primary:hover { background:#0056b3; }
+.btn-secondary { background:#28a745; color:#fff; border:none; padding:8px 20px; border-radius:4px; cursor:pointer; font-size:0.95rem; }
+.btn-secondary:hover { background:#1e7e34; }
+.btn-danger { background:#dc3545; color:#fff; border:none; padding:8px 20px; border-radius:4px; cursor:pointer; font-size:0.95rem; }
+.btn-danger:hover { background:#c82333; }
+.main-area { display:flex; flex:1; overflow:hidden; }
+.editor-panel { flex:1; display:flex; flex-direction:column; border-right:1px solid #e0e0e0; }
+.panel-header { padding:12px 16px; background:#fff; border-bottom:1px solid #e0e0e0; font-size:0.95rem; font-weight:500; color:#555; display:flex; justify-content:space-between; align-items:center; flex-shrink:0; }
+textarea { flex:1; border:none; padding:16px; font-family:'Consolas','Courier New',monospace; font-size:14px; resize:none; outline:none; background:#fafafa; white-space:pre; overflow:auto; }
+.result-panel { flex:1; display:flex; flex-direction:column; }
+.output-area { flex:1; border:none; padding:16px; font-family:'Consolas','Courier New',monospace; font-size:14px; background:#fafafa; overflow:auto; white-space:pre-wrap; word-break:break-all; }
+.xml-tag { color:#881391; }
+.xml-attr { color:#c41a16; }
+.xml-text { color:#1c00cf; }
+.status-bar { padding:8px 16px; font-size:0.85rem; border-top:1px solid #e0e0e0; flex-shrink:0; color:#888; }
+label { font-size:0.9rem; color:#555; font-weight:500; }
+</style>
+</head>
+<body>
+    <div class="ad-banner-top"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+<div class="header">
+  <h1>JSON 转 XML</h1>
+  <a href="https://fm-han.github.io" class="back-link">← 返回工具站</a>
+</div>
+<div class="main-area">
+  <div class="editor-panel">
+    <div class="panel-header">
+      <span>输入 JSON</span>
+      <div>
+        <button class="btn-secondary" onclick="loadExample()" style="padding:4px 12px;font-size:0.85rem;">示例</button>
+        <button class="btn-danger" onclick="clearAll()" style="padding:4px 12px;font-size:0.85rem;margin-left:4px;">清空</button>
+      </div>
+    </div>
+    <textarea id="jsonInput" placeholder="在此输入或粘贴 JSON 内容..."></textarea>
+    <div class="panel-header" style="border-top:1px solid #e0e0e0; justify-content:center;">
+      <button class="btn-primary" onclick="convert()" style="padding:6px 24px;">转换为 XML</button>
+    </div>
+  </div>
+  <div class="result-panel">
+    <div class="panel-header">
+      <span>XML 输出</span>
+      <button class="btn-secondary" onclick="copyResult()" style="padding:4px 12px;font-size:0.85rem;">复制</button>
+    </div>
+    <div class="output-area" id="resultArea">转换结果将显示在此处...</div>
+    <div class="status-bar" id="statusBar">就绪</div>
+  </div>
+</div>
+<script>
+const input = document.getElementById('jsonInput');
+const result = document.getElementById('resultArea');
+const status = document.getElementById('statusBar');
+
+function convert() {
+  const jsonStr = input.value.trim();
+  if (!jsonStr) { setStatus('请输入 JSON 内容','err'); return; }
+  try {
+    const obj = JSON.parse(jsonStr);
+    const xml = '<?xml version="1.0" encoding="UTF-8"?>\n' + objToXml(obj, 'root');
+    result.innerHTML = syntaxHighlight(xml);
+    setStatus('转换成功 | 大小：' + (new Blob([jsonStr]).size/1024).toFixed(1) + 'KB → ' + (new Blob([xml]).size/1024).toFixed(1) + 'KB','ok');
+  } catch(e) {
+    result.textContent = 'JSON 解析错误：\n' + e.message;
+    setStatus('转换失败：' + e.message,'err');
+  }
+}
+
+function objToXml(obj, name) {
+  if (obj === null) return '<' + name + '/>';
+  if (typeof obj === 'string' || obj instanceof String) return '<' + name + '>' + escapeXml(String(obj)) + '</' + name + '>';
+  if (typeof obj === 'number') return '<' + name + '>' + obj + '</' + name + '>';
+  if (typeof obj === 'boolean') return '<' + name + '>' + obj + '</' + name + '>';
+  if (Array.isArray(obj)) {
+    let xml = '';
+    obj.forEach(item => { xml += objToXml(item, name); });
+    return xml;
+  }
+  if (typeof obj === 'object') {
+    let xml = '<' + name + '>';
+    for (const key in obj) {
+      if (key === '@attributes' && typeof obj[key] === 'object') {
+        // Handle attributes - they should be added to parent tag
+        continue;
+      }
+      xml += objToXml(obj[key], key);
+    }
+    xml += '</' + name + '>';
+    return xml;
+  }
+  return '<' + name + '>' + String(obj) + '</' + name + '>';
+}
+
+function escapeXml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&apos;');
+}
+
+function syntaxHighlight(xml) {
+  return xml.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/(&lt;\/?)([\w-]+)/g, '$1<span class="xml-tag">$2</span>')
+    .replace(/([\w-]+)(=)(&quot;[^&]*&quot;)/g, '<span class="xml-attr">$1</span>$2$3')
+    .replace(/&gt;([^<]*)&lt;/g, function(m, t) { return '&gt;<span class="xml-text">' + t + '</span>&lt;'; });
+}
+
+function loadExample() {
+  input.value = '{\n  "user": {\n    "name": "张三",\n    "age": 28,\n    "active": true,\n    "skills": ["JavaScript","Python"]\n  }\n}';
+  convert();
+}
+
+function clearAll() { input.value=''; result.textContent='转换结果将显示在此处...'; setStatus('就绪',''); }
+function copyResult() { navigator.clipboard.writeText(result.textContent).then(()=>setStatus('已复制','ok')); }
+function setStatus(msg,type) { status.textContent=msg; status.style.color=type==='ok'?'#28a745':type==='err'?'#dc3545':'#888'; }
+</script>
+    <div class="ad-banner-bottom"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+</body>
+</html>

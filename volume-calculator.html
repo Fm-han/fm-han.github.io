@@ -1,0 +1,365 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>体积计算器</title>
+    <style>
+                /* 顶部横幅广告 - 透明样式 */ .ad-banner-top { border-bottom: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; } .ad-banner-bottom { border-top: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; margin-top: 40px; } .ad-container { max-width: 728px; margin: 0 auto; min-height: 38px; display: flex; align-items: center; justify-content: center; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #fafafa; min-height: 100vh; padding: 20px; }
+        .container { max-width: 600px; margin: 0 auto; }
+        .card { background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; padding: 24px; margin-bottom: 20px; }
+        h1 { font-size: 1.5rem; font-weight: 600; margin-bottom: 20px; color: #333; text-align: center; }
+        .title { font-size: 1.25rem; font-weight: 600; margin-bottom: 16px; color: #333; }
+        label { display: block; margin-bottom: 8px; color: #555; font-weight: 500; }
+        input { border: 1px solid #ddd; border-radius: 4px; padding: 8px 12px; width: 100%; box-sizing: border-box; margin-bottom: 16px; }
+        button { background: #007bff; color: #fff; border: none; padding: 8px 20px; border-radius: 4px; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        button.calc-btn { background: #28a745; width: 100%; padding: 12px; font-size: 1.1rem; }
+        .shapes-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 16px; }
+        .shape-btn { padding: 12px 8px; text-align: center; background: #f0f0f0; border: 2px solid transparent; border-radius: 8px; cursor: pointer; font-size: 0.9rem; transition: all 0.2s; }
+        .shape-btn:hover { background: #e0e0e0; }
+        .shape-btn.active { background: #e7f3ff; border-color: #007bff; color: #007bff; }
+        .shape-icon { font-size: 1.8rem; display: block; margin-bottom: 4px; }
+        .inputs-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .inputs-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+        .input-group { display: none; }
+        .input-group.active { display: block; }
+        .input-with-unit { position: relative; }
+        .input-with-unit input { padding-right: 50px; }
+        .input-unit { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: #999; font-size: 0.85rem; }
+        .result { background: #f0f7ff; border: 1px solid #007bff; border-radius: 4px; padding: 16px; margin-top: 16px; text-align: center; }
+        .result-label { color: #666; font-size: 0.9rem; margin-bottom: 8px; }
+        .result-value { color: #007bff; font-size: 1.8rem; font-weight: 700; }
+        .formula { background: #f8f9fa; padding: 12px; border-radius: 4px; font-family: monospace; font-size: 0.9rem; margin-top: 12px; }
+        .error { color: #dc3545; margin-top: 8px; font-size: 0.9rem; }
+    </style>
+</head>
+<body>
+    <div class="ad-banner-top"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+    <div class="container">
+        <h1>体积计算器</h1>
+        <div class="card">
+            <div class="title">选择几何体</div>
+            <div class="shapes-grid">
+                <div class="shape-btn active" onclick="selectShape('cube', this)">
+                    <span class="shape-icon">🔲</span>
+                    立方体
+                </div>
+                <div class="shape-btn" onclick="selectShape('sphere', this)">
+                    <span class="shape-icon">🔵</span>
+                    球体
+                </div>
+                <div class="shape-btn" onclick="selectShape('cylinder', this)">
+                    <span class="shape-icon">🥁</span>
+                    圆柱体
+                </div>
+                <div class="shape-btn" onclick="selectShape('cone', this)">
+                    <span class="shape-icon">🍦</span>
+                    圆锥体
+                </div>
+                <div class="shape-btn" onclick="selectShape('pyramid', this)">
+                    <span class="shape-icon">🔺</span>
+                    四棱锥
+                </div>
+                <div class="shape-btn" onclick="selectShape('rectangular', this)">
+                    <span class="shape-icon">📦</span>
+                    长方体
+                </div>
+                <div class="shape-btn" onclick="selectShape('torus', this)">
+                    <span class="shape-icon">🍩</span>
+                    圆环体
+                </div>
+                <div class="shape-btn" onclick="selectShape('capsule', this)">
+                    <span class="shape-icon">💊</span>
+                    胶囊体
+                </div>
+                <div class="shape-btn" onclick="selectShape('ellipsoid', this)">
+                    <span class="shape-icon">🥚</span>
+                    椭球体
+                </div>
+            </div>
+            
+            <div id="cubeInputs" class="input-group active">
+                <label>边长 a</label>
+                <div class="input-with-unit">
+                    <input type="number" id="cubeA" placeholder="输入边长" step="any">
+                    <span class="input-unit">单位</span>
+                </div>
+                <div class="formula">V = a³</div>
+            </div>
+            
+            <div id="sphereInputs" class="input-group">
+                <label>半径 r</label>
+                <div class="input-with-unit">
+                    <input type="number" id="sphereR" placeholder="输入半径" step="any">
+                    <span class="input-unit">单位</span>
+                </div>
+                <div class="formula">V = (4/3)πr³</div>
+            </div>
+            
+            <div id="cylinderInputs" class="input-group">
+                <div class="inputs-row">
+                    <div>
+                        <label>半径 r</label>
+                        <div class="input-with-unit">
+                            <input type="number" id="cylR" placeholder="半径" step="any">
+                            <span class="input-unit">单位</span>
+                        </div>
+                    </div>
+                    <div>
+                        <label>高 h</label>
+                        <div class="input-with-unit">
+                            <input type="number" id="cylH" placeholder="高度" step="any">
+                            <span class="input-unit">单位</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="formula">V = πr²h</div>
+            </div>
+            
+            <div id="coneInputs" class="input-group">
+                <div class="inputs-row">
+                    <div>
+                        <label>半径 r</label>
+                        <div class="input-with-unit">
+                            <input type="number" id="coneR" placeholder="半径" step="any">
+                            <span class="input-unit">单位</span>
+                        </div>
+                    </div>
+                    <div>
+                        <label>高 h</label>
+                        <div class="input-with-unit">
+                            <input type="number" id="coneH" placeholder="高度" step="any">
+                            <span class="input-unit">单位</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="formula">V = (1/3)πr²h</div>
+            </div>
+            
+            <div id="pyramidInputs" class="input-group">
+                <div class="inputs-row">
+                    <div>
+                        <label>底边长 a</label>
+                        <div class="input-with-unit">
+                            <input type="number" id="pyrA" placeholder="底边" step="any">
+                            <span class="input-unit">单位</span>
+                        </div>
+                    </div>
+                    <div>
+                        <label>高 h</label>
+                        <div class="input-with-unit">
+                            <input type="number" id="pyrH" placeholder="高度" step="any">
+                            <span class="input-unit">单位</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="formula">V = (1/3)a²h</div>
+            </div>
+            
+            <div id="rectangularInputs" class="input-group">
+                <div class="inputs-row-3">
+                    <div>
+                        <label>长 l</label>
+                        <div class="input-with-unit">
+                            <input type="number" id="rectL" placeholder="长度" step="any">
+                            <span class="input-unit">单位</span>
+                        </div>
+                    </div>
+                    <div>
+                        <label>宽 w</label>
+                        <div class="input-with-unit">
+                            <input type="number" id="rectW" placeholder="宽度" step="any">
+                            <span class="input-unit">单位</span>
+                        </div>
+                    </div>
+                    <div>
+                        <label>高 h</label>
+                        <div class="input-with-unit">
+                            <input type="number" id="rectH" placeholder="高度" step="any">
+                            <span class="input-unit">单位</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="formula">V = l × w × h</div>
+            </div>
+            
+            <div id="torusInputs" class="input-group">
+                <div class="inputs-row">
+                    <div>
+                        <label>大半径 R</label>
+                        <div class="input-with-unit">
+                            <input type="number" id="torusR" placeholder="大半径" step="any">
+                            <span class="input-unit">单位</span>
+                        </div>
+                    </div>
+                    <div>
+                        <label>小半径 r</label>
+                        <div class="input-with-unit">
+                            <input type="number" id="torusr" placeholder="小半径" step="any">
+                            <span class="input-unit">单位</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="formula">V = 2π²Rr²</div>
+            </div>
+            
+            <div id="capsuleInputs" class="input-group">
+                <div class="inputs-row">
+                    <div>
+                        <label>半径 r</label>
+                        <div class="input-with-unit">
+                            <input type="number" id="capR" placeholder="半径" step="any">
+                            <span class="input-unit">单位</span>
+                        </div>
+                    </div>
+                    <div>
+                        <label>高度 h</label>
+                        <div class="input-with-unit">
+                            <input type="number" id="capH" placeholder="高度" step="any">
+                            <span class="input-unit">单位</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="formula">V = πr²h + (4/3)πr³</div>
+            </div>
+            
+            <div id="ellipsoidInputs" class="input-group">
+                <div class="inputs-row-3">
+                    <div>
+                        <label>轴 a</label>
+                        <div class="input-with-unit">
+                            <input type="number" id="ellA" placeholder="轴a" step="any">
+                            <span class="input-unit">单位</span>
+                        </div>
+                    </div>
+                    <div>
+                        <label>轴 b</label>
+                        <div class="input-with-unit">
+                            <input type="number" id="ellB" placeholder="轴b" step="any">
+                            <span class="input-unit">单位</span>
+                        </div>
+                    </div>
+                    <div>
+                        <label>轴 c</label>
+                        <div class="input-with-unit">
+                            <input type="number" id="ellC" placeholder="轴c" step="any">
+                            <span class="input-unit">单位</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="formula">V = (4/3)πabc</div>
+            </div>
+            
+            <button class="calc-btn" onclick="calculate()">计算体积</button>
+            
+            <div id="result" class="result" style="display:none;">
+                <div class="result-label">计算结果</div>
+                <div id="resultValue" class="result-value"></div>
+                <div id="resultDetail" style="color:#666; font-size:0.85rem; margin-top:8px;"></div>
+            </div>
+            <div id="error" class="error" style="display:none;"></div>
+        </div>
+    </div>
+
+    <script>
+        let currentShape = 'cube';
+
+        function selectShape(shape, btn) {
+            currentShape = shape;
+            document.querySelectorAll('.shape-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            document.querySelectorAll('.input-group').forEach(g => g.classList.remove('active'));
+            document.getElementById(shape + 'Inputs').classList.add('active');
+            document.getElementById('result').style.display = 'none';
+            document.getElementById('error').style.display = 'none';
+        }
+
+        function calculate() {
+            let volume, detail;
+            const errorDiv = document.getElementById('error');
+            errorDiv.style.display = 'none';
+
+            try {
+                switch (currentShape) {
+                    case 'cube':
+                        const a = parseFloat(document.getElementById('cubeA').value);
+                        if (isNaN(a) || a <= 0) throw '请输入有效的边长';
+                        volume = a * a * a;
+                        detail = `${a}³ = ${volume.toFixed(4)}`;
+                        break;
+                    case 'sphere':
+                        const sr = parseFloat(document.getElementById('sphereR').value);
+                        if (isNaN(sr) || sr <= 0) throw '请输入有效的半径';
+                        volume = (4 / 3) * Math.PI * sr * sr * sr;
+                        detail = `(4/3) × π × ${sr}³ = ${volume.toFixed(4)}`;
+                        break;
+                    case 'cylinder':
+                        const cr = parseFloat(document.getElementById('cylR').value);
+                        const ch = parseFloat(document.getElementById('cylH').value);
+                        if (isNaN(cr) || isNaN(ch) || cr <= 0 || ch <= 0) throw '请输入有效的半径和高度';
+                        volume = Math.PI * cr * cr * ch;
+                        detail = `π × ${cr}² × ${ch} = ${volume.toFixed(4)}`;
+                        break;
+                    case 'cone':
+                        const conr = parseFloat(document.getElementById('coneR').value);
+                        const conh = parseFloat(document.getElementById('coneH').value);
+                        if (isNaN(conr) || isNaN(conh) || conr <= 0 || conh <= 0) throw '请输入有效的半径和高度';
+                        volume = (1 / 3) * Math.PI * conr * conr * conh;
+                        detail = `(1/3) × π × ${conr}² × ${conh} = ${volume.toFixed(4)}`;
+                        break;
+                    case 'pyramid':
+                        const pa = parseFloat(document.getElementById('pyrA').value);
+                        const ph = parseFloat(document.getElementById('pyrH').value);
+                        if (isNaN(pa) || isNaN(ph) || pa <= 0 || ph <= 0) throw '请输入有效的底边和高度';
+                        volume = (1 / 3) * pa * pa * ph;
+                        detail = `(1/3) × ${pa}² × ${ph} = ${volume.toFixed(4)}`;
+                        break;
+                    case 'rectangular':
+                        const rl = parseFloat(document.getElementById('rectL').value);
+                        const rw = parseFloat(document.getElementById('rectW').value);
+                        const rh = parseFloat(document.getElementById('rectH').value);
+                        if ([rl, rw, rh].some(isNaN) || [rl, rw, rh].some(v => v <= 0)) throw '请输入有效的长宽高';
+                        volume = rl * rw * rh;
+                        detail = `${rl} × ${rw} × ${rh} = ${volume.toFixed(4)}`;
+                        break;
+                    case 'torus':
+                        const tR = parseFloat(document.getElementById('torusR').value);
+                        const tr = parseFloat(document.getElementById('torusr').value);
+                        if (isNaN(tR) || isNaN(tr) || tR <= 0 || tr <= 0) throw '请输入有效的大半径和小半径';
+                        volume = 2 * Math.PI * Math.PI * tR * tr * tr;
+                        detail = `2π² × ${tR} × ${tr}² = ${volume.toFixed(4)}`;
+                        break;
+                    case 'capsule':
+                        const capr = parseFloat(document.getElementById('capR').value);
+                        const caph = parseFloat(document.getElementById('capH').value);
+                        if (isNaN(capr) || isNaN(caph) || capr <= 0 || caph <= 0) throw '请输入有效的半径和高度';
+                        const cylPart = Math.PI * capr * capr * (caph - 2 * capr);
+                        const sphPart = (4 / 3) * Math.PI * capr * capr * capr;
+                        volume = cylPart + sphPart;
+                        detail = `πr²h + (4/3)πr³ = ${cylPart.toFixed(4)} + ${sphPart.toFixed(4)} = ${volume.toFixed(4)}`;
+                        break;
+                    case 'ellipsoid':
+                        const ea = parseFloat(document.getElementById('ellA').value);
+                        const eb = parseFloat(document.getElementById('ellB').value);
+                        const ec = parseFloat(document.getElementById('ellC').value);
+                        if ([ea, eb, ec].some(isNaN) || [ea, eb, ec].some(v => v <= 0)) throw '请输入有效的三个半轴';
+                        volume = (4 / 3) * Math.PI * ea * eb * ec;
+                        detail = `(4/3) × π × ${ea} × ${eb} × ${ec} = ${volume.toFixed(4)}`;
+                        break;
+                }
+
+                document.getElementById('resultValue').textContent = volume.toFixed(4);
+                document.getElementById('resultDetail').textContent = detail;
+                document.getElementById('result').style.display = 'block';
+            } catch (e) {
+                errorDiv.textContent = e;
+                errorDiv.style.display = 'block';
+            }
+        }
+    </script>
+    <div class="ad-banner-bottom"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+</body>
+</html>

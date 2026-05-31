@@ -1,0 +1,149 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>代码对比工具 - 在线文本/代码差异比较</title>
+  <meta name="description" content="免费在线代码对比工具，支持两段文本/代码的差异比较，高亮显示新增/删除/修改行，浏览器本地处理。">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://fm-han.github.io/diff/">
+  <style>
+                /* 顶部横幅广告 - 透明样式 */ .ad-banner-top { border-bottom: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; } .ad-banner-bottom { border-top: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; margin-top: 40px; } .ad-container { max-width: 728px; margin: 0 auto; min-height: 38px; display: flex; align-items: center; justify-content: center; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; max-width: 1100px; margin: 0 auto; padding: 20px; color: #333; line-height: 1.6; background: #fafafa; }
+    h1 { text-align: center; font-size: 1.8rem; color: #1a1a1a; }
+    h1 small { display: block; font-size: 0.85rem; color: #666; margin-top: 4px; font-weight: normal; }
+    .section { margin: 20px 0; padding: 16px; border: 1px solid #e0e0e0; border-radius: 8px; background: #fff; }
+    .section label { display: block; font-weight: 600; margin-bottom: 8px; }
+    .split-view { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    textarea { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 0.9rem; box-sizing: border-box; font-family: 'Consolas', 'Monaco', monospace; resize: vertical; min-height: 200px; }
+    .diff-view { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .diff-panel { border: 1px solid #e0e0e0; border-radius: 6px; overflow: hidden; }
+    .diff-panel-header { padding: 8px 12px; background: #f8f9fa; border-bottom: 1px solid #e0e0e0; font-weight: 600; font-size: 0.9rem; }
+    .diff-content { padding: 12px; font-family: 'Consolas', 'Monaco', monospace; font-size: 0.9rem; line-height: 1.8; white-space: pre-wrap; word-break: break-all; min-height: 200px; max-height: 500px; overflow-y: auto; }
+    .line-added { background: #e6ffec; color: #22863a; display: block; }
+    .line-removed { background: #ffebe9; color: #cb2431; display: block; }
+    .line-unchanged { color: #333; display: block; }
+    .line-num { display: inline-block; width: 40px; color: #999; user-select: none; }
+    .summary { display: flex; gap: 16px; margin-top: 8px; flex-wrap: wrap; }
+    .summary span { font-size: 0.9rem; font-weight: 600; }
+    .added { color: #22863a; }
+    .removed { color: #cb2431; }
+    .unchanged { color: #666; }
+    .buttons { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+    button { padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-size: 0.95rem; }
+    .btn-primary { background: #007bff; color: #fff; }
+    .btn-clear { background: #6c757d; color: #fff; }
+    button:hover { opacity: 0.9; }
+    .footer { text-align: center; margin: 24px 0; padding: 12px; font-size: 0.85rem; color: #28a745; font-weight: 500; }
+    @media (max-width: 700px) { .split-view, .diff-view { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+    <div class="ad-banner-top"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+
+  <h1>代码对比工具 <small>文本差异高亮 / 行号显示 / 浏览器本地</small></h1>
+
+  <div class="section">
+    <div class="split-view">
+      <div>
+        <label>原始文本 (A)</label>
+        <textarea id="textA" placeholder="粘贴原始代码或文本..."></textarea>
+      </div>
+      <div>
+        <label>修改后文本 (B)</label>
+        <textarea id="textB" placeholder="粘贴修改后的代码或文本..."></textarea>
+      </div>
+    </div>
+    <div class="buttons">
+      <button class="btn-primary" onclick="doDiff()">对比差异</button>
+      <button class="btn-clear" onclick="document.getElementById('textA').value='';document.getElementById('textB').value='';document.getElementById('diffA').innerHTML='等待输入...';document.getElementById('diffB').innerHTML='等待输入...'">清空</button>
+    </div>
+  </div>
+
+  <div class="section">
+    <label>差异结果</label>
+    <div class="summary" id="summary">
+      <span class="added">+0 新增</span>
+      <span class="removed">-0 删除</span>
+      <span class="unchanged">=0 未变</span>
+    </div>
+    <div class="diff-view">
+      <div class="diff-panel">
+        <div class="diff-panel-header">原始 (A)</div>
+        <div class="diff-content" id="diffA">等待输入...</div>
+      </div>
+      <div class="diff-panel">
+        <div class="diff-panel-header">修改后 (B)</div>
+        <div class="diff-content" id="diffB">等待输入...</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">100% 免费 · 数据不上传服务器 · 仅浏览器本地处理</div>
+
+  <script>
+    function doDiff() {
+      const aLines = document.getElementById('textA').value.split('\n');
+      const bLines = document.getElementById('textB').value.split('\n');
+
+      const lcs = computeLCS(aLines, bLines);
+      const result = buildDiff(aLines, bLines, lcs);
+
+      let aHtml = '', bHtml = '';
+      let added = 0, removed = 0, unchanged = 0;
+      let aNum = 1, bNum = 1;
+
+      result.forEach(item => {
+        if (item.type === 'unchanged') {
+          aHtml += `<span class="line-unchanged"><span class="line-num">${aNum++}</span>${escapeHtml(item.a)}</span>`;
+          bHtml += `<span class="line-unchanged"><span class="line-num">${bNum++}</span>${escapeHtml(item.b)}</span>`;
+          unchanged++;
+        } else if (item.type === 'removed') {
+          aHtml += `<span class="line-removed"><span class="line-num">${aNum++}</span>-${escapeHtml(item.a)}</span>`;
+          bHtml += `<span class="line-removed"><span class="line-num"></span>&nbsp;</span>`;
+          removed++;
+        } else if (item.type === 'added') {
+          aHtml += `<span class="line-added"><span class="line-num"></span>&nbsp;</span>`;
+          bHtml += `<span class="line-added"><span class="line-num">${bNum++}</span>+${escapeHtml(item.b)}</span>`;
+          added++;
+        }
+      });
+
+      document.getElementById('diffA').innerHTML = aHtml || '<span class="line-unchanged">无差异</span>';
+      document.getElementById('diffB').innerHTML = bHtml || '<span class="line-unchanged">无差异</span>';
+      document.getElementById('summary').innerHTML =
+        `<span class="added">+${added} 新增</span><span class="removed">-${removed} 删除</span><span class="unchanged">=${unchanged} 未变</span>`;
+    }
+
+    function computeLCS(a, b) {
+      const m = a.length, n = b.length;
+      const dp = Array.from({length: m + 1}, () => new Array(n + 1).fill(0));
+      for (let i = 1; i <= m; i++) {
+        for (let j = 1; j <= n; j++) {
+          if (a[i-1] === b[j-1]) dp[i][j] = dp[i-1][j-1] + 1;
+          else dp[i][j] = Math.max(dp[i-1][j], dp[i][j-1]);
+        }
+      }
+      const result = [];
+      let i = m, j = n;
+      while (i > 0 || j > 0) {
+        if (i > 0 && j > 0 && a[i-1] === b[j-1]) { result.unshift({a: a[i-1], b: b[j-1], type: 'unchanged'}); i--; j--; }
+        else if (j > 0 && (i === 0 || dp[i][j-1] >= dp[i-1][j])) { result.unshift({a: null, b: b[j-1], type: 'added'}); j--; }
+        else { result.unshift({a: a[i-1], b: null, type: 'removed'}); i--; }
+      }
+      return result;
+    }
+
+    function buildDiff(a, b, lcs) {
+      // Merge consecutive removed/added into a single diff display
+      return lcs;
+    }
+
+    function escapeHtml(str) {
+      if (str === null || str === undefined) return '';
+      return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'');
+    }
+  </script>
+    <div class="ad-banner-bottom"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+</body>
+</html>

@@ -1,0 +1,113 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Base64图片预览 - Data URL生成</title>
+  <meta name="description" content="免费在线Base64图片预览工具，上传图片转换为Data URL格式，用于内嵌HTML或CSS。">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://fm-han.github.io/base64-image/">
+  <style>
+                /* 顶部横幅广告 - 透明样式 */ .ad-banner-top { border-bottom: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; } .ad-banner-bottom { border-top: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; margin-top: 40px; } .ad-container { max-width: 728px; margin: 0 auto; min-height: 38px; display: flex; align-items: center; justify-content: center; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; color: #333; line-height: 1.6; background: #fafafa; }
+    h1 { text-align: center; font-size: 1.8rem; color: #1a1a1a; }
+    h1 small { display: block; font-size: 0.85rem; color: #666; margin-top: 4px; font-weight: normal; }
+    .card { margin: 20px 0; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px; background: #fff; }
+    .upload-area { border: 2px dashed #ccc; border-radius: 12px; padding: 48px; text-align: center; cursor: pointer; transition: all 0.3s; }
+    .upload-area:hover { border-color: #007bff; background: rgba(0,123,255,0.05); }
+    .upload-area .icon { font-size: 3rem; }
+    .upload-area input { display: none; }
+    .preview-area { margin: 20px 0; text-align: center; }
+    .preview-area img { max-width: 100%; max-height: 400px; border-radius: 8px; border: 1px solid #eee; }
+    .code-box { background: #1e1e1e; border-radius: 8px; padding: 16px; color: #d4d4d4; font-family: monospace; font-size: 0.85rem; position: relative; max-height: 200px; overflow-y: auto; }
+    .code-box pre { margin: 0; white-space: pre-wrap; word-break: break-all; }
+    .copy-btn { position: absolute; top: 8px; right: 8px; padding: 6px 12px; background: #007bff; color: #fff; border: none; border-radius: 4px; cursor: pointer; }
+    button { padding: 12px 28px; border: none; border-radius: 6px; cursor: pointer; font-size: 1rem; }
+    .btn-primary { background: #007bff; color: #fff; }
+    .btn-success { background: #28a745; color: #fff; }
+    button:hover { opacity: 0.9; }
+    .buttons { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+    .info { background: #f5f5f5; padding: 16px; border-radius: 8px; margin-top: 16px; }
+    .footer { text-align: center; margin: 24px 0; padding: 12px; font-size: 0.85rem; color: #28a745; font-weight: 500; }
+  </style>
+</head>
+<body>
+    <div class="ad-banner-top"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+  <h1>Base64图片预览 <small>Data URL · 图片编码 · 内嵌HTML</small></h1>
+
+  <div class="card">
+    <div class="upload-area" id="uploadArea">
+      <div class="icon">📷</div>
+      <div style="margin-top:12px;color:#666;">点击或拖拽上传图片</div>
+      <input type="file" id="fileInput" accept="image/*">
+    </div>
+    <div class="preview-area" id="previewArea" style="display:none;">
+      <img id="previewImg" src="" alt="预览">
+    </div>
+  </div>
+
+  <div class="card" id="resultCard" style="display:none;">
+    <h3>Base64编码结果</h3>
+    <div class="code-box">
+      <button class="copy-btn" onclick="copyCode()">复制代码</button>
+      <pre id="base64Code"></pre>
+    </div>
+    <div class="info">
+      <strong>使用说明：</strong>
+      <ul style="margin:8px 0;padding-left:20px;">
+        <li>复制上面的代码，粘贴到HTML的img标签src属性中</li>
+        <li>或作为CSS背景图：background-image: url('data:image/...');</li>
+      </ul>
+    </div>
+    <div class="buttons" style="margin-top:16px;">
+      <button class="btn-success" onclick="downloadHtml()">下载HTML预览</button>
+    </div>
+  </div>
+
+  <div class="footer">100% 免费 · 数据不上传服务器 · 仅浏览器本地处理</div>
+
+  <script>
+    const uploadArea = document.getElementById('uploadArea');
+    const fileInput = document.getElementById('fileInput');
+    uploadArea.addEventListener('click', () => fileInput.click());
+    uploadArea.addEventListener('dragover', e => { e.preventDefault(); uploadArea.style.borderColor = '#007bff'; });
+    uploadArea.addEventListener('dragleave', () => uploadArea.style.borderColor = '#ccc');
+    uploadArea.addEventListener('drop', e => {
+      e.preventDefault();
+      uploadArea.style.borderColor = '#ccc';
+      if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
+    });
+    fileInput.addEventListener('change', e => { if (e.target.files.length) handleFile(e.target.files[0]); });
+    function handleFile(file) {
+      if (!file.type.startsWith('image/')) { alert('请上传图片文件'); return; }
+      const reader = new FileReader();
+      reader.onload = e => {
+        document.getElementById('previewArea').style.display = 'block';
+        document.getElementById('previewImg').src = e.target.result;
+        const base64 = e.target.result;
+        document.getElementById('base64Code').textContent = base64;
+        document.getElementById('resultCard').style.display = 'block';
+      };
+      reader.readAsDataURL(file);
+    }
+    function copyCode() {
+      const code = document.getElementById('base64Code').textContent;
+      navigator.clipboard.writeText(code).then(() => alert('已复制'));
+    }
+    function downloadHtml() {
+      const imgSrc = document.getElementById('base64Code').textContent;
+      const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Image Preview</title></head><body style="margin:40px;text-align:center;">
+    <div class="ad-banner-top"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div><img src="${imgSrc}" alt="Preview">    <div class="ad-banner-bottom"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+</body></html>`;
+      const blob = new Blob([html], { type: 'text/html' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'image-preview.html';
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+  </script>
+    <div class="ad-banner-bottom"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+</body>
+</html>

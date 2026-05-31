@@ -1,0 +1,153 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>数字炸弹游戏 - 猜数字小游戏</title>
+  <meta name="description" content="免费在线数字炸弹游戏，1-100随机数，输入猜测数字，系统提示大小直到猜中。">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://fm-han.github.io/chinese-number-game/">
+  <style>
+                /* 顶部横幅广告 - 透明样式 */ .ad-banner-top { border-bottom: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; } .ad-banner-bottom { border-top: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; margin-top: 40px; } .ad-container { max-width: 728px; margin: 0 auto; min-height: 38px; display: flex; align-items: center; justify-content: center; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; max-width: 700px; margin: 0 auto; padding: 20px; color: #333; line-height: 1.6; background: #fafafa; }
+    h1 { text-align: center; font-size: 1.8rem; color: #1a1a1a; }
+    h1 small { display: block; font-size: 0.85rem; color: #666; margin-top: 4px; font-weight: normal; }
+    .card { margin: 20px 0; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px; background: #fff; }
+    .game-display { background: linear-gradient(135deg, #dc3545, #c82333); border-radius: 12px; padding: 40px; color: #fff; text-align: center; margin: 20px 0; }
+    .game-display .range { font-size: 1.2rem; opacity: 0.9; }
+    .game-display .number { font-size: 4rem; font-weight: 700; margin: 16px 0; }
+    .game-display .hint { font-size: 1.5rem; }
+    .game-display.won { background: linear-gradient(135deg, #28a745, #218838); }
+    .input-group { margin-bottom: 16px; text-align: center; }
+    .input-group label { display: block; font-weight: 600; margin-bottom: 8px; }
+    .input-group input { width: 200px; padding: 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 1.5rem; text-align: center; }
+    button { padding: 12px 28px; border: none; border-radius: 6px; cursor: pointer; font-size: 1rem; }
+    .btn-primary { background: #007bff; color: #fff; }
+    .btn-success { background: #28a745; color: #fff; }
+    .btn-danger { background: #dc3545; color: #fff; }
+    button:hover { opacity: 0.9; }
+    .buttons { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+    .history { margin-top: 20px; }
+    .history h3 { margin: 0 0 12px 0; }
+    .guess-list { display: flex; flex-wrap: wrap; gap: 8px; }
+    .guess-item { padding: 8px 16px; border-radius: 20px; font-weight: 600; }
+    .guess-item.big { background: #fff3cd; color: #856404; }
+    .guess-item.small { background: #d1ecf1; color: #0c5460; }
+    .guess-item.hit { background: #28a745; color: #fff; }
+    .stats { display: flex; gap: 16px; justify-content: center; margin-top: 16px; }
+    .stat-item { padding: 12px 20px; background: #f5f5f5; border-radius: 8px; text-align: center; }
+    .stat-item .num { font-size: 2rem; font-weight: 700; color: #007bff; }
+    .stat-item .label { font-size: 0.85rem; color: #666; }
+    .footer { text-align: center; margin: 24px 0; padding: 12px; font-size: 0.85rem; color: #28a745; font-weight: 500; }
+  </style>
+</head>
+<body>
+    <div class="ad-banner-top"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+  <h1>数字炸弹游戏 <small>猜数字 · 1-100 · 挑战极限</small></h1>
+
+  <div class="card">
+    <div class="game-display" id="gameDisplay">
+      <div class="range" id="rangeDisplay">猜测范围: 1 - 100</div>
+      <div class="number" id="guessDisplay">?</div>
+      <div class="hint" id="hintDisplay">请输入你的猜测</div>
+    </div>
+    <div class="input-group">
+      <label>输入1-100之间的数字</label>
+      <input type="number" id="guessInput" placeholder="?" min="1" max="100">
+    </div>
+    <div class="buttons">
+      <button class="btn-primary" onclick="makeGuess()">猜！</button>
+      <button class="btn-danger" onclick="newGame()">重新开始</button>
+    </div>
+    <div class="history" id="historySection" style="display:none;">
+      <h3>猜测历史</h3>
+      <div class="guess-list" id="guessList"></div>
+    </div>
+    <div class="stats">
+      <div class="stat-item"><div class="num" id="guessCount">0</div><div class="label">猜测次数</div></div>
+      <div class="stat-item"><div class="num" id="bestScore">-</div><div class="label">最佳成绩</div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>游戏规则</h3>
+    <ul style="padding-left:20px;color:#666;">
+      <li>系统会随机选择一个1-100之间的数字作为"炸弹"</li>
+      <li>你输入猜测的数字，系统会提示"太大了"或"太小了"</li>
+      <li>根据提示缩小范围，直到找到炸弹</li>
+      <li>用最少的猜测次数找到炸弹即为胜利</li>
+    </ul>
+  </div>
+
+  <div class="footer">100% 免费 · 数据不上传服务器 · 仅浏览器本地处理</div>
+
+  <script>
+    let bomb, minRange = 1, maxRange = 100, guessCount = 0, gameOver = false;
+    let bestScore = localStorage.getItem('bombBestScore') || null;
+    document.getElementById('bestScore').textContent = bestScore || '-';
+    function newGame() {
+      bomb = Math.floor(Math.random() * 100) + 1;
+      minRange = 1;
+      maxRange = 100;
+      guessCount = 0;
+      gameOver = false;
+      document.getElementById('guessInput').value = '';
+      document.getElementById('guessInput').disabled = false;
+      document.getElementById('guessDisplay').textContent = '?';
+      document.getElementById('hintDisplay').textContent = '请输入你的猜测';
+      document.getElementById('rangeDisplay').textContent = `猜测范围: ${minRange} - ${maxRange}`;
+      document.getElementById('guessCount').textContent = '0';
+      document.getElementById('gameDisplay').classList.remove('won');
+      document.getElementById('historySection').style.display = 'none';
+      document.getElementById('guessList').innerHTML = '';
+    }
+    function makeGuess() {
+      if (gameOver) return;
+      const guess = parseInt(document.getElementById('guessInput').value);
+      if (isNaN(guess) || guess < 1 || guess > 100) {
+        alert('请输入1-100之间的数字');
+        return;
+      }
+      guessCount++;
+      document.getElementById('guessCount').textContent = guessCount;
+      document.getElementById('guessDisplay').textContent = guess;
+      const historySection = document.getElementById('historySection');
+      const guessList = document.getElementById('guessList');
+      historySection.style.display = 'block';
+      const item = document.createElement('span');
+      item.className = 'guess-item';
+      if (guess === bomb) {
+        item.classList.add('hit');
+        item.textContent = guess + ' ✓';
+        document.getElementById('hintDisplay').textContent = '恭喜你！找到了炸弹！';
+        document.getElementById('gameDisplay').classList.add('won');
+        document.getElementById('guessInput').disabled = true;
+        gameOver = true;
+        if (!bestScore || guessCount < parseInt(bestScore)) {
+          bestScore = guessCount;
+          localStorage.setItem('bombBestScore', bestScore);
+          document.getElementById('bestScore').textContent = bestScore;
+        }
+        alert(`🎉 恭喜！你用了 ${guessCount} 次猜到了炸弹 ${bomb}！`);
+      } else if (guess > bomb) {
+        item.classList.add('big');
+        item.textContent = guess + ' ↓';
+        maxRange = Math.min(maxRange, guess - 1);
+        document.getElementById('hintDisplay').textContent = '太大了！往小猜';
+      } else {
+        item.classList.add('small');
+        item.textContent = guess + ' ↑';
+        minRange = Math.max(minRange, guess + 1);
+        document.getElementById('hintDisplay').textContent = '太小了！往大猜';
+      }
+      guessList.insertBefore(item, guessList.firstChild);
+      document.getElementById('rangeDisplay').textContent = `猜测范围: ${minRange} - ${maxRange}`;
+      document.getElementById('guessInput').value = '';
+      document.getElementById('guessInput').focus();
+    }
+    document.getElementById('guessInput').addEventListener('keypress', e => { if (e.key === 'Enter') makeGuess(); });
+    newGame();
+  </script>
+    <div class="ad-banner-bottom"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+</body>
+</html>

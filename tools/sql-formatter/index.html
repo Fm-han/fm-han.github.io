@@ -1,0 +1,150 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SQL格式化工具 - 在线工具</title>
+    <link rel="canonical" href="https://fm-han.github.io/sql-formatter/">
+    <style>
+                /* 顶部横幅广告 - 透明样式 */ .ad-banner-top { border-bottom: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; } .ad-banner-bottom { border-top: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; margin-top: 40px; } .ad-container { max-width: 728px; margin: 0 auto; min-height: 38px; display: flex; align-items: center; justify-content: center; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #fafafa; min-height: 100vh; display: flex; flex-direction: column; }
+        .container { max-width: 1000px; margin: 0 auto; padding: 20px; flex: 1; }
+        h1 { text-align: center; color: #333; margin-bottom: 30px; font-size: 28px; }
+        .card { background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; padding: 24px; margin-bottom: 20px; }
+        .input-group { margin-bottom: 16px; }
+        label { display: block; margin-bottom: 8px; color: #555; font-weight: 500; }
+        textarea { width: 100%; min-height: 200px; padding: 16px; border: 1px solid #ddd; border-radius: 6px; font-family: 'Consolas', 'Monaco', monospace; font-size: 14px; resize: vertical; }
+        textarea:focus { outline: none; border-color: #007bff; }
+        .btn-group { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
+        .btn { padding: 12px 24px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; color: #fff; }
+        .btn-primary { background: #007bff; }
+        .btn-secondary { background: #28a745; }
+        .btn-gray { background: #6c757d; }
+        .btn:hover { opacity: 0.85; }
+        .options { display: flex; gap: 20px; margin-bottom: 16px; flex-wrap: wrap; }
+        .option-label { display: flex; align-items: center; gap: 6px; cursor: pointer; }
+        input[type="checkbox"] { width: 16px; height: 16px; }
+        .examples { margin-top: 20px; }
+        .examples h3 { margin-bottom: 12px; color: #333; }
+        .example-btn { margin: 4px; }
+        footer { text-align: center; padding: 20px; color: #888; font-size: 14px; }
+    </style>
+</head>
+<body>
+    <div class="ad-banner-top"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+    <div class="container">
+        <h1>SQL 格式化工具</h1>
+        <div class="card">
+            <div class="input-group">
+                <label for="sqlInput">输入 SQL 语句</label>
+                <textarea id="sqlInput" placeholder="在此输入SQL语句...">SELECT id,name,email FROM users WHERE status='active' ORDER BY created_at DESC LIMIT 10;</textarea>
+            </div>
+            <div class="options">
+                <label class="option-label"><input type="checkbox" id="uppercase" checked> 关键词大写</label>
+                <label class="option-label"><input type="checkbox" id="indent" checked> 缩进</label>
+                <label class="option-label"><input type="checkbox" id="commas"> 逗号前置</label>
+            </div>
+            <div class="btn-group">
+                <button class="btn btn-primary" onclick="formatSQL()">格式化</button>
+                <button class="btn btn-secondary" onclick="compressSQL()">压缩</button>
+                <button class="btn btn-gray" onclick="copyResult()">复制结果</button>
+                <button class="btn btn-gray" onclick="clearAll()">清空</button>
+            </div>
+            <div class="input-group">
+                <label for="sqlOutput">格式化结果</label>
+                <textarea id="sqlOutput" readonly></textarea>
+            </div>
+        </div>
+        <div class="card examples">
+            <h3>示例 SQL</h3>
+            <button class="btn btn-gray example-btn" onclick="setExample('SELECT * FROM users WHERE id > 100')">SELECT</button>
+            <button class="btn btn-gray example-btn" onclick="setExample('INSERT INTO users (name, email) VALUES (\"张三\", \"zhang@example.com\")')">INSERT</button>
+            <button class="btn btn-gray example-btn" onclick="setExample('UPDATE users SET status=\"active\", updated_at=NOW() WHERE id=1')">UPDATE</button>
+            <button class="btn btn-gray example-btn" onclick="setExample('SELECT u.name, o.total FROM users u LEFT JOIN orders o ON u.id=o.user_id WHERE o.total>1000')">JOIN</button>
+            <button class="btn btn-gray example-btn" onclick="setExample('SELECT COUNT(*), SUM(amount), AVG(amount) FROM orders WHERE date>\"2024-01-01\" GROUP BY user_id HAVING COUNT(*)>5')">GROUP BY</button>
+        </div>
+    </div>
+    <footer>100% 免费 · 数据不上传服务器 · 仅浏览器本地处理</footer>
+    <script>
+        const KEYWORDS = ['SELECT', 'FROM', 'WHERE', 'AND', 'OR', 'NOT', 'IN', 'LIKE', 'BETWEEN', 'IS', 'NULL', 'AS', 'ON', 'JOIN', 'LEFT', 'RIGHT', 'INNER', 'OUTER', 'FULL', 'CROSS', 'ORDER', 'BY', 'ASC', 'DESC', 'GROUP', 'HAVING', 'LIMIT', 'OFFSET', 'INSERT', 'INTO', 'VALUES', 'UPDATE', 'SET', 'DELETE', 'CREATE', 'TABLE', 'ALTER', 'DROP', 'INDEX', 'VIEW', 'UNION', 'ALL', 'DISTINCT', 'CASE', 'WHEN', 'THEN', 'ELSE', 'END', 'EXISTS', 'ANY', 'SOME'];
+        
+        function formatSQL() {
+            let sql = document.getElementById('sqlInput').value.trim();
+            if (!sql) return;
+            
+            const uppercase = document.getElementById('uppercase').checked;
+            const indent = document.getElementById('indent').checked;
+            const commas = document.getElementById('commas').checked;
+            
+            if (uppercase) {
+                KEYWORDS.forEach(kw => {
+                    const regex = new RegExp(`\\b${kw}\\b`, 'gi');
+                    sql = sql.replace(regex, kw);
+                });
+            }
+            
+            const clauses = ['SELECT', 'FROM', 'WHERE', 'AND', 'OR', 'ORDER BY', 'GROUP BY', 'HAVING', 'LIMIT', 'INSERT INTO', 'VALUES', 'UPDATE', 'SET', 'DELETE FROM', 'JOIN', 'LEFT JOIN', 'RIGHT JOIN', 'INNER JOIN', 'ON'];
+            clauses.forEach(clause => {
+                const regex = new RegExp(`\\s+${clause.replace(/\s+/g, '\\s+')}\\s+`, 'gi');
+                sql = sql.replace(regex, `\n${clause} `);
+            });
+            
+            if (commas) {
+                sql = sql.replace(/,\s*/g, `,\n  `);
+            }
+            
+            if (indent) {
+                const lines = sql.split('\n');
+                let indentLevel = 0;
+                sql = lines.map(line => {
+                    const trimmed = line.trim();
+                    if (!trimmed) return '';
+                    if (trimmed.startsWith('FROM') || trimmed.startsWith('WHERE') || trimmed.startsWith('AND') || trimmed.startsWith('OR') || trimmed.startsWith('ORDER BY') || trimmed.startsWith('GROUP BY') || trimmed.startsWith('HAVING') || trimmed.startsWith('LIMIT') || trimmed.startsWith('SET') || trimmed.startsWith('JOIN') || trimmed.startsWith('VALUES')) {
+                        indentLevel = Math.max(0, indentLevel - 1);
+                    }
+                    const result = '  '.repeat(indentLevel) + trimmed;
+                    if (trimmed.startsWith('SELECT') || trimmed.startsWith('INSERT INTO') || trimmed.startsWith('UPDATE') || trimmed.startsWith('DELETE FROM')) {
+                        indentLevel++;
+                    }
+                    return result;
+                }).join('\n');
+            }
+            
+            document.getElementById('sqlOutput').value = sql.trim();
+        }
+        
+        function compressSQL() {
+            let sql = document.getElementById('sqlInput').value.trim();
+            sql = sql.replace(/\s+/g, ' ');
+            sql = sql.replace(/\s*,\s*/g, ', ');
+            sql = sql.replace(/\s*\(\s*/g, '(');
+            sql = sql.replace(/\s*\)\s*/g, ')');
+            sql = sql.replace(/\s*=\s*/g, '=');
+            document.getElementById('sqlOutput').value = sql.trim();
+        }
+        
+        function copyResult() {
+            const output = document.getElementById('sqlOutput').value;
+            if (!output) {
+                alert('没有可复制的内容');
+                return;
+            }
+            navigator.clipboard.writeText(output).then(() => alert('已复制到剪贴板'));
+        }
+        
+        function clearAll() {
+            document.getElementById('sqlInput').value = '';
+            document.getElementById('sqlOutput').value = '';
+        }
+        
+        function setExample(sql) {
+            document.getElementById('sqlInput').value = sql;
+            formatSQL();
+        }
+        
+        formatSQL();
+    </script>
+    <div class="ad-banner-bottom"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+</body>
+</html>

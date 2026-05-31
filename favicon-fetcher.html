@@ -1,0 +1,102 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Favicon获取器 - 免费在线工具</title>
+<style>
+                /* 顶部横幅广告 - 透明样式 */ .ad-banner-top { border-bottom: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; } .ad-banner-bottom { border-top: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; margin-top: 40px; } .ad-container { max-width: 728px; margin: 0 auto; min-height: 38px; display: flex; align-items: center; justify-content: center; }
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #fafafa; color: #333; padding: 20px; }
+.container { max-width: 800px; margin: 0 auto; }
+h1 { font-size: 1.25rem; font-weight: 600; margin-bottom: 16px; color: #333; }
+.desc { color: #666; margin-bottom: 20px; line-height: 1.6; }
+.card { background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; padding: 24px; margin-bottom: 16px; }
+label { display: block; margin-bottom: 8px; font-weight: 500; }
+input[type="text"] { border: 1px solid #ddd; border-radius: 4px; padding: 8px 12px; width: 100%; box-sizing: border-box; margin-bottom: 12px; font-size: 14px; }
+input[type="text"]:focus { outline: none; border-color: #007bff; }
+.btn-primary { background: #007bff; color: #fff; border: none; padding: 8px 20px; border-radius: 4px; cursor: pointer; font-size: 14px; }
+.btn-primary:hover { background: #0056b3; }
+.btn-primary:disabled { background: #ccc; cursor: not-allowed; }
+.btn-secondary { background: #28a745; color: #fff; border: none; padding: 8px 20px; border-radius: 4px; cursor: pointer; font-size: 14px; margin-left: 8px; }
+.btn-secondary:hover { background: #1e7e34; }
+.status { margin-top: 12px; padding: 12px; border-radius: 4px; font-size: 14px; display: none; }
+.status.success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+.status.error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+.result { margin-top: 16px; text-align: center; display: none; }
+.result img { max-width: 128px; max-height: 128px; border: 1px solid #e0e0e0; border-radius: 4px; padding: 8px; }
+.info { margin-top: 12px; font-size: 14px; color: #666; }
+</style>
+</head>
+<body>
+    <div class="ad-banner-top"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+<div class="container">
+  <div class="card">
+    <h1>Favicon获取器</h1>
+    <p class="desc">输入网站域名，获取该网站的Favicon图标。</p>
+    <label for="domain">网站域名</label>
+    <input type="text" id="domain" placeholder="example.com">
+    <button class="btn-primary" id="fetchBtn" onclick="fetchFavicon()">获取Favicon</button>
+    <div class="status" id="status"></div>
+    <div class="result" id="result">
+      <img id="faviconImg" src="" alt="Favicon">
+      <div class="info" id="info"></div>
+      <div style="margin-top:12px">
+        <button class="btn-secondary" onclick="downloadFavicon()">下载图标</button>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+let faviconUrl = '';
+async function fetchFavicon() {
+  const domain = document.getElementById('domain').value.trim().replace(/^https?:\/\//, '').replace(/\/.*$/, '');
+  if (!domain) { showStatus('请输入网站域名', 'error'); return; }
+  const btn = document.getElementById('fetchBtn');
+  const result = document.getElementById('result');
+  const status = document.getElementById('status');
+  btn.disabled = true;
+  result.style.display = 'none';
+  status.style.display = 'none';
+  const urls = [
+    `https://${domain}/favicon.ico`,
+    `https://${domain}/favicon.png`,
+    `https://www.google.com/s2/favicons?domain=${domain}&sz=128`
+  ];
+  for (const url of urls) {
+    try {
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      await new Promise((resolve, reject) => {
+        img.onload = resolve;
+        img.onerror = reject;
+        img.src = url;
+      });
+      faviconUrl = url;
+      document.getElementById('faviconImg').src = url;
+      document.getElementById('info').textContent = '来源: ' + domain;
+      result.style.display = 'block';
+      btn.disabled = false;
+      return;
+    } catch (e) { continue; }
+  }
+  showStatus('无法获取该网站的Favicon', 'error');
+  btn.disabled = false;
+}
+function downloadFavicon() {
+  if (!faviconUrl) return;
+  const a = document.createElement('a');
+  a.href = faviconUrl;
+  a.download = 'favicon.ico';
+  a.click();
+}
+function showStatus(msg, type) {
+  const el = document.getElementById('status');
+  el.textContent = msg;
+  el.className = 'status ' + type;
+  el.style.display = 'block';
+}
+</script>
+    <div class="ad-banner-bottom"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+</body>
+</html>

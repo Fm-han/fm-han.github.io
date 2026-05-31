@@ -1,0 +1,155 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cron表达式生成器 - 在线定时任务时间配置工具</title>
+  <meta name="description" content="免费在线Cron表达式生成器，可视化配置分钟/小时/日期/月份/星期，下一次执行时间自动计算，支持常见预设。">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://fm-han.github.io/crontab-generator/">
+  <style>
+                /* 顶部横幅广告 - 透明样式 */ .ad-banner-top { border-bottom: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; } .ad-banner-bottom { border-top: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; margin-top: 40px; } .ad-container { max-width: 728px; margin: 0 auto; min-height: 38px; display: flex; align-items: center; justify-content: center; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; max-width: 700px; margin: 0 auto; padding: 20px; color: #333; line-height: 1.6; background: #fafafa; }
+    h1 { text-align: center; font-size: 1.8rem; color: #1a1a1a; }
+    h1 small { display: block; font-size: 0.85rem; color: #666; margin-top: 4px; font-weight: normal; }
+    .section { margin: 20px 0; padding: 16px; border: 1px solid #e0e0e0; border-radius: 8px; background: #fff; }
+    .section label { display: block; font-weight: 600; margin-bottom: 8px; }
+    input[type="text"], select { width: 100%; padding: 10px 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 1rem; box-sizing: border-box; }
+    .cron-display { padding: 16px; background: #f0f7ff; border-radius: 8px; text-align: center; margin: 12px 0; }
+    .cron-display .expr { font-size: 1.5rem; font-weight: 700; color: #007bff; font-family: monospace; letter-spacing: 4px; }
+    .field-row { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+    .field-item { text-align: center; }
+    .field-item label { font-size: 0.8rem; color: #666; display: block; margin-bottom: 4px; }
+    .field-item input { text-align: center; }
+    .preset-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 8px; margin-bottom: 12px; }
+    .preset-item { padding: 10px 12px; background: #f8f9fa; border-radius: 6px; cursor: pointer; border: 1px solid transparent; }
+    .preset-item:hover { border-color: #007bff; background: #f0f7ff; }
+    .preset-item .name { font-weight: 600; font-size: 0.9rem; }
+    .preset-item .cron { font-family: monospace; font-size: 0.8rem; color: #666; }
+    .next-runs { margin-top: 12px; }
+    .next-runs li { padding: 6px 0; font-size: 0.9rem; color: #333; border-bottom: 1px solid #eee; }
+    .buttons { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+    button { padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-size: 0.95rem; }
+    .btn-primary { background: #007bff; color: #fff; }
+    .btn-copy { background: #28a745; color: #fff; }
+    .btn-clear { background: #6c757d; color: #fff; }
+    button:hover { opacity: 0.9; }
+    .footer { text-align: center; margin: 24px 0; padding: 12px; font-size: 0.85rem; color: #28a745; font-weight: 500; }
+    @media (max-width: 600px) { .field-row { grid-template-columns: 1fr 1fr; } }
+  </style>
+</head>
+<body>
+    <div class="ad-banner-top"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+
+  <h1>Cron表达式生成器 <small>可视化配置 / 下次执行时间 / 预设模板 · 浏览器本地</small></h1>
+
+  <div class="section">
+    <label>快速预设</label>
+    <div class="preset-grid">
+      <div class="preset-item" onclick="setCron('0 * * * *')"><div class="name">每小时</div><div class="cron">0 * * * *</div></div>
+      <div class="preset-item" onclick="setCron('0 0 * * *')"><div class="name">每天午夜</div><div class="cron">0 0 * * *</div></div>
+      <div class="preset-item" onclick="setCron('0 9 * * *')"><div class="name">每天上午9点</div><div class="cron">0 9 * * *</div></div>
+      <div class="preset-item" onclick="setCron('0 9 * * 1-5')"><div class="name">工作日上午9点</div><div class="cron">0 9 * * 1-5</div></div>
+      <div class="preset-item" onclick="setCron('*/5 * * * *')"><div class="name">每5分钟</div><div class="cron">*/5 * * * *</div></div>
+      <div class="preset-item" onclick="setCron('*/15 * * * *')"><div class="name">每15分钟</div><div class="cron">*/15 * * * *</div></div>
+      <div class="preset-item" onclick="setCron('0 0 * * 0')"><div class="name">每周日午夜</div><div class="cron">0 0 * * 0</div></div>
+      <div class="preset-item" onclick="setCron('0 0 1 * *')"><div class="name">每月1日午夜</div><div class="cron">0 0 1 * *</div></div>
+    </div>
+    <div class="cron-display">
+      <div class="expr" id="cronExpr">* * * * *</div>
+    </div>
+    <div class="field-row">
+      <div class="field-item"><label>分钟 (0-59)</label><input type="text" id="fMin" value="*" oninput="updateCron()"></div>
+      <div class="field-item"><label>小时 (0-23)</label><input type="text" id="fHour" value="*" oninput="updateCron()"></div>
+      <div class="field-item"><label>日期 (1-31)</label><input type="text" id="fDom" value="*" oninput="updateCron()"></div>
+      <div class="field-item"><label>月份 (1-12)</label><input type="text" id="fMon" value="*" oninput="updateCron()"></div>
+      <div class="field-item"><label>星期 (0-6)</label><input type="text" id="fDow" value="*" oninput="updateCron()"></div>
+    </div>
+    <div class="buttons">
+      <button class="btn-primary" onclick="calcNext()">计算下次执行</button>
+      <button class="btn-copy" onclick="copyCron()">复制表达式</button>
+      <button class="btn-clear" onclick="reset()">重置</button>
+    </div>
+  </div>
+
+  <div class="section">
+    <label>下次执行时间</label>
+    <ul class="next-runs" id="nextRuns" style="list-style:none;padding:0;">
+      <li style="color:#999;">点击"计算下次执行"...</li>
+    </ul>
+  </div>
+
+  <div class="footer">100% 免费 · 数据不上传服务器 · 仅浏览器本地处理</div>
+
+  <script>
+    function setCron(expr) {
+      const parts = expr.split(' ');
+      document.getElementById('fMin').value = parts[0];
+      document.getElementById('fHour').value = parts[1];
+      document.getElementById('fDom').value = parts[2];
+      document.getElementById('fMon').value = parts[3];
+      document.getElementById('fDow').value = parts[4];
+      updateCron();
+      calcNext();
+    }
+    function updateCron() {
+      const parts = [
+        document.getElementById('fMin').value || '*',
+        document.getElementById('fHour').value || '*',
+        document.getElementById('fDom').value || '*',
+        document.getElementById('fMon').value || '*',
+        document.getElementById('fDow').value || '*'
+      ];
+      document.getElementById('cronExpr').textContent = parts.join(' ');
+    }
+    function calcNext() {
+      const min = document.getElementById('fMin').value;
+      const hour = document.getElementById('fHour').value;
+      const dom = document.getElementById('fDom').value;
+      const mon = document.getElementById('fMon').value;
+      const dow = document.getElementById('fDow').value;
+      const expr = `${min} ${hour} ${dom} ${mon} ${dow}`;
+      const runs = [];
+      let date = new Date();
+      date.setSeconds(0, 0);
+      date.setMinutes(date.getMinutes() + 1);
+      for (let i = 0; i < 10 && runs.length < 5; i++) {
+        for (let j = 0; j < 60 && runs.length < 5; j++) {
+          if (matches(date, min, hour, dom, mon, dow)) {
+            runs.push(date.toLocaleString('zh-CN', {year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',weekday:'short'}));
+          }
+          date = new Date(date.getTime() + 60000);
+        }
+        date = new Date(date.getTime() + 60000 * 59);
+      }
+      document.getElementById('nextRuns').innerHTML = runs.length
+        ? runs.map(r => `<li>${r}</li>`).join('')
+        : '<li style="color:#d9534f;">无法在近期找到匹配的执行时间</li>';
+    }
+    function matches(date, min, hour, dom, mon, dow) {
+      return fieldMatch(date.getMinutes(), min)
+          && fieldMatch(date.getHours(), hour)
+          && fieldMatch(date.getDate(), dom)
+          && fieldMatch(date.getMonth()+1, mon)
+          && fieldMatch(date.getDay(), dow);
+    }
+    function fieldMatch(val, field) {
+      if (field === '*') return true;
+      if (field.includes('/')) { const [_, step] = field.split('/'); return val % parseInt(step) === 0; }
+      if (field.includes('-')) { const [a, b] = field.split('-'); return val >= parseInt(a) && val <= parseInt(b); }
+      if (field.includes(',')) { return field.split(',').map(Number).includes(val); }
+      return val === parseInt(field);
+    }
+    function copyCron() {
+      const expr = document.getElementById('cronExpr').textContent;
+      navigator.clipboard.writeText(expr).then(() => alert('已复制: ' + expr));
+    }
+    function reset() {
+      ['fMin','fHour','fDom','fMon','fDow'].forEach(id => document.getElementById(id).value = '*');
+      updateCron();
+      document.getElementById('nextRuns').innerHTML = '<li style="color:#999;">点击"计算下次执行"...</li>';
+    }
+  </script>
+    <div class="ad-banner-bottom"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+</body>
+</html>

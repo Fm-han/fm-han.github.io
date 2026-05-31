@@ -1,0 +1,151 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>卡路里计算器 - 每日所需热量在线计算</title>
+  <meta name="description" content="免费在线卡路里计算器，计算基础代谢率(BMR)和每日所需热量(TDEE)，提供常见食物热量参考，帮助科学减肥或增重。">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://fm-han.github.io/calorie-calculator/">
+  <style>
+                /* 顶部横幅广告 - 透明样式 */ .ad-banner-top { border-bottom: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; } .ad-banner-bottom { border-top: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; margin-top: 40px; } .ad-container { max-width: 728px; margin: 0 auto; min-height: 38px; display: flex; align-items: center; justify-content: center; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; max-width: 700px; margin: 0 auto; padding: 20px; color: #333; line-height: 1.6; background: #fafafa; }
+    h1 { text-align: center; font-size: 1.8rem; color: #1a1a1a; }
+    h1 small { display: block; font-size: 0.85rem; color: #666; margin-top: 4px; font-weight: normal; }
+    .card { margin: 20px 0; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px; background: #fff; }
+    .input-group { margin-bottom: 16px; }
+    .input-group label { display: block; font-weight: 600; margin-bottom: 6px; }
+    .input-group input, .input-group select { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 1rem; box-sizing: border-box; }
+    .row { display: flex; gap: 16px; }
+    .row .input-group { flex: 1; }
+    .result-box { background: linear-gradient(135deg, #007bff, #0056b3); border-radius: 12px; padding: 24px; color: #fff; text-align: center; margin: 16px 0; }
+    .result-box .label { font-size: 1rem; opacity: 0.9; }
+    .result-box .value { font-size: 3rem; font-weight: 700; }
+    .result-box .unit { font-size: 1.2rem; }
+    .result-row { display: flex; justify-content: space-around; margin-top: 16px; }
+    .result-row .item { text-align: center; }
+    .result-row .num { font-size: 1.5rem; font-weight: 600; }
+    .result-row .txt { font-size: 0.85rem; opacity: 0.8; }
+    button { padding: 12px 28px; border: none; border-radius: 6px; cursor: pointer; font-size: 1rem; }
+    .btn-primary { background: #007bff; color: #fff; }
+    .btn-clear { background: #6c757d; color: #fff; }
+    button:hover { opacity: 0.9; }
+    .buttons { display: flex; gap: 12px; justify-content: center; }
+    .goal-section { display: flex; gap: 8px; margin-top: 12px; }
+    .goal-btn { flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 6px; background: #fff; cursor: pointer; text-align: center; }
+    .goal-btn.active { background: #28a745; color: #fff; border-color: #28a745; }
+    .food-list { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+    .food-item { padding: 8px; background: #f5f5f5; border-radius: 6px; font-size: 0.85rem; }
+    .food-item span { color: #007bff; font-weight: 600; }
+    .footer { text-align: center; margin: 24px 0; padding: 12px; font-size: 0.85rem; color: #28a745; font-weight: 500; }
+  </style>
+</head>
+<body>
+    <div class="ad-banner-top"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+  <h1>卡路里计算器 <small>基础代谢 · 每日消耗 · 食物热量参考</small></h1>
+
+  <div class="card">
+    <div class="row">
+      <div class="input-group"><label>性别</label><select id="gender"><option value="male">男</option><option value="female">女</option></select></div>
+      <div class="input-group"><label>年龄（岁）</label><input type="number" id="age" placeholder="25" min="15" max="100"></div>
+    </div>
+    <div class="row">
+      <div class="input-group"><label>身高（cm）</label><input type="number" id="height" placeholder="170" min="100" max="250"></div>
+      <div class="input-group"><label>体重（kg）</label><input type="number" id="weight" placeholder="65" min="30" max="300"></div>
+    </div>
+    <div class="input-group">
+      <label>活动水平</label>
+      <select id="activity">
+        <option value="1.2">久坐（很少运动）</option>
+        <option value="1.375">轻度（每周1-3天运动）</option>
+        <option value="1.55" selected>中度（每周3-5天运动）</option>
+        <option value="1.725">活跃（每周6-7天运动）</option>
+        <option value="1.9">非常活跃（每天高强度运动）</option>
+      </select>
+    </div>
+    <div class="goal-section">
+      <div class="goal-btn active" onclick="setGoal(-500, this)">减脂<br><small>-500kcal/天</small></div>
+      <div class="goal-btn" onclick="setGoal(0, this)">维持<br><small>±0</small></div>
+      <div class="goal-btn" onclick="setGoal(500, this)">增肌<br><small>+500kcal/天</small></div>
+    </div>
+    <div class="buttons" style="margin-top:16px;">
+      <button class="btn-primary" onclick="calculate()">计算</button>
+      <button class="btn-clear" onclick="clearAll()">清空</button>
+    </div>
+  </div>
+
+  <div class="card" id="resultCard" style="display:none;">
+    <div class="result-box">
+      <div class="label">每日目标热量</div>
+      <div class="value" id="tdeeValue">--</div>
+      <div class="unit">千卡/天</div>
+      <div class="result-row">
+        <div class="item"><div class="num" id="bmrValue">--</div><div class="txt">基础代谢(BMR)</div></div>
+        <div class="item"><div class="num" id="tdeeBase">--</div><div class="txt">每日消耗(TDEE)</div></div>
+      </div>
+    </div>
+    <div style="display:flex;justify-content:center;gap:16px;margin-top:12px;font-size:0.9rem;color:#666;">
+      <span>碳水: <strong id="carb">--</strong>g</span>
+      <span>蛋白质: <strong id="protein">--</strong>g</span>
+      <span>脂肪: <strong id="fat">--</strong>g</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>常见食物热量参考（每100g）</h3>
+    <div class="food-list">
+      <div class="food-item">白米饭 <span>130kcal</span></div>
+      <div class="food-item">面条 <span>280kcal</span></div>
+      <div class="food-item">鸡胸肉 <span>165kcal</span></div>
+      <div class="food-item">牛肉 <span>250kcal</span></div>
+      <div class="food-item">鸡蛋 <span>155kcal</span></div>
+      <div class="food-item">牛奶 <span>54kcal</span></div>
+      <div class="food-item">苹果 <span>52kcal</span></div>
+      <div class="food-item">香蕉 <span>93kcal</span></div>
+      <div class="food-item">青菜 <span>14kcal</span></div>
+      <div class="food-item">土豆 <span>76kcal</span></div>
+      <div class="food-item">面包 <span>265kcal</span></div>
+      <div class="food-item">豆腐 <span>81kcal</span></div>
+    </div>
+  </div>
+
+  <div class="footer">100% 免费 · 数据不上传服务器 · 仅浏览器本地处理</div>
+
+  <script>
+    let goalCal = -500;
+    function setGoal(g, el) {
+      goalCal = g;
+      document.querySelectorAll('.goal-btn').forEach(b => b.classList.remove('active'));
+      el.classList.add('active');
+    }
+    function calculate() {
+      const gender = document.getElementById('gender').value;
+      const age = parseInt(document.getElementById('age').value);
+      const height = parseFloat(document.getElementById('height').value);
+      const weight = parseFloat(document.getElementById('weight').value);
+      const activity = parseFloat(document.getElementById('activity').value);
+      if (!age || !height || !weight) { alert('请填写完整信息'); return; }
+      let bmr;
+      if (gender === 'male') bmr = 88.362 + (13.397 * weight) + (4.799 * height) - (5.677 * age);
+      else bmr = 447.593 + (9.247 * weight) + (3.098 * height) - (4.330 * age);
+      const tdee = bmr * activity;
+      const target = Math.round(tdee + goalCal);
+      const carb = Math.round(target * 0.5 / 4);
+      const protein = Math.round(weight * 1.8);
+      const fat = Math.round(target * 0.25 / 9);
+      document.getElementById('resultCard').style.display = 'block';
+      document.getElementById('bmrValue').textContent = Math.round(bmr);
+      document.getElementById('tdeeBase').textContent = Math.round(tdee);
+      document.getElementById('tdeeValue').textContent = target;
+      document.getElementById('carb').textContent = carb;
+      document.getElementById('protein').textContent = protein;
+      document.getElementById('fat').textContent = fat;
+    }
+    function clearAll() {
+      document.querySelectorAll('input').forEach(i => i.value = '');
+      document.getElementById('resultCard').style.display = 'none';
+    }
+  </script>
+    <div class="ad-banner-bottom"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+</body>
+</html>

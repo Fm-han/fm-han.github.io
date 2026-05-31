@@ -1,0 +1,159 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>文本分列工具 - 按分隔符拆分文本</title>
+  <meta name="description" content="免费在线文本分列工具，按逗号、空格、制表符等分隔符将文本拆分成多列显示。">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://fm-han.github.io/text-to-columns/">
+  <style>
+                /* 顶部横幅广告 - 透明样式 */ .ad-banner-top { border-bottom: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; } .ad-banner-bottom { border-top: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; margin-top: 40px; } .ad-container { max-width: 728px; margin: 0 auto; min-height: 38px; display: flex; align-items: center; justify-content: center; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 20px; color: #333; line-height: 1.6; background: #fafafa; }
+    h1 { text-align: center; font-size: 1.8rem; color: #1a1a1a; }
+    h1 small { display: block; font-size: 0.85rem; color: #666; margin-top: 4px; font-weight: normal; }
+    .card { margin: 20px 0; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px; background: #fff; }
+    .input-section textarea { width: 100%; min-height: 120px; padding: 12px; border: 1px solid #ccc; border-radius: 6px; font-family: monospace; font-size: 0.9rem; resize: vertical; box-sizing: border-box; }
+    .options { display: flex; gap: 16px; margin: 16px 0; flex-wrap: wrap; }
+    .option { display: flex; align-items: center; gap: 6px; }
+    .option select, .option input { padding: 6px; border: 1px solid #ccc; border-radius: 4px; }
+    .option input[type="text"] { width: 80px; }
+    .columns-display { display: flex; gap: 16px; overflow-x: auto; padding: 16px; background: #f5f5f5; border-radius: 8px; }
+    .column { flex: 1; min-width: 150px; background: #fff; border: 1px solid #e0e0e0; border-radius: 6px; overflow: hidden; }
+    .column-header { background: #007bff; color: #fff; padding: 10px; font-weight: 600; text-align: center; }
+    .column-body { max-height: 400px; overflow-y: auto; }
+    .column-cell { padding: 8px 12px; border-bottom: 1px solid #eee; font-size: 0.9rem; word-break: break-all; }
+    .column-cell:nth-child(even) { background: #f9f9f9; }
+    .result-output { margin-top: 16px; }
+    .result-output textarea { width: 100%; min-height: 200px; padding: 12px; border: 1px solid #ccc; border-radius: 6px; font-family: monospace; font-size: 0.9rem; background: #f5f5f5; resize: vertical; box-sizing: border-box; }
+    button { padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-size: 1rem; }
+    .btn-primary { background: #007bff; color: #fff; }
+    .btn-success { background: #28a745; color: #fff; }
+    button:hover { opacity: 0.9; }
+    .buttons { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+    .footer { text-align: center; margin: 24px 0; padding: 12px; font-size: 0.85rem; color: #28a745; font-weight: 500; }
+  </style>
+</head>
+<body>
+    <div class="ad-banner-top"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+  <h1>文本分列工具 <small>分隔符拆分 · 表格显示 · 数据整理</small></h1>
+
+  <div class="card">
+    <div class="input-section">
+      <label><strong>输入文本</strong></label>
+      <textarea id="inputText" placeholder="输入要分列的文本，每行一条记录...">张三,男,25,北京
+李四,女,30,上海
+王五,男,28,广州
+赵六,女,22,深圳</textarea>
+    </div>
+    <div class="options">
+      <div class="option">
+        <label>分隔符：</label>
+        <select id="delimiter" onchange="toggleCustom()">
+          <option value=",">逗号 ,</option>
+          <option value=" ">空格</option>
+          <option value="\t">Tab键</option>
+          <option value=";">分号 ;</option>
+          <option value="|">竖线 |</option>
+          <option value="custom">自定义</option>
+        </select>
+      </div>
+      <div class="option" id="customDelOption" style="display:none;">
+        <label>自定义：</label>
+        <input type="text" id="customDelimiter" placeholder="输入分隔符">
+      </div>
+      <div class="option">
+        <label>表头行：</label>
+        <select id="hasHeader">
+          <option value="yes">有表头</option>
+          <option value="no">无表头</option>
+        </select>
+      </div>
+    </div>
+    <div class="buttons">
+      <button class="btn-primary" onclick="splitColumns()">分列</button>
+      <button class="btn-success" onclick="joinColumns()">合并列</button>
+    </div>
+  </div>
+
+  <div class="card" id="resultCard" style="display:none;">
+    <h3>分列结果</h3>
+    <div class="columns-display" id="columnsDisplay"></div>
+    <div class="result-output">
+      <label><strong>导出为文本</strong></label>
+      <textarea id="outputText" readonly></textarea>
+    </div>
+    <div class="buttons" style="margin-top:16px;">
+      <button class="btn-success" onclick="copyResult()">复制文本</button>
+      <button class="btn-primary" onclick="downloadCSV()">下载CSV</button>
+    </div>
+  </div>
+
+  <div class="footer">100% 免费 · 数据不上传服务器 · 仅浏览器本地处理</div>
+
+  <script>
+    function toggleCustom() {
+      document.getElementById('customDelOption').style.display = 
+        document.getElementById('delimiter').value === 'custom' ? 'flex' : 'none';
+    }
+    function getDelimiter() {
+      const sel = document.getElementById('delimiter').value;
+      return sel === 'custom' ? document.getElementById('customDelimiter').value : sel;
+    }
+    function splitColumns() {
+      const text = document.getElementById('inputText').value;
+      if (!text.trim()) { alert('请输入文本'); return; }
+      const delimiter = getDelimiter();
+      if (!delimiter) { alert('请输入分隔符'); return; }
+      const lines = text.split('\n').filter(l => l.trim());
+      const rows = lines.map(line => line.split(delimiter).map(s => s.trim()));
+      const maxCols = Math.max(...rows.map(r => r.length));
+      let headers = [];
+      const hasHeader = document.getElementById('hasHeader').value === 'yes';
+      if (hasHeader && rows.length > 0) {
+        headers = rows[0];
+        if (headers.length < maxCols) {
+          for (let i = headers.length; i < maxCols; i++) headers.push(`列${i + 1}`);
+        }
+      } else {
+        headers = Array.from({length: maxCols}, (_, i) => `列${i + 1}`);
+      }
+      document.getElementById('resultCard').style.display = 'block';
+      let html = '';
+      for (let i = 0; i < maxCols; i++) {
+        html += `<div class="column"><div class="column-header">${headers[i] || '列' + (i+1)}</div><div class="column-body">`;
+        const start = hasHeader ? 1 : 0;
+        for (let j = start; j < rows.length; j++) {
+          html += `<div class="column-cell">${rows[j][i] || ''}</div>`;
+        }
+        html += '</div></div>';
+      }
+      document.getElementById('columnsDisplay').innerHTML = html;
+      document.getElementById('outputText').value = rows.map(r => r.join('\t')).join('\n');
+    }
+    function joinColumns() {
+      const text = document.getElementById('inputText').value;
+      const delimiter = getDelimiter();
+      const lines = text.split('\n');
+      const result = lines.map(line => line.split('\t').join(delimiter)).join('\n');
+      document.getElementById('outputText').value = result;
+    }
+    function copyResult() {
+      navigator.clipboard.writeText(document.getElementById('outputText').value).then(() => alert('已复制'));
+    }
+    function downloadCSV() {
+      const text = document.getElementById('outputText').value;
+      const lines = text.split('\n');
+      const csv = lines.map(l => l.split('\t').map(s => `"${s}"`).join(',')).join('\n');
+      const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'data.csv';
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+  </script>
+    <div class="ad-banner-bottom"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+</body>
+</html>

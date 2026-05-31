@@ -1,0 +1,140 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JSON验证器 - 免费在线工具</title>
+<style>
+                /* 顶部横幅广告 - 透明样式 */ .ad-banner-top { border-bottom: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; } .ad-banner-bottom { border-top: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; margin-top: 40px; } .ad-container { max-width: 728px; margin: 0 auto; min-height: 38px; display: flex; align-items: center; justify-content: center; }
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; background:#fafafa; color:#333; min-height:100vh; display:flex; flex-direction:column; height:100vh; }
+.header { background:#fff; border-bottom:1px solid #e0e0e0; padding:12px 24px; display:flex; align-items:center; justify-content:space-between; flex-shrink:0; }
+.header h1 { font-size:1.25rem; font-weight:600; }
+.back-link { color:#007bff; text-decoration:none; font-size:0.9rem; }
+.back-link:hover { text-decoration:underline; }
+.toolbar { display:flex; gap:8px; }
+.btn-primary { background:#007bff; color:#fff; border:none; padding:8px 20px; border-radius:4px; cursor:pointer; font-size:0.95rem; }
+.btn-primary:hover { background:#0056b3; }
+.btn-secondary { background:#28a745; color:#fff; border:none; padding:8px 20px; border-radius:4px; cursor:pointer; font-size:0.95rem; }
+.btn-secondary:hover { background:#1e7e34; }
+.btn-danger { background:#dc3545; color:#fff; border:none; padding:8px 20px; border-radius:4px; cursor:pointer; font-size:0.95rem; }
+.btn-danger:hover { background:#c82333; }
+.main-area { display:flex; flex:1; overflow:hidden; }
+.editor-panel { flex:1; display:flex; flex-direction:column; border-right:1px solid #e0e0e0; }
+.panel-header { padding:12px 16px; background:#fff; border-bottom:1px solid #e0e0e0; font-size:0.95rem; font-weight:500; color:#555; display:flex; justify-content:space-between; align-items:center; flex-shrink:0; }
+textarea { flex:1; border:none; padding:16px; font-family:'Consolas','Courier New',monospace; font-size:14px; resize:none; outline:none; background:#fafafa; white-space:pre; overflow:auto; }
+.result-panel { flex:1; display:flex; flex-direction:column; min-width:0; }
+.output-area { flex:1; border:none; padding:16px; font-family:'Consolas','Courier New',monospace; font-size:14px; background:#fafafa; overflow:auto; white-space:pre-wrap; word-break:break-all; }
+label { font-size:0.9rem; color:#555; font-weight:500; }
+.json-key { color:#881391; }
+.json-string { color:#c41a16; }
+.json-number { color:#1c00cf; }
+.json-boolean { color:#0d22aa; }
+.json-null { color:#808080; }
+.status-bar { padding:8px 16px; font-size:0.85rem; border-top:1px solid #e0e0e0; flex-shrink:0; }
+.status-ok { color:#28a745; }
+.status-err { color:#dc3545; }
+</style>
+</head>
+<body>
+    <div class="ad-banner-top"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+<div class="header">
+  <h1>JSON 验证器</h1>
+  <a href="https://fm-han.github.io" class="back-link">← 返回工具站</a>
+</div>
+<div class="main-area">
+  <div class="editor-panel">
+    <div class="panel-header">
+      <span>输入 JSON</span>
+      <div>
+        <button class="btn-secondary" onclick="loadExample()" style="padding:4px 12px;font-size:0.85rem;">示例</button>
+        <button class="btn-danger" onclick="clearEditor()" style="padding:4px 12px;font-size:0.85rem;margin-left:4px;">清空</button>
+      </div>
+    </div>
+    <textarea id="jsonInput" placeholder='在此输入或粘贴 JSON 内容...'></textarea>
+    <div class="panel-header" style="border-top:1px solid #e0e0e0; justify-content:center;">
+      <button class="btn-primary" onclick="validateJSON()" style="padding:6px 24px;">验证 / 格式化</button>
+      <button class="btn-secondary" onclick="minifyJSON()" style="padding:6px 24px;margin-left:8px;">压缩</button>
+    </div>
+  </div>
+  <div class="result-panel">
+    <div class="panel-header">
+      <span>验证结果</span>
+      <button class="btn-secondary" onclick="copyResult()" id="copyBtn" style="padding:4px 12px;font-size:0.85rem;">复制结果</button>
+    </div>
+    <div class="output-area" id="resultArea">等待输入...</div>
+    <div class="status-bar" id="statusBar">就绪</div>
+  </div>
+</div>
+<script>
+const input = document.getElementById('jsonInput');
+const result = document.getElementById('resultArea');
+const status = document.getElementById('statusBar');
+
+function validateJSON() {
+  const raw = input.value.trim();
+  if (!raw) { setStatus('请输入 JSON 内容','err'); return; }
+  try {
+    const obj = JSON.parse(raw);
+    const formatted = JSON.stringify(obj, null, 2);
+    result.innerHTML = syntaxHighlight(formatted);
+    input.value = formatted;
+    setStatus('JSON 格式正确，已格式化输出 | 类型：' + getType(obj) + ' | 大小：' + (new Blob([raw]).size/1024).toFixed(1) + 'KB','ok');
+  } catch(e) {
+    // Try to find error position
+    result.textContent = 'JSON 格式错误：\n' + e.message;
+    setStatus('JSON 格式错误：' + e.message,'err');
+  }
+}
+
+function minifyJSON() {
+  const raw = input.value.trim();
+  if (!raw) return;
+  try {
+    const obj = JSON.parse(raw);
+    const minified = JSON.stringify(obj);
+    input.value = minified;
+    result.textContent = '压缩完成，大小：' + (new Blob([raw]).size/1024).toFixed(1) + 'KB → ' + (new Blob([minified]).size/1024).toFixed(1) + 'KB';
+    setStatus('压缩完成','ok');
+  } catch(e) {
+    result.textContent = '错误：' + e.message;
+    setStatus('压缩失败：JSON 格式错误','err');
+  }
+}
+
+function syntaxHighlight(json) {
+  json = json.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function(match) {
+    let cls = 'json-number';
+    if (/^"/.test(match)) { cls = /:$/.test(match) ? 'json-key' : 'json-string'; }
+    else if (/true|false/.test(match)) cls = 'json-boolean';
+    else if (/null/.test(match)) cls = 'json-null';
+    return '<span class="' + cls + '">' + match + '</span>';
+  });
+}
+
+function getType(obj) {
+  if (Array.isArray(obj)) return 'Array[' + obj.length + ']';
+  if (obj === null) return 'null';
+  return typeof obj;
+}
+
+function setStatus(msg, type) {
+  status.textContent = msg;
+  status.className = type==='ok' ? 'status-ok' : type==='err' ? 'status-err' : '';
+}
+
+function loadExample() {
+  input.value = '{\n  "name": "测试数据",\n  "version": 1,\n  "active": true,\n  "tags": ["json","validate","format"],\n  "meta": {\n    "author": "FM-Han",\n    "date": "2024"\n  }\n}';
+  validateJSON();
+}
+
+function clearEditor() { input.value=''; result.textContent='等待输入...'; setStatus('就绪',''); }
+function copyResult() {
+  const text = result.textContent;
+  navigator.clipboard.writeText(text).then(() => { setStatus('已复制到剪贴板','ok'); });
+}
+</script>
+    <div class="ad-banner-bottom"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+</body>
+</html>

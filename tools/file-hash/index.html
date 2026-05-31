@@ -1,0 +1,160 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>文件哈希校验 - 在线工具</title>
+    <link rel="canonical" href="https://fm-han.github.io/file-hash/">
+    <style>
+                /* 顶部横幅广告 - 透明样式 */ .ad-banner-top { border-bottom: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; } .ad-banner-bottom { border-top: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; margin-top: 40px; } .ad-container { max-width: 728px; margin: 0 auto; min-height: 38px; display: flex; align-items: center; justify-content: center; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #fafafa; min-height: 100vh; display: flex; flex-direction: column; }
+        .container { max-width: 800px; margin: 0 auto; padding: 20px; flex: 1; }
+        h1 { text-align: center; color: #333; margin-bottom: 30px; font-size: 28px; }
+        .card { background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; padding: 24px; margin-bottom: 20px; }
+        .drop-zone { border: 2px dashed #ccc; border-radius: 8px; padding: 40px; text-align: center; cursor: pointer; transition: all 0.3s; }
+        .drop-zone:hover, .drop-zone.dragover { border-color: #007bff; background: #e7f3ff; }
+        .drop-zone input { display: none; }
+        .file-info { margin-top: 16px; padding: 12px; background: #f5f5f5; border-radius: 6px; }
+        .file-info p { margin: 4px 0; color: #555; }
+        .file-name { font-weight: 600; color: #333; word-break: break-all; }
+        .hash-result { margin-top: 16px; }
+        .hash-item { display: flex; align-items: center; padding: 12px; background: #f8f9fa; border-radius: 6px; margin-bottom: 8px; }
+        .hash-label { width: 80px; font-weight: 600; color: #333; }
+        .hash-value { flex: 1; font-family: monospace; font-size: 13px; color: #444; word-break: break-all; }
+        .hash-value.match { color: #28a745; }
+        .hash-value.mismatch { color: #dc3545; }
+        .copy-btn { padding: 6px 12px; background: #007bff; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; margin-left: 8px; }
+        .copy-btn:hover { opacity: 0.85; }
+        .verify-section { margin-top: 24px; }
+        label { display: block; margin-bottom: 8px; color: #555; font-weight: 500; }
+        input[type="text"] { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px; font-family: monospace; font-size: 14px; margin-bottom: 12px; }
+        input[type="text"]:focus { outline: none; border-color: #007bff; }
+        .progress { width: 100%; height: 8px; background: #e9ecef; border-radius: 4px; overflow: hidden; margin-top: 12px; display: none; }
+        .progress-bar { height: 100%; background: #007bff; width: 0%; transition: width 0.2s; }
+        .btn { padding: 12px 24px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; color: #fff; }
+        .btn-primary { background: #007bff; }
+        .btn-gray { background: #6c757d; }
+        .btn:hover { opacity: 0.85; }
+        footer { text-align: center; padding: 20px; color: #888; font-size: 14px; }
+    </style>
+</head>
+<body>
+    <div class="ad-banner-top"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+    <div class="container">
+        <h1>文件哈希校验</h1>
+        <div class="card">
+            <div class="drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
+                <p style="font-size: 18px; color: #666;">拖拽文件到此处，或点击选择文件</p>
+                <p style="color: #999; margin-top: 8px;">支持任意大小任意类型的文件</p>
+                <input type="file" id="fileInput" onchange="handleFile(this.files[0])">
+            </div>
+            <div id="fileInfo" class="file-info" style="display:none;">
+                <p class="file-name" id="fileName"></p>
+                <p>大小: <span id="fileSize"></span></p>
+                <p>类型: <span id="fileType"></span></p>
+            </div>
+            <div id="progress" class="progress"><div class="progress-bar" id="progressBar"></div></div>
+            <div id="hashResult" class="hash-result" style="display:none;"></div>
+        </div>
+        <div class="card verify-section">
+            <h3 style="margin-bottom: 16px;">校验哈希值</h3>
+            <div id="verifyInputs"></div>
+            <div style="margin-top: 16px; display: flex; gap: 10px;">
+                <button class="btn btn-primary" onclick="verifyHashes()">校验</button>
+                <button class="btn btn-gray" onclick="clearAll()">清空</button>
+            </div>
+        </div>
+    </div>
+    <footer>100% 免费 · 数据不上传服务器 · 仅浏览器本地处理</footer>
+    <script>
+        let currentHashes = {};
+        
+        async function handleFile(file) {
+            if (!file) return;
+            document.getElementById('fileName').textContent = file.name;
+            document.getElementById('fileSize').textContent = formatSize(file.size);
+            document.getElementById('fileType').textContent = file.type || '未知';
+            document.getElementById('fileInfo').style.display = 'block';
+            document.getElementById('progress').style.display = 'block';
+            
+            const algorithms = ['MD5', 'SHA-1', 'SHA-256', 'SHA-512'];
+            const hashes = await calculateAllHashes(file, algorithms);
+            currentHashes = hashes;
+            
+            document.getElementById('progress').style.display = 'none';
+            const resultDiv = document.getElementById('hashResult');
+            resultDiv.style.display = 'block';
+            resultDiv.innerHTML = algorithms.map(alg => `
+                <div class="hash-item">
+                    <span class="hash-label">${alg}</span>
+                    <span class="hash-value" id="hash-${alg.replace(/[^a-zA-Z0-9]/g,'')}">${hashes[alg]}</span>
+                    <button class="copy-btn" onclick="copyHash('${alg}')">复制</button>
+                </div>
+            `).join('');
+            
+            updateVerifyInputs(algorithms);
+        }
+        
+        async function calculateAllHashes(file, algorithms) {
+            const results = {};
+            const buffer = await file.arrayBuffer();
+            const progressBar = document.getElementById('progressBar');
+            
+            for (let i = 0; i < algorithms.length; i++) {
+                progressBar.style.width = `${(i / algorithms.length) * 100}%`;
+                const hash = await crypto.subtle.digest(algorithms[i].replace('-', '-'), buffer);
+                results[algorithms[i]] = Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
+            }
+            progressBar.style.width = '100%';
+            return results;
+        }
+        
+        function formatSize(bytes) {
+            if (bytes < 1024) return bytes + ' B';
+            if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(2) + ' KB';
+            if (bytes < 1024 * 1024 * 1024) return (bytes / 1024 / 1024).toFixed(2) + ' MB';
+            return (bytes / 1024 / 1024 / 1024).toFixed(2) + ' GB';
+        }
+        
+        function copyHash(alg) {
+            navigator.clipboard.writeText(currentHashes[alg]).then(() => alert(`${alg} 已复制`));
+        }
+        
+        function updateVerifyInputs(algorithms) {
+            const container = document.getElementById('verifyInputs');
+            container.innerHTML = algorithms.map(alg => `
+                <label>输入 ${alg} 值进行校验</label>
+                <input type="text" id="verify-${alg.replace(/[^a-zA-Z0-9]/g,'')}" placeholder="粘贴哈希值进行比对...">
+            `).join('');
+        }
+        
+        function verifyHashes() {
+            const ids = ['MD5', 'SHA-1', 'SHA-256', 'SHA-512'].map(a => a.replace(/[^a-zA-Z0-9]/g,''));
+            ids.forEach((id, i) => {
+                const input = document.getElementById(`verify-${id}`);
+                const hashEl = document.getElementById(`hash-${id}`);
+                if (input && hashEl && input.value.trim()) {
+                    const match = input.value.trim().toLowerCase() === hashEl.textContent.toLowerCase();
+                    hashEl.className = `hash-value ${match ? 'match' : 'mismatch'}`;
+                    hashEl.textContent = hashEl.textContent + (match ? ' ✓' : ' ✗');
+                }
+            });
+        }
+        
+        function clearAll() {
+            document.getElementById('fileInput').value = '';
+            document.getElementById('fileInfo').style.display = 'none';
+            document.getElementById('hashResult').style.display = 'none';
+            document.getElementById('verifyInputs').innerHTML = '';
+            currentHashes = {};
+        }
+        
+        const dropZone = document.getElementById('dropZone');
+        dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
+        dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+        dropZone.addEventListener('drop', e => { e.preventDefault(); dropZone.classList.remove('dragover'); handleFile(e.dataTransfer.files[0]); });
+    </script>
+    <div class="ad-banner-bottom"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+</body>
+</html>

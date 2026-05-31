@@ -1,0 +1,150 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>工作日计算器 - 计算工作日后日期</title>
+  <meta name="description" content="免费在线工作日计算器，计算N个工作日后的日期，排除周末，可自定义节假日。">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://fm-han.github.io/workday-calculator/">
+  <style>
+                /* 顶部横幅广告 - 透明样式 */ .ad-banner-top { border-bottom: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; } .ad-banner-bottom { border-top: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; margin-top: 40px; } .ad-container { max-width: 728px; margin: 0 auto; min-height: 38px; display: flex; align-items: center; justify-content: center; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; max-width: 700px; margin: 0 auto; padding: 20px; color: #333; line-height: 1.6; background: #fafafa; }
+    h1 { text-align: center; font-size: 1.8rem; color: #1a1a1a; }
+    h1 small { display: block; font-size: 0.85rem; color: #666; margin-top: 4px; font-weight: normal; }
+    .card { margin: 20px 0; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px; background: #fff; }
+    .input-row { display: flex; gap: 16px; margin-bottom: 16px; align-items: flex-end; }
+    .input-group { flex: 1; }
+    .input-group label { display: block; font-weight: 600; margin-bottom: 6px; }
+    .input-group input { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 1rem; box-sizing: border-box; }
+    .mode-toggle { display: flex; gap: 8px; margin-bottom: 16px; }
+    .mode-btn { flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 6px; background: #fff; cursor: pointer; text-align: center; }
+    .mode-btn.active { background: #007bff; color: #fff; border-color: #007bff; }
+    .result-box { background: linear-gradient(135deg, #28a745, #218838); border-radius: 12px; padding: 24px; color: #fff; text-align: center; margin: 20px 0; }
+    .result-box .date { font-size: 2rem; font-weight: 700; }
+    .result-box .desc { font-size: 1rem; opacity: 0.9; margin-top: 8px; }
+    .holiday-section { margin-top: 16px; }
+    .holiday-section label { display: block; font-weight: 600; margin-bottom: 6px; }
+    .holiday-input { display: flex; gap: 8px; margin-bottom: 8px; }
+    .holiday-input input { flex: 1; padding: 8px; border: 1px solid #ccc; border-radius: 6px; }
+    .holiday-list { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+    .holiday-tag { background: #fff3cd; padding: 4px 10px; border-radius: 12px; font-size: 0.85rem; display: flex; align-items: center; gap: 4px; }
+    .holiday-tag .del { color: #dc3545; cursor: pointer; }
+    button { padding: 12px 28px; border: none; border-radius: 6px; cursor: pointer; font-size: 1rem; }
+    .btn-primary { background: #007bff; color: #fff; }
+    .btn-success { background: #28a745; color: #fff; }
+    .btn-clear { background: #6c757d; color: #fff; }
+    button:hover { opacity: 0.9; }
+    .buttons { display: flex; gap: 12px; justify-content: center; }
+    .weekends-toggle { display: flex; align-items: center; gap: 8px; margin-top: 12px; }
+    .footer { text-align: center; margin: 24px 0; padding: 12px; font-size: 0.85rem; color: #28a745; font-weight: 500; }
+  </style>
+</head>
+<body>
+    <div class="ad-banner-top"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+  <h1>工作日计算器 <small>计算N个工作日后日期 · 排除周末节假日</small></h1>
+
+  <div class="card">
+    <div class="input-row">
+      <div class="input-group"><label>起始日期</label><input type="date" id="startDate"></div>
+    </div>
+    <div class="mode-toggle">
+      <button class="mode-btn active" onclick="setMode('add', this)">加N个工作日</button>
+      <button class="mode-btn" onclick="setMode('sub', this)">减N个工作日</button>
+    </div>
+    <div class="input-row">
+      <div class="input-group"><label>工作日数</label><input type="number" id="workdays" placeholder="例如：5" min="1" value="5"></div>
+    </div>
+    <div class="holiday-section">
+      <label>添加节假日（这些天不算工作日）</label>
+      <div class="holiday-input">
+        <input type="date" id="holidayInput">
+        <button class="btn-success" onclick="addHoliday()">添加</button>
+      </div>
+      <div class="holiday-list" id="holidayList"></div>
+    </div>
+    <div class="weekends-toggle">
+      <input type="checkbox" id="skipWeekends" checked>
+      <label for="skipWeekends" style="margin:0;font-weight:normal;">跳过周末（周六周日不算工作日）</label>
+    </div>
+    <div class="buttons" style="margin-top:16px;">
+      <button class="btn-primary" onclick="calculate()">计算</button>
+      <button class="btn-clear" onclick="clearAll()">清空</button>
+    </div>
+  </div>
+
+  <div class="card" id="resultCard" style="display:none;">
+    <div class="result-box">
+      <div class="date" id="resultDate">--</div>
+      <div class="desc" id="resultDesc">--</div>
+    </div>
+    <div id="calendarView"></div>
+  </div>
+
+  <div class="footer">100% 免费 · 数据不上传服务器 · 仅浏览器本地处理</div>
+
+  <script>
+    let mode = 'add';
+    let holidays = [];
+    const weekdays = ['周日','周一','周二','周三','周四','周五','周六'];
+    document.getElementById('startDate').valueAsDate = new Date();
+    function setMode(m, el) {
+      mode = m;
+      document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+      el.classList.add('active');
+    }
+    function addHoliday() {
+      const input = document.getElementById('holidayInput');
+      const date = input.value;
+      if (!date) return;
+      if (holidays.includes(date)) { alert('该日期已添加'); return; }
+      holidays.push(date);
+      holidays.sort();
+      renderHolidays();
+      input.value = '';
+    }
+    function removeHoliday(date) {
+      holidays = holidays.filter(d => d !== date);
+      renderHolidays();
+    }
+    function renderHolidays() {
+      document.getElementById('holidayList').innerHTML = holidays.map(d => 
+        `<span class="holiday-tag">${d} <span class="del" onclick="removeHoliday('${d}')">✕</span></span>`
+      ).join('');
+    }
+    function isHoliday(date) {
+      const d = date.toISOString().split('T')[0];
+      return holidays.includes(d);
+    }
+    function isWeekend(date) {
+      const day = date.getDay();
+      return day === 0 || day === 6;
+    }
+    function calculate() {
+      const startStr = document.getElementById('startDate').value;
+      const n = parseInt(document.getElementById('workdays').value);
+      if (!startStr || !n) { alert('请填写完整信息'); return; }
+      const skipWeekends = document.getElementById('skipWeekends').checked;
+      let current = new Date(startStr);
+      let workdaysCounted = 0;
+      const direction = mode === 'add' ? 1 : -1;
+      while (workdaysCounted < n) {
+        current.setDate(current.getDate() + direction);
+        if (skipWeekends && isWeekend(current)) continue;
+        if (isHoliday(current)) continue;
+        workdaysCounted++;
+      }
+      const weekdaysName = weekdays[current.getDay()];
+      document.getElementById('resultCard').style.display = 'block';
+      document.getElementById('resultDate').textContent = current.toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' });
+      document.getElementById('resultDesc').textContent = `${weekdaysName} · 第${n}个工作日后`;
+    }
+    function clearAll() {
+      holidays = [];
+      renderHolidays();
+      document.getElementById('resultCard').style.display = 'none';
+    }
+  </script>
+    <div class="ad-banner-bottom"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+</body>
+</html>

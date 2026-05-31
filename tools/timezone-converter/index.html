@@ -1,0 +1,136 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>时区转换器 - 在线全球时区时间互转工具</title>
+  <meta name="description" content="免费在线时区转换器，支持全球时区互转，输入时间选择源时区和目标时区即可实时转换，支持夏令时自动计算。">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://fm-han.github.io/timezone-converter/">
+  <style>
+                /* 顶部横幅广告 - 透明样式 */ .ad-banner-top { border-bottom: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; } .ad-banner-bottom { border-top: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; margin-top: 40px; } .ad-container { max-width: 728px; margin: 0 auto; min-height: 38px; display: flex; align-items: center; justify-content: center; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; max-width: 700px; margin: 0 auto; padding: 20px; color: #333; line-height: 1.6; background: #fafafa; }
+    h1 { text-align: center; font-size: 1.8rem; color: #1a1a1a; }
+    h1 small { display: block; font-size: 0.85rem; color: #666; margin-top: 4px; font-weight: normal; }
+    .section { margin: 20px 0; padding: 16px; border: 1px solid #e0e0e0; border-radius: 8px; background: #fff; }
+    .section label { display: block; font-weight: 600; margin-bottom: 8px; }
+    .tz-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 12px; }
+    input[type="datetime-local"], input[type="time"], select { width: 100%; padding: 10px 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 1rem; box-sizing: border-box; }
+    .result-display { padding: 20px; background: #f0f7ff; border-radius: 8px; text-align: center; margin-top: 12px; }
+    .result-display .time { font-size: 2rem; font-weight: 700; color: #007bff; }
+    .result-display .date { font-size: 1rem; color: #333; margin-top: 4px; }
+    .result-display .tz { font-size: 0.85rem; color: #666; margin-top: 4px; }
+    .now-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+    .buttons { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+    button { padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-size: 0.95rem; }
+    .btn-primary { background: #007bff; color: #fff; }
+    .btn-copy { background: #28a745; color: #fff; }
+    .btn-clear { background: #6c757d; color: #fff; }
+    button:hover { opacity: 0.9; }
+    .footer { text-align: center; margin: 24px 0; padding: 12px; font-size: 0.85rem; color: #28a745; font-weight: 500; }
+    @media (max-width: 600px) { .tz-row { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+    <div class="ad-banner-top"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+
+  <h1>时区转换器 <small>全球时区 / 实时转换 / 夏令时 · 浏览器本地</small></h1>
+
+  <div class="section">
+    <label>选择源时区</label>
+    <select id="srcTz"></select>
+    <div style="margin-top:12px;">
+      <label style="display:block;font-weight:600;margin-bottom:8px;">输入时间</label>
+      <input type="datetime-local" id="srcTime">
+    </div>
+    <div class="now-row">
+      <button class="btn-primary" onclick="convert()">转换</button>
+      <button class="btn-primary" onclick="useNow()">使用当前时间</button>
+      <button class="btn-clear" onclick="document.getElementById('srcTime').value='';document.getElementById('results').innerHTML=''">清空</button>
+    </div>
+  </div>
+
+  <div class="section">
+    <label>选择目标时区</label>
+    <select id="dstTz"></select>
+    <div class="result-display" id="results">
+      <div style="color:#999;padding:20px;">选择时区并转换...</div>
+    </div>
+    <div class="buttons">
+      <button class="btn-copy" onclick="copyResult()">复制结果</button>
+    </div>
+  </div>
+
+  <div class="footer">100% 免费 · 数据不上传服务器 · 仅浏览器本地处理</div>
+
+  <script>
+    const zones = [
+      ['Asia/Shanghai','北京时间 (UTC+8)'],
+      ['Asia/Tokyo','东京时间 (UTC+9)'],
+      ['Asia/Seoul','首尔时间 (UTC+9)'],
+      ['Asia/Singapore','新加坡时间 (UTC+8)'],
+      ['Asia/Hong_Kong','香港时间 (UTC+8)'],
+      ['Asia/Dubai','迪拜时间 (UTC+4)'],
+      ['Asia/Kolkata','印度时间 (UTC+5:30)'],
+      ['Europe/London','伦敦时间 (UTC+0)'],
+      ['Europe/Paris','巴黎时间 (UTC+1)'],
+      ['Europe/Berlin','柏林时间 (UTC+1)'],
+      ['Europe/Moscow','莫斯科时间 (UTC+3)'],
+      ['America/New_York','纽约时间 (UTC-5)'],
+      ['America/Los_Angeles','洛杉矶时间 (UTC-8)'],
+      ['America/Chicago','芝加哥时间 (UTC-6)'],
+      ['America/Toronto','多伦多时间 (UTC-5)'],
+      ['America/Vancouver','温哥华时间 (UTC-8)'],
+      ['Australia/Sydney','悉尼时间 (UTC+10)'],
+      ['Australia/Melbourne','墨尔本时间 (UTC+10)'],
+      ['Pacific/Auckland','奥克兰时间 (UTC+12)'],
+      ['UTC','UTC 世界标准时间']
+    ];
+
+    function populate() {
+      zones.forEach(([val, name]) => {
+        document.getElementById('srcTz').innerHTML += `<option value="${val}">${name}</option>`;
+        document.getElementById('dstTz').innerHTML += `<option value="${val}">${name}</option>`;
+      });
+      document.getElementById('srcTz').value = 'Asia/Shanghai';
+      document.getElementById('dstTz').value = 'America/New_York';
+    }
+
+    function useNow() {
+      document.getElementById('srcTime').value = new Date().toISOString().slice(0,16);
+      convert();
+    }
+
+    function convert() {
+      const srcTz = document.getElementById('srcTz').value;
+      const dstTz = document.getElementById('dstTz').value;
+      let srcInput = document.getElementById('srcTime').value;
+      if (!srcInput) { alert('请输入时间'); return; }
+
+      const srcDate = new Date(srcInput);
+      const options = { timeZone: dstTz, year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit', second:'2-digit', hour12: false };
+      const dstStr = srcDate.toLocaleString('zh-CN', options);
+      const dstParts = dstStr.match(/(\d{4})\/(\d{2})\/(\d{2}) (\d{2}):(\d{2}):(\d{2})/);
+      const dstDate = new Date(dstParts[1], dstParts[2]-1, dstParts[3], dstParts[4], dstParts[5], dstParts[6]);
+      const diffMs = dstDate - srcDate;
+      const diffHours = (diffMs / 3600000).toFixed(1);
+      const sign = diffHours >= 0 ? '+' : '';
+
+      document.getElementById('results').innerHTML = `
+        <div class="time">${dstParts[4]}:${dstParts[5]}:${dstParts[6]}</div>
+        <div class="date">${dstParts[1]}年${dstParts[2]}月${dstParts[3]}日</div>
+        <div class="tz">${zones.find(z=>z[0]===dstTz)[1]} · 时差${sign}${diffHours}小时</div>
+      `;
+    }
+
+    function copyResult() {
+      const r = document.getElementById('results').innerText;
+      if (r.includes('选择')) { alert('无内容'); return; }
+      navigator.clipboard.writeText(r).then(() => alert('已复制!'));
+    }
+
+    populate();
+  </script>
+    <div class="ad-banner-bottom"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+</body>
+</html>

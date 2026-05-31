@@ -1,0 +1,131 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>图片Base64编码 - 图片转Base64字符串在线工具</title>
+  <meta name="description" content="免费在线图片转Base64工具，将图片文件转换为Base64编码字符串，可用于HTML/CSS嵌入，浏览器本地处理。">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://fm-han.github.io/image-base64/">
+  <style>
+                /* 顶部横幅广告 - 透明样式 */ .ad-banner-top { border-bottom: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; } .ad-banner-bottom { border-top: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; margin-top: 40px; } .ad-container { max-width: 728px; margin: 0 auto; min-height: 38px; display: flex; align-items: center; justify-content: center; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 20px; color: #333; line-height: 1.6; background: #fafafa; }
+    h1 { text-align: center; font-size: 1.8rem; color: #1a1a1a; }
+    h1 small { display: block; font-size: 0.85rem; color: #666; margin-top: 4px; font-weight: normal; }
+    .section { margin: 20px 0; padding: 16px; border: 1px solid #e0e0e0; border-radius: 8px; background: #fff; }
+    .section label { display: block; font-weight: 600; margin-bottom: 8px; }
+    .drop-zone { border: 2px dashed #ccc; padding: 32px; text-align: center; border-radius: 8px; cursor: pointer; }
+    .drop-zone:hover { border-color: #007bff; background: #f0f7ff; }
+    .drop-zone input { display: none; }
+    .preview-row { display: flex; gap: 16px; margin-top: 16px; flex-wrap: wrap; }
+    .preview-img { max-width: 200px; max-height: 200px; border-radius: 6px; border: 1px solid #e0e0e0; }
+    .preview-info { flex: 1; min-width: 200px; }
+    .preview-info p { margin: 4px 0; font-size: 0.9rem; color: #666; }
+    .code-output { width: 100%; min-height: 100px; padding: 12px; border: 1px solid #ccc; border-radius: 6px; font-family: monospace; font-size: 0.85rem; box-sizing: border-box; resize: vertical; background: #f8f9fa; }
+    .output-preview { margin-top: 12px; padding: 12px; background: #e8f5e9; border-radius: 6px; font-size: 0.85rem; color: #2e7d32; }
+    .buttons { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+    button { padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-size: 0.95rem; }
+    .btn-primary { background: #007bff; color: #fff; }
+    .btn-copy { background: #28a745; color: #fff; }
+    .btn-html { background: #6f42c1; color: #fff; }
+    .btn-css { background: #fd7e14; color: #fff; }
+    button:hover { opacity: 0.9; }
+    .footer { text-align: center; margin: 24px 0; padding: 12px; font-size: 0.85rem; color: #28a745; font-weight: 500; }
+  </style>
+</head>
+<body>
+    <div class="ad-banner-top"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+
+  <h1>图片Base64编码 <small>图片 → Base64字符串 · HTML/CSS嵌入 · 浏览器本地</small></h1>
+
+  <div class="section">
+    <label>上传图片</label>
+    <div class="drop-zone" id="dropZone">
+      <input type="file" id="fileInput" accept="image/*" onchange="handleFile(this.files[0])">
+      <p>点击选择图片，或拖拽图片到此处</p>
+      <p style="color:#888;font-size:0.85rem;margin-top:8px;">支持 PNG / JPG / GIF / WEBP / SVG</p>
+    </div>
+
+    <div class="preview-row" id="previewRow" style="display:none;">
+      <img id="previewImg" class="preview-img">
+      <div class="preview-info">
+        <p>文件名: <b id="fileName">-</b></p>
+        <p>原始大小: <b id="fileSize">-</b></p>
+        <p>Base64长度: <b id="base64Len">-</b></p>
+        <p>编码后大小: <b id="encodedSize">-</b></p>
+        <p>MIME类型: <b id="mimeType">-</b></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <label>Base64 字符串</label>
+    <textarea id="base64Output" class="code-output" readonly placeholder="上传图片后自动生成..."></textarea>
+    <div class="output-preview" id="outputPreview" style="display:none;"></div>
+    <div class="buttons">
+      <button class="btn-copy" onclick="copyBase64()">复制 Base64</button>
+      <button class="btn-html" onclick="copyHTML()">复制 HTML img</button>
+      <button class="btn-css" onclick="copyCSS()">复制 CSS background</button>
+    </div>
+  </div>
+
+  <div class="footer">100% 免费 · 数据不上传服务器 · 仅浏览器本地处理</div>
+
+  <script>
+    let currentBase64 = '';
+    let currentMime = '';
+
+    function handleFile(file) {
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        currentBase64 = reader.result;
+        currentMime = file.type;
+
+        document.getElementById('previewImg').src = reader.result;
+        document.getElementById('fileName').textContent = file.name;
+        document.getElementById('fileSize').textContent = formatSize(file.size);
+        document.getElementById('mimeType').textContent = file.type;
+        document.getElementById('base64Len').textContent = currentBase64.length + ' 字符';
+        document.getElementById('encodedSize').textContent = formatSize(new Blob([currentBase64]).size);
+        document.getElementById('base64Output').value = currentBase64;
+        document.getElementById('previewRow').style.display = 'flex';
+        document.getElementById('outputPreview').style.display = 'block';
+        document.getElementById('outputPreview').textContent = '✅ 编码成功！HTML标签: <img src="' + currentBase64.substring(0,60) + '...">';
+      };
+      reader.readAsDataURL(file);
+    }
+
+    const dropZone = document.getElementById('dropZone');
+    ['dragenter','dragover'].forEach(e => {
+      dropZone.addEventListener(e, ev => { ev.preventDefault(); dropZone.style.borderColor='#007bff'; dropZone.style.background='#f0f7ff'; });
+    });
+    ['dragleave','drop'].forEach(e => {
+      dropZone.addEventListener(e, ev => { ev.preventDefault(); dropZone.style.borderColor='#ccc'; dropZone.style.background=''; });
+    });
+    dropZone.addEventListener('drop', e => handleFile(e.dataTransfer.files[0]));
+
+    function copyBase64() {
+      if (!currentBase64) return;
+      navigator.clipboard.writeText(currentBase64).then(() => alert('已复制!'));
+    }
+    function copyHTML() {
+      if (!currentBase64) return;
+      const html = `<img src="${currentBase64}" alt="">`;
+      navigator.clipboard.writeText(html).then(() => alert('已复制 HTML img!'));
+    }
+    function copyCSS() {
+      if (!currentBase64) return;
+      const css = `background-image: url("${currentBase64}");`;
+      navigator.clipboard.writeText(css).then(() => alert('已复制 CSS!'));
+    }
+
+    function formatSize(bytes) {
+      if (bytes < 1024) return bytes + ' B';
+      if (bytes < 1048576) return (bytes/1024).toFixed(1) + ' KB';
+      return (bytes/1048576).toFixed(1) + ' MB';
+    }
+  </script>
+    <div class="ad-banner-bottom"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+</body>
+</html>

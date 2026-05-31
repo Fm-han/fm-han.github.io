@@ -1,0 +1,98 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>条形码生成器 - CODE128在线生成</title>
+  <meta name="description" content="免费在线条形码生成器，输入数字或文本生成CODE128格式条形码，支持下载。">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://fm-han.github.io/barcode-generator/">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/JsBarcode/3.11.0/JsBarcode.all.min.js"></script>
+  <style>
+                /* 顶部横幅广告 - 透明样式 */ .ad-banner-top { border-bottom: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; } .ad-banner-bottom { border-top: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; margin-top: 40px; } .ad-container { max-width: 728px; margin: 0 auto; min-height: 38px; display: flex; align-items: center; justify-content: center; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; max-width: 700px; margin: 0 auto; padding: 20px; color: #333; line-height: 1.6; background: #fafafa; }
+    h1 { text-align: center; font-size: 1.8rem; color: #1a1a1a; }
+    h1 small { display: block; font-size: 0.85rem; color: #666; margin-top: 4px; font-weight: normal; }
+    .card { margin: 20px 0; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px; background: #fff; }
+    .input-group { margin-bottom: 16px; }
+    .input-group label { display: block; font-weight: 600; margin-bottom: 6px; }
+    .input-group input, .input-group select { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 1rem; box-sizing: border-box; }
+    .barcode-display { text-align: center; padding: 24px; background: #fff; border: 1px solid #eee; border-radius: 12px; margin: 20px 0; min-height: 200px; display: flex; align-items: center; justify-content: center; flex-direction: column; }
+    svg { max-width: 100%; }
+    button { padding: 12px 28px; border: none; border-radius: 6px; cursor: pointer; font-size: 1rem; }
+    .btn-primary { background: #007bff; color: #fff; }
+    .btn-success { background: #28a745; color: #fff; }
+    button:hover { opacity: 0.9; }
+    .buttons { display: flex; gap: 12px; justify-content: center; }
+    .footer { text-align: center; margin: 24px 0; padding: 12px; font-size: 0.85rem; color: #28a745; font-weight: 500; }
+  </style>
+</head>
+<body>
+    <div class="ad-banner-top"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+  <h1>条形码生成器 <small>CODE128 · 数字文本 · 扫码识别</small></h1>
+
+  <div class="card">
+    <div class="input-group">
+      <label>输入内容（数字或文本）</label>
+      <input type="text" id="content" placeholder="输入条形码内容..." value="1234567890128">
+    </div>
+    <div class="input-group">
+      <label>条形码格式</label>
+      <select id="format">
+        <option value="CODE128" selected>CODE128（通用）</option>
+        <option value="CODE39">CODE39</option>
+        <option value="EAN13">EAN-13（商品码）</option>
+        <option value="EAN8">EAN-8</option>
+        <option value="UPC">UPC</option>
+        <option value="ITF14">ITF-14</option>
+      </select>
+    </div>
+    <div class="buttons">
+      <button class="btn-primary" onclick="generateBarcode()">生成条形码</button>
+      <button class="btn-success" onclick="downloadBarcode()">下载SVG</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="barcode-display" id="barcodeDisplay">
+      <svg id="barcode"></svg>
+    </div>
+  </div>
+
+  <div class="footer">100% 免费 · 数据不上传服务器 · 仅浏览器本地处理</div>
+
+  <script>
+    function generateBarcode() {
+      const content = document.getElementById('content').value.trim();
+      const format = document.getElementById('format').value;
+      if (!content) { alert('请输入内容'); return; }
+      try {
+        JsBarcode('#barcode', content, {
+          format: format,
+          width: 2,
+          height: 100,
+          displayValue: true,
+          fontSize: 14,
+          margin: 10
+        });
+      } catch (e) {
+        alert('条形码格式错误: ' + e.message);
+      }
+    }
+    function downloadBarcode() {
+      const svg = document.querySelector('#barcode');
+      if (!svg) { alert('请先生成条形码'); return; }
+      const svgData = new XMLSerializer().serializeToString(svg);
+      const blob = new Blob([svgData], { type: 'image/svg+xml' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'barcode.svg';
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+    generateBarcode();
+  </script>
+    <div class="ad-banner-bottom"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+</body>
+</html>

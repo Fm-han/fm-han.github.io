@@ -1,0 +1,157 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>词频统计 - 在线工具</title>
+    <link rel="canonical" href="https://fm-han.github.io/word-frequency/">
+    <style>
+                /* 顶部横幅广告 - 透明样式 */ .ad-banner-top { border-bottom: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; } .ad-banner-bottom { border-top: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; margin-top: 40px; } .ad-container { max-width: 728px; margin: 0 auto; min-height: 38px; display: flex; align-items: center; justify-content: center; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #fafafa; min-height: 100vh; display: flex; flex-direction: column; }
+        .container { max-width: 900px; margin: 0 auto; padding: 20px; flex: 1; }
+        h1 { text-align: center; color: #333; margin-bottom: 30px; font-size: 28px; }
+        .card { background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; padding: 24px; margin-bottom: 20px; }
+        .input-group { margin-bottom: 16px; }
+        label { display: block; margin-bottom: 8px; color: #555; font-weight: 500; }
+        textarea { width: 100%; min-height: 150px; padding: 16px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; resize: vertical; }
+        textarea:focus { outline: none; border-color: #007bff; }
+        .btn-group { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
+        .btn { padding: 12px 24px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; color: #fff; }
+        .btn-primary { background: #007bff; }
+        .btn-secondary { background: #28a745; }
+        .btn-gray { background: #6c757d; }
+        .btn:hover { opacity: 0.85; }
+        .options { display: flex; gap: 20px; margin-bottom: 16px; flex-wrap: wrap; }
+        .option-label { display: flex; align-items: center; gap: 6px; cursor: pointer; }
+        input[type="checkbox"] { width: 16px; height: 16px; }
+        select { padding: 10px 14px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; }
+        .stats { display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 20px; }
+        .stat-item { padding: 12px 20px; background: #e7f3ff; border-radius: 6px; text-align: center; }
+        .stat-value { font-size: 24px; font-weight: bold; color: #007bff; }
+        .stat-label { color: #666; font-size: 12px; margin-top: 4px; }
+        .results { margin-top: 20px; }
+        .word-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 8px; margin-bottom: 20px; }
+        .word-item { padding: 8px 12px; background: #f5f5f5; border-radius: 4px; display: flex; justify-content: space-between; font-size: 14px; }
+        .word-text { color: #333; }
+        .word-count { color: #007bff; font-weight: 600; }
+        .chart-container { margin-top: 20px; }
+        .bar-chart { display: flex; align-items: flex-end; gap: 4px; height: 200px; padding: 10px 0; }
+        .bar { flex: 1; background: #007bff; border-radius: 4px 4px 0 0; min-width: 20px; position: relative; transition: background 0.2s; }
+        .bar:hover { background: #0056b3; }
+        .bar-label { position: absolute; bottom: -20px; left: 50%; transform: translateX(-50%); font-size: 10px; color: #666; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 60px; }
+        .bar-value { position: absolute; top: -18px; left: 50%; transform: translateX(-50%); font-size: 10px; color: #333; }
+        footer { text-align: center; padding: 20px; color: #888; font-size: 14px; }
+    </style>
+</head>
+<body>
+    <div class="ad-banner-top"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+    <div class="container">
+        <h1>词频统计</h1>
+        <div class="card">
+            <div class="input-group">
+                <label for="textInput">输入文本（支持中文、英文、混合文本）</label>
+                <textarea id="textInput" placeholder="在此输入或粘贴文本...">在这个快速发展的数字时代，人工智能技术正在深刻地改变着我们的生活方式和工作模式。人工智能技术的快速发展带来了许多机遇，也带来了挑战。我们需要不断地学习和适应新技术，才能在这个充满变化的世界中保持竞争力。人工智能技术将继续发展，我们需要积极拥抱变化，迎接更加美好的未来。</textarea>
+            </div>
+            <div class="options">
+                <label class="option-label"><input type="checkbox" id="ignoreCase" checked> 忽略大小写</label>
+                <label class="option-label">最小词长: <input type="number" id="minLen" value="2" min="1" max="10" style="width:60px;padding:6px;"></label>
+                <label class="option-label">显示数量: <select id="topN"><option value="10">前10</option><option value="20" selected>前20</option><option value="50">前50</option></select></label>
+            </div>
+            <div class="btn-group">
+                <button class="btn btn-primary" onclick="analyze()">统计词频</button>
+                <button class="btn btn-secondary" onclick="loadSample()">加载示例</button>
+                <button class="btn btn-gray" onclick="clearAll()">清空</button>
+            </div>
+        </div>
+        <div id="results" class="card results" style="display:none;">
+            <div id="stats" class="stats"></div>
+            <h3 style="margin-bottom: 12px;">词频列表</h3>
+            <div id="wordList" class="word-list"></div>
+            <h3 style="margin-bottom: 12px;">可视化图表</h3>
+            <div id="chart" class="bar-chart"></div>
+        </div>
+    </div>
+    <footer>100% 免费 · 数据不上传服务器 · 仅浏览器本地处理</footer>
+    <script>
+        function tokenize(text) {
+            const minLen = parseInt(document.getElementById('minLen').value) || 2;
+            const ignoreCase = document.getElementById('ignoreCase').checked;
+            
+            let words = [];
+            
+            const chinesePattern = /[\u4e00-\u9fa5]+/g;
+            let match;
+            while ((match = chinesePattern.exec(text)) !== null) {
+                if (match[0].length >= minLen) {
+                    words.push(ignoreCase ? match[0].toLowerCase() : match[0]);
+                }
+            }
+            
+            const englishPattern = /[a-zA-Z]+/g;
+            while ((match = englishPattern.exec(text)) !== null) {
+                const word = ignoreCase ? match[0].toLowerCase() : match[0];
+                if (word.length >= minLen) {
+                    words.push(word);
+                }
+            }
+            
+            return words;
+        }
+        
+        function analyze() {
+            const text = document.getElementById('textInput').value;
+            if (!text.trim()) {
+                alert('请输入文本');
+                return;
+            }
+            
+            const words = tokenize(text);
+            const freq = {};
+            words.forEach(w => freq[w] = (freq[w] || 0) + 1);
+            
+            const sorted = Object.entries(freq).sort((a, b) => b[1] - a[1]);
+            const topN = parseInt(document.getElementById('topN').value) || 20;
+            const top = sorted.slice(0, topN);
+            
+            const totalWords = words.length;
+            const uniqueWords = sorted.length;
+            
+            document.getElementById('stats').innerHTML = `
+                <div class="stat-item"><div class="stat-value">${totalWords}</div><div class="stat-label">总词数</div></div>
+                <div class="stat-item"><div class="stat-value">${uniqueWords}</div><div class="stat-label">不重复词数</div></div>
+                <div class="stat-item"><div class="stat-value">${top.length}</div><div class="stat-label">显示词数</div></div>
+            `;
+            
+            document.getElementById('wordList').innerHTML = top.map(([word, count]) => `
+                <div class="word-item"><span class="word-text">${word}</span><span class="word-count">${count}</span></div>
+            `).join('');
+            
+            const maxCount = top.length > 0 ? top[0][1] : 1;
+            document.getElementById('chart').innerHTML = top.map(([word, count]) => {
+                const height = (count / maxCount * 100).toFixed(1);
+                return `<div class="bar" style="height:${height}%"><span class="bar-value">${count}</span><span class="bar-label">${word}</span></div>`;
+            }).join('');
+            
+            document.getElementById('results').style.display = 'block';
+        }
+        
+        function loadSample() {
+            const samples = [
+                '人工智能技术的发展日新月异，机器学习、深度学习等技术正在改变世界。人工智能将深刻影响各行各业，从医疗诊断到自动驾驶，从金融分析到艺术创作。掌握人工智能技术将成为未来必备技能。',
+                'The quick brown fox jumps over the lazy dog. A quick brown fox and a lazy dog make a perfect pair. Dogs are loyal companions while foxes are clever and adaptive.',
+                '在数字化转型的浪潮中，云计算、大数据、物联网、人工智能等技术正在重塑商业模式。云原生架构、DevOps流程、微服务设计成为现代软件开发的主流趋势。敏捷开发方法论指导着团队协作与项目管理。'
+            ];
+            document.getElementById('textInput').value = samples[Math.floor(Math.random() * samples.length)];
+        }
+        
+        function clearAll() {
+            document.getElementById('textInput').value = '';
+            document.getElementById('results').style.display = 'none';
+        }
+        
+        analyze();
+    </script>
+    <div class="ad-banner-bottom"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+</body>
+</html>

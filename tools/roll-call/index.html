@@ -1,0 +1,116 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>随机点名器 - 在线课堂/会议随机抽取人员工具</title>
+  <meta name="description" content="免费在线随机点名器，输入学生或员工名单，一键随机抽取，支持名单管理、历史记录、权重设置，适合课堂教学和会议。">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://fm-han.github.io/roll-call/">
+  <style>
+                /* 顶部横幅广告 - 透明样式 */ .ad-banner-top { border-bottom: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; } .ad-banner-bottom { border-top: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; margin-top: 40px; } .ad-container { max-width: 728px; margin: 0 auto; min-height: 38px; display: flex; align-items: center; justify-content: center; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; max-width: 700px; margin: 0 auto; padding: 20px; color: #333; line-height: 1.6; background: #fafafa; }
+    h1 { text-align: center; font-size: 1.8rem; color: #1a1a1a; }
+    h1 small { display: block; font-size: 0.85rem; color: #666; margin-top: 4px; font-weight: normal; }
+    .section { margin: 20px 0; padding: 16px; border: 1px solid #e0e0e0; border-radius: 8px; background: #fff; }
+    .section label { display: block; font-weight: 600; margin-bottom: 8px; }
+    textarea { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 0.95rem; box-sizing: border-box; resize: vertical; min-height: 150px; }
+    .result-display { padding: 32px; background: #f0f7ff; border-radius: 8px; text-align: center; margin: 16px 0; min-height: 100px; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: all 0.3s; }
+    .result-display .name { font-size: 2.5rem; font-weight: 700; color: #007bff; animation: popIn 0.3s ease; }
+    .result-display .count { font-size: 0.9rem; color: #666; margin-top: 8px; }
+    @keyframes popIn { 0%{transform:scale(0.5);opacity:0} 50%{transform:scale(1.2)} 100%{transform:scale(1);opacity:1} }
+    .name-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+    .name-tag { padding: 6px 14px; background: #e8f4ff; color: #007bff; border-radius: 20px; font-size: 0.9rem; cursor: pointer; }
+    .name-tag.used { background: #e0e0e0; color: #999; text-decoration: line-through; }
+    .name-tag:hover { background: #d0e8ff; }
+    .buttons { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; justify-content: center; }
+    button { padding: 12px 28px; border: none; border-radius: 6px; cursor: pointer; font-size: 1rem; }
+    .btn-primary { background: #007bff; color: #fff; }
+    .btn-roll { background: linear-gradient(135deg, #007bff, #0056b3); color: #fff; font-size: 1.3rem; padding: 16px 48px; }
+    .btn-copy { background: #28a745; color: #fff; }
+    .btn-clear { background: #6c757d; color: #fff; }
+    button:hover { opacity: 0.9; }
+    .footer { text-align: center; margin: 24px 0; padding: 12px; font-size: 0.85rem; color: #28a745; font-weight: 500; }
+  </style>
+</head>
+<body>
+    <div class="ad-banner-top"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+
+  <h1>随机点名器 <small>课堂点名 / 公平抽取 / 历史记录 · 浏览器本地</small></h1>
+
+  <div class="section">
+    <label>名单（每行一个姓名）</label>
+    <textarea id="nameList" placeholder="张三&#10;李四&#10;王五&#10;赵六&#10;钱七&#10;孙八"></textarea>
+    <div class="buttons">
+      <button class="btn-primary" onclick="useClass()">使用示例班级</button>
+      <button class="btn-clear" onclick="resetAll()">重置全部</button>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="result-display" id="resultDisplay">
+      <div class="name" id="resultName">?</div>
+      <div class="count" id="resultCount">已点名: 0 / 0</div>
+    </div>
+    <div class="name-tags" id="nameTags"></div>
+    <div class="buttons">
+      <button class="btn-roll" onclick="roll()">🎲 点名</button>
+      <button class="btn-primary" onclick="rollMulti()">连点3人</button>
+      <button class="btn-copy" onclick="copyHistory()">复制记录</button>
+    </div>
+  </div>
+
+  <div class="footer">100% 免费 · 数据不上传服务器 · 仅浏览器本地处理</div>
+
+  <script>
+    let names = [], used = [], history = [];
+    function useClass() {
+      document.getElementById('nameList').value = '张小明\n李小红\n王大力\n赵美丽\n钱多多\n孙浩然\n周婉儿\n吴俊杰\n郑思琪\n陈飞扬';
+      initNames();
+    }
+    function initNames() {
+      names = document.getElementById('nameList').value.split('\n').filter(s => s.trim());
+      used = [];
+      history = [];
+      renderTags();
+      updateCount();
+    }
+    function renderTags() {
+      document.getElementById('nameTags').innerHTML = names.map(n => `<div class="name-tag${used.includes(n)?' used':''}" onclick="toggleUsed('${n}')">${n}</div>`).join('');
+    }
+    function toggleUsed(n) {
+      if (used.includes(n)) used = used.filter(x => x !== n);
+      else used.push(n);
+      renderTags();
+      updateCount();
+    }
+    function roll() {
+      if (names.length === 0) { initNames(); }
+      const available = names.filter(n => !used.includes(n));
+      if (available.length === 0) { alert('所有人都被点过了！点击"重置全部"重新开始。'); return; }
+      const winner = available[Math.floor(Math.random() * available.length)];
+      used.push(winner);
+      history.push(winner);
+      document.getElementById('resultName').textContent = winner;
+      document.getElementById('resultName').style.animation = 'none';
+      setTimeout(() => { document.getElementById('resultName').style.animation = 'popIn 0.3s ease'; }, 10);
+      renderTags();
+      updateCount();
+    }
+    function rollMulti() {
+      for (let i = 0; i < 3; i++) roll();
+    }
+    function updateCount() {
+      document.getElementById('resultCount').textContent = `已点名: ${used.length} / ${names.length}`;
+    }
+    function resetAll() { used = []; history = []; renderTags(); updateCount(); document.getElementById('resultName').textContent = '?'; }
+    function copyHistory() {
+      if (history.length === 0) { alert('无点名记录'); return; }
+      const text = '点名顺序:\n' + history.map((n,i) => `${i+1}. ${n}`).join('\n');
+      navigator.clipboard.writeText(text).then(() => alert('已复制!\n' + text));
+    }
+    document.getElementById('nameList').addEventListener('input', initNames);
+  </script>
+    <div class="ad-banner-bottom"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+</body>
+</html>

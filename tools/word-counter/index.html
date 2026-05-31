@@ -1,0 +1,123 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>单词计数器 - 在线中英文文字统计/阅读时间估算</title>
+  <meta name="description" content="免费在线单词计数器，支持字符、单词、句子、段落统计，中英文分开计算，阅读时间估算，浏览器本地处理。">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://fm-han.github.io/word-counter/">
+  <style>
+                /* 顶部横幅广告 - 透明样式 */ .ad-banner-top { border-bottom: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; } .ad-banner-bottom { border-top: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; margin-top: 40px; } .ad-container { max-width: 728px; margin: 0 auto; min-height: 38px; display: flex; align-items: center; justify-content: center; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; color: #333; line-height: 1.6; background: #fafafa; }
+    h1 { text-align: center; font-size: 1.8rem; color: #1a1a1a; }
+    h1 small { display: block; font-size: 0.85rem; color: #666; margin-top: 4px; font-weight: normal; }
+    .section { margin: 20px 0; padding: 16px; border: 1px solid #e0e0e0; border-radius: 8px; background: #fff; }
+    .section label { display: block; font-weight: 600; margin-bottom: 8px; }
+    textarea { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 1rem; box-sizing: border-box; resize: vertical; min-height: 180px; }
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-top: 16px; }
+    .stat-item { padding: 16px; background: #f8f9fa; border-radius: 8px; text-align: center; }
+    .stat-item .number { font-size: 2rem; font-weight: 700; color: #007bff; }
+    .stat-item .label { font-size: 0.85rem; color: #666; margin-top: 4px; }
+    .buttons { display: flex; gap: 8px; margin-top: 12px; }
+    button { padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-size: 0.95rem; }
+    .btn-clear { background: #6c757d; color: #fff; }
+    button:hover { opacity: 0.9; }
+    .footer { text-align: center; margin: 24px 0; padding: 12px; font-size: 0.85rem; color: #28a745; font-weight: 500; }
+  </style>
+</head>
+<body>
+    <div class="ad-banner-top"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+
+  <h1>单词计数器 <small>字符 / 单词 / 句子 / 段落统计 · 浏览器本地处理</small></h1>
+
+  <div class="section">
+    <label>输入文本</label>
+    <textarea id="text" placeholder="在此输入或粘贴文本..." oninput="count()"></textarea>
+    <div class="buttons">
+      <button class="btn-clear" onclick="clearText()">清空</button>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="stats-grid">
+      <div class="stat-item">
+        <div class="number" id="chars">0</div>
+        <div class="label">总字符数</div>
+      </div>
+      <div class="stat-item">
+        <div class="number" id="charsNoSpace">0</div>
+        <div class="label">不含空格</div>
+      </div>
+      <div class="stat-item">
+        <div class="number" id="words">0</div>
+        <div class="label">英文单词</div>
+      </div>
+      <div class="stat-item">
+        <div class="number" id="chinese">0</div>
+        <div class="label">中文字符</div>
+      </div>
+      <div class="stat-item">
+        <div class="number" id="sentences">0</div>
+        <div class="label">句子数</div>
+      </div>
+      <div class="stat-item">
+        <div class="number" id="paragraphs">0</div>
+        <div class="label">段落数</div>
+      </div>
+      <div class="stat-item">
+        <div class="number" id="readTime">0</div>
+        <div class="label">阅读时间(分钟)</div>
+      </div>
+      <div class="stat-item">
+        <div class="number" id="speakTime">0</div>
+        <div class="label">朗读时间(分钟)</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">100% 免费 · 数据不上传服务器 · 仅浏览器本地处理</div>
+
+  <script>
+    function count() {
+      const text = document.getElementById('text').value;
+      
+      // 总字符数
+      document.getElementById('chars').textContent = text.length;
+      
+      // 不含空格
+      document.getElementById('charsNoSpace').textContent = text.replace(/\s/g, '').length;
+      
+      // 英文单词数
+      const words = text.match(/[a-zA-Z]+/g) || [];
+      document.getElementById('words').textContent = words.length;
+      
+      // 中文字符数
+      const chinese = text.match(/[\u4e00-\u9fa5]/g) || [];
+      document.getElementById('chinese').textContent = chinese.length;
+      
+      // 句子数 (中英文句号、感叹号、问号)
+      const sentences = text.split(/[.!?。！？]+/).filter(s => s.trim().length > 0);
+      document.getElementById('sentences').textContent = Math.max(sentences.length, text.trim() ? 1 : 0);
+      
+      // 段落数
+      const paragraphs = text.split(/\n\s*\n/).filter(p => p.trim().length > 0);
+      document.getElementById('paragraphs').textContent = Math.max(paragraphs.length, text.trim() ? 1 : 0);
+      
+      // 阅读时间 (中文字300/分钟，英文200/分钟)
+      const readMin = (chinese.length / 300 + words.length / 200).toFixed(1);
+      document.getElementById('readTime').textContent = readMin;
+      
+      // 朗读时间 (约150字/分钟)
+      const speakMin = (text.replace(/\s/g, '').length / 150).toFixed(1);
+      document.getElementById('speakTime').textContent = speakMin;
+    }
+
+    function clearText() {
+      document.getElementById('text').value = '';
+      count();
+    }
+  </script>
+    <div class="ad-banner-bottom"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+</body>
+</html>

@@ -1,0 +1,110 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>数字金额大写 - 在线人民币数字转中文大写工具</title>
+  <meta name="description" content="免费在线数字金额转中文大写工具，将阿拉伯数字金额转换为人民币中文大写格式，支持元角分和万元格式，财务报销必备。">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://fm-han.github.io/number-to-chinese/">
+  <style>
+                /* 顶部横幅广告 - 透明样式 */ .ad-banner-top { border-bottom: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; } .ad-banner-bottom { border-top: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; margin-top: 40px; } .ad-container { max-width: 728px; margin: 0 auto; min-height: 38px; display: flex; align-items: center; justify-content: center; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; max-width: 700px; margin: 0 auto; padding: 20px; color: #333; line-height: 1.6; background: #fafafa; }
+    h1 { text-align: center; font-size: 1.8rem; color: #1a1a1a; }
+    h1 small { display: block; font-size: 0.85rem; color: #666; margin-top: 4px; font-weight: normal; }
+    .section { margin: 20px 0; padding: 16px; border: 1px solid #e0e0e0; border-radius: 8px; background: #fff; }
+    .section label { display: block; font-weight: 600; margin-bottom: 8px; }
+    input[type="number"], input[type="text"] { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 1.5rem; box-sizing: border-box; text-align: center; font-family: monospace; }
+    .result-display { padding: 20px; background: #f0f7ff; border-radius: 8px; text-align: center; margin-top: 12px; }
+    .result-display .value { font-size: 1.5rem; font-weight: 700; color: #007bff; font-family: 'KaiTi', 'STKaiti', serif; min-height: 2em; }
+    .quick-btns { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+    .quick-btns button { padding: 6px 14px; border: 1px solid #ccc; border-radius: 6px; background: #fff; cursor: pointer; font-size: 0.9rem; }
+    .quick-btns button:hover { background: #f0f0f0; }
+    .buttons { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+    button { padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-size: 0.95rem; }
+    .btn-primary { background: #007bff; color: #fff; }
+    .btn-copy { background: #28a745; color: #fff; }
+    button:hover { opacity: 0.9; }
+    .footer { text-align: center; margin: 24px 0; padding: 12px; font-size: 0.85rem; color: #28a745; font-weight: 500; }
+  </style>
+</head>
+<body>
+    <div class="ad-banner-top"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+
+  <h1>数字金额大写 <small>人民币大写 / 财务报销 / 合同金额 · 浏览器本地</small></h1>
+
+  <div class="section">
+    <label>输入金额（元）</label>
+    <input type="number" id="inputNum" value="0" placeholder="输入阿拉伯数字金额" oninput="convert()">
+    <div class="quick-btns">
+      <button onclick="setVal(100)">100</button>
+      <button onclick="setVal(1000)">1,000</button>
+      <button onclick="setVal(10000)">1万</button>
+      <button onclick="setVal(100000)">10万</button>
+      <button onclick="setVal(1000000)">100万</button>
+      <button onclick="setVal(3.14159)">π</button>
+    </div>
+    <div class="result-display">
+      <div class="value" id="resultVal">零元整</div>
+    </div>
+    <div class="buttons">
+      <button class="btn-primary" onclick="convert()">转换</button>
+      <button class="btn-copy" onclick="copyResult()">复制大写</button>
+    </div>
+  </div>
+
+  <div class="section">
+    <label>常见金额</label>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;">
+      <div class="quick-btns" style="padding:10px;background:#f8f9fa;border-radius:6px;cursor:pointer;" onclick="setVal(0.01)">1分钱 · 壹分整</div>
+      <div class="quick-btns" style="padding:10px;background:#f8f9fa;border-radius:6px;cursor:pointer;" onclick="setVal(0.1)">1角钱 · 壹角整</div>
+      <div class="quick-btns" style="padding:10px;background:#f8f9fa;border-radius:6px;cursor:pointer;" onclick="setVal(1)">1块钱 · 壹元整</div>
+      <div class="quick-btns" style="padding:10px;background:#f8f9fa;border-radius:6px;cursor:pointer;" onclick="setVal(88.88)">88.88 · 捌拾捌元捌角捌分</div>
+      <div class="quick-btns" style="padding:10px;background:#f8f9fa;border-radius:6px;cursor:pointer;" onclick="setVal(10086.66)">10086.66 · 壹万零捌拾陆元陆角陆分</div>
+      <div class="quick-btns" style="padding:10px;background:#f8f9fa;border-radius:6px;cursor:pointer;" onclick="setVal(123456789.99)">1.23亿 · 壹亿贰仟叁佰肆拾伍万陆仟柒佰捌拾玖元玖角玖分</div>
+    </div>
+  </div>
+
+  <div class="footer">100% 免费 · 数据不上传服务器 · 仅浏览器本地处理</div>
+
+  <script>
+    function numToChinese(num) {
+      if (num === 0) return '零元整';
+      const units = ['分','角','元','拾','佰','仟','万','拾','佰','仟','亿'];
+      const digits = ['零','壹','贰','叁','肆','伍','陆','柒','捌','玖'];
+      let str = num.toFixed(2).replace('.', '');
+      while (str.length > 1 && str[0] === '0') str = str.slice(1);
+      let result = '';
+      for (let i = 0; i < str.length; i++) {
+        const n = parseInt(str[i]);
+        const u = units[str.length - 1 - i];
+        if (n !== 0) {
+          result += digits[n] + u;
+        } else {
+          if (u === '元' || u === '万' || u === '亿') {
+            if (result && !result.endsWith('零')) result += '零';
+          } else if (i < str.length - 2) {
+            if (result && !result.endsWith('零')) result += '零';
+          }
+        }
+      }
+      result = result.replace(/零+/g, '零').replace(/零元/g, '元').replace(/零分/g, '整').replace(/零角/g, '整').replace(/元整/g, '元整').replace(/整$/g, '整').replace(/亿万/g, '亿').replace(/零整$/g, '整');
+      if (result.startsWith('零')) result = result.slice(1);
+      if (!result.endsWith('整') && result.includes('分')) result += '分';
+      if (!result.endsWith('整') && !result.includes('分') && !result.includes('角')) result += '整';
+      return result;
+    }
+    function convert() {
+      const val = parseFloat(document.getElementById('inputNum').value) || 0;
+      document.getElementById('resultVal').textContent = numToChinese(val);
+    }
+    function setVal(v) { document.getElementById('inputNum').value = v; convert(); }
+    function copyResult() {
+      const t = document.getElementById('resultVal').textContent;
+      navigator.clipboard.writeText(t).then(() => alert('已复制: ' + t));
+    }
+    convert();
+  </script>
+    <div class="ad-banner-bottom"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+</body>
+</html>

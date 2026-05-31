@@ -1,0 +1,149 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>图片尺寸计算器 - 等比例缩放计算</title>
+  <meta name="description" content="免费在线图片尺寸计算器，计算图片等比例缩放后的尺寸，支持按宽度或高度缩放。">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://fm-han.github.io/image-dimension/">
+  <style>
+                /* 顶部横幅广告 - 透明样式 */ .ad-banner-top { border-bottom: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; } .ad-banner-bottom { border-top: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; margin-top: 40px; } .ad-container { max-width: 728px; margin: 0 auto; min-height: 38px; display: flex; align-items: center; justify-content: center; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; max-width: 700px; margin: 0 auto; padding: 20px; color: #333; line-height: 1.6; background: #fafafa; }
+    h1 { text-align: center; font-size: 1.8rem; color: #1a1a1a; }
+    h1 small { display: block; font-size: 0.85rem; color: #666; margin-top: 4px; font-weight: normal; }
+    .card { margin: 20px 0; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px; background: #fff; }
+    .input-group { margin-bottom: 16px; }
+    .input-group label { display: block; font-weight: 600; margin-bottom: 6px; }
+    .input-group input { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 1rem; box-sizing: border-box; }
+    .input-row { display: flex; gap: 16px; }
+    .input-row .input-group { flex: 1; }
+    .result-display { background: linear-gradient(135deg, #007bff, #0056b3); border-radius: 12px; padding: 24px; color: #fff; text-align: center; margin: 20px 0; }
+    .result-display .dimensions { font-size: 2.5rem; font-weight: 700; }
+    .result-display .info { font-size: 1rem; opacity: 0.9; margin-top: 8px; }
+    .preset-btns { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+    .preset-btn { padding: 8px 14px; border: 1px solid #ccc; border-radius: 20px; background: #fff; cursor: pointer; font-size: 0.85rem; }
+    .preset-btn:hover { background: #f0f0f0; }
+    .scale-options { display: flex; gap: 8px; margin-bottom: 16px; }
+    .scale-btn { flex: 1; padding: 12px; border: 1px solid #ccc; border-radius: 6px; background: #fff; cursor: pointer; text-align: center; }
+    .scale-btn:hover { background: #f0f0f0; }
+    .scale-btn.active { background: #007bff; color: #fff; border-color: #007bff; }
+    button { padding: 12px 28px; border: none; border-radius: 6px; cursor: pointer; font-size: 1rem; }
+    .btn-primary { background: #007bff; color: #fff; }
+    button:hover { opacity: 0.9; }
+    .buttons { display: flex; gap: 12px; justify-content: center; }
+    .footer { text-align: center; margin: 24px 0; padding: 12px; font-size: 0.85rem; color: #28a745; font-weight: 500; }
+  </style>
+</head>
+<body>
+    <div class="ad-banner-top"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+  <h1>图片尺寸计算器 <small>等比例缩放 · 像素计算</small></h1>
+
+  <div class="card">
+    <h3>原始图片尺寸</h3>
+    <div class="input-row">
+      <div class="input-group"><label>宽度 (px)</label><input type="number" id="origWidth" placeholder="宽度" value="1920"></div>
+      <div class="input-group"><label>高度 (px)</label><input type="number" id="origHeight" placeholder="高度" value="1080"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>选择缩放方式</h3>
+    <div class="scale-options">
+      <button class="scale-btn active" onclick="setScaleMode('width', this)">按宽度缩放</button>
+      <button class="scale-btn" onclick="setScaleMode('height', this)">按高度缩放</button>
+      <button class="scale-btn" onclick="setScaleMode('percent', this)">按百分比</button>
+    </div>
+    <div class="input-group" id="targetInput">
+      <label>目标宽度 (px)</label>
+      <input type="number" id="targetValue" placeholder="输入目标值" value="960" oninput="calculate()">
+    </div>
+    <div class="preset-btns" id="percentPresets" style="display:none;">
+      <button class="preset-btn" onclick="setPercent(50)">50%</button>
+      <button class="preset-btn" onclick="setPercent(75)">75%</button>
+      <button class="preset-btn" onclick="setPercent(100)">100%</button>
+      <button class="preset-btn" onclick="setPercent(200)">200%</button>
+    </div>
+    <div class="buttons">
+      <button class="btn-primary" onclick="calculate()">计算</button>
+    </div>
+  </div>
+
+  <div class="card" id="resultCard" style="display:none;">
+    <div class="result-display">
+      <div class="dimensions" id="resultDimensions">960 x 540</div>
+      <div class="info" id="resultInfo">缩放比例: 50%</div>
+    </div>
+    <div style="text-align:center;padding:12px;background:#f5f5f5;border-radius:8px;">
+      <div>缩放后像素数</div>
+      <div style="font-size:1.5rem;font-weight:700;color:#007bff;" id="resultPixels">518,400</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>常用图片尺寸参考</h3>
+    <table style="width:100%;border-collapse:collapse;">
+      <tr style="background:#f0f0f0;"><th style="padding:8px;border:1px solid #ddd;">用途</th><th style="padding:8px;border:1px solid #ddd;">尺寸</th></tr>
+      <tr><td style="padding:8px;border:1px solid #ddd;">微信头像</td><td style="padding:8px;border:1px solid #ddd;">200x200</td></tr>
+      <tr><td style="padding:8px;border:1px solid #ddd;">公众号封面</td><td style="padding:8px;border:1px solid #ddd;">900x383</td></tr>
+      <tr><td style="padding:8px;border:1px solid #ddd;">微博封面</td><td style="padding:8px;border:1px solid #ddd;">900x300</td></tr>
+      <tr><td style="padding:8px;border:1px solid #ddd;">电商主图</td><td style="padding:8px;border:1px solid #ddd;">800x800</td></tr>
+      <tr><td style="padding:8px;border:1px solid #ddd;">PPT图片</td><td style="padding:8px;border:1px solid #ddd;">1920x1080</td></tr>
+    </table>
+  </div>
+
+  <div class="footer">100% 免费 · 数据不上传服务器 · 仅浏览器本地处理</div>
+
+  <script>
+    let scaleMode = 'width';
+    function setScaleMode(mode, btn) {
+      scaleMode = mode;
+      document.querySelectorAll('.scale-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const input = document.getElementById('targetInput');
+      const presets = document.getElementById('percentPresets');
+      if (mode === 'percent') {
+        input.style.display = 'none';
+        presets.style.display = 'flex';
+        document.getElementById('targetValue').value = 50;
+      } else {
+        input.style.display = 'block';
+        presets.style.display = 'none';
+        input.querySelector('label').textContent = mode === 'width' ? '目标宽度 (px)' : '目标高度 (px)';
+        document.getElementById('targetValue').placeholder = mode === 'width' ? '宽度' : '高度';
+      }
+      calculate();
+    }
+    function setPercent(p) {
+      document.getElementById('targetValue').value = p;
+      calculate();
+    }
+    function calculate() {
+      const origW = parseInt(document.getElementById('origWidth').value) || 0;
+      const origH = parseInt(document.getElementById('origHeight').value) || 0;
+      const target = parseFloat(document.getElementById('targetValue').value) || 0;
+      if (origW <= 0 || origH <= 0) return;
+      let newW, newH, ratio;
+      if (scaleMode === 'width') {
+        ratio = target / origW;
+        newW = Math.round(target);
+        newH = Math.round(origH * ratio);
+      } else if (scaleMode === 'height') {
+        ratio = target / origH;
+        newW = Math.round(origW * ratio);
+        newH = Math.round(target);
+      } else {
+        ratio = target / 100;
+        newW = Math.round(origW * ratio);
+        newH = Math.round(origH * ratio);
+      }
+      document.getElementById('resultCard').style.display = 'block';
+      document.getElementById('resultDimensions').textContent = newW + ' x ' + newH;
+      document.getElementById('resultInfo').textContent = '缩放比例: ' + (ratio * 100).toFixed(0) + '%';
+      document.getElementById('resultPixels').textContent = (newW * newH).toLocaleString();
+    }
+    calculate();
+  </script>
+    <div class="ad-banner-bottom"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+</body>
+</html>

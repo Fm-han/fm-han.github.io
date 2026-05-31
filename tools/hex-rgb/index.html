@@ -1,0 +1,137 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HEX颜色转换器 - 十六进制RGB互转</title>
+  <meta name="description" content="免费在线HEX颜色转换工具，HEX十六进制与RGB颜色互转，支持RGBA透明度设置。">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://fm-han.github.io/hex-rgb/">
+  <style>
+                /* 顶部横幅广告 - 透明样式 */ .ad-banner-top { border-bottom: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; } .ad-banner-bottom { border-top: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; margin-top: 40px; } .ad-container { max-width: 728px; margin: 0 auto; min-height: 38px; display: flex; align-items: center; justify-content: center; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; max-width: 700px; margin: 0 auto; padding: 20px; color: #333; line-height: 1.6; background: #fafafa; }
+    h1 { text-align: center; font-size: 1.8rem; color: #1a1a1a; }
+    h1 small { display: block; font-size: 0.85rem; color: #666; margin-top: 4px; font-weight: normal; }
+    .card { margin: 20px 0; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px; background: #fff; }
+    .color-preview { height: 150px; border-radius: 12px; margin: 20px 0; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 1.5rem; font-weight: 600; text-shadow: 0 2px 4px rgba(0,0,0,0.3); transition: all 0.3s; }
+    .input-section { margin-bottom: 16px; }
+    .input-group { margin-bottom: 12px; }
+    .input-group label { display: block; font-weight: 600; margin-bottom: 6px; }
+    .input-group input { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 1rem; box-sizing: border-box; font-family: monospace; }
+    .rgb-inputs { display: flex; gap: 12px; }
+    .rgb-inputs .input-group { flex: 1; }
+    .rgb-inputs input { text-align: center; }
+    .code-box { background: #1e1e1e; border-radius: 8px; padding: 16px; color: #d4d4d4; font-family: monospace; margin: 16px 0; position: relative; }
+    .code-box pre { margin: 0; white-space: pre-wrap; }
+    .code-box code { color: #4ec9b0; }
+    .copy-btn { position: absolute; top: 8px; right: 8px; padding: 6px 12px; background: #007bff; color: #fff; border: none; border-radius: 4px; cursor: pointer; }
+    button { padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-size: 1rem; }
+    .btn-primary { background: #007bff; color: #fff; }
+    button:hover { opacity: 0.9; }
+    .buttons { display: flex; gap: 12px; justify-content: center; }
+    .footer { text-align: center; margin: 24px 0; padding: 12px; font-size: 0.85rem; color: #28a745; font-weight: 500; }
+  </style>
+</head>
+<body>
+    <div class="ad-banner-top"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+  <h1>HEX颜色转换器 <small>HEX ↔ RGB ↔ RGBA</small></h1>
+
+  <div class="card">
+    <div class="color-preview" id="colorPreview">#007BFF</div>
+    <div class="input-section">
+      <div class="input-group">
+        <label>HEX 颜色值</label>
+        <input type="text" id="hexInput" value="#007BFF" placeholder="#RRGGBB" oninput="hexToRgb()">
+      </div>
+      <div class="rgb-inputs">
+        <div class="input-group">
+          <label>R (红)</label>
+          <input type="number" id="rInput" value="0" min="0" max="255" oninput="rgbToHex()">
+        </div>
+        <div class="input-group">
+          <label>G (绿)</label>
+          <input type="number" id="gInput" value="123" min="0" max="255" oninput="rgbToHex()">
+        </div>
+        <div class="input-group">
+          <label>B (蓝)</label>
+          <input type="number" id="bInput" value="255" min="0" max="255" oninput="rgbToHex()">
+        </div>
+      </div>
+      <div class="input-group">
+        <label>透明度 Alpha (0-1)</label>
+        <input type="number" id="aInput" value="1" min="0" max="1" step="0.1" oninput="updateRgba()">
+      </div>
+    </div>
+    <div class="buttons">
+      <button class="btn-primary" onclick="copyHex()">复制 HEX</button>
+      <button class="btn-primary" onclick="copyRgb()">复制 RGB</button>
+      <button class="btn-primary" onclick="copyRgba()">复制 RGBA</button>
+    </div>
+    <div class="code-box">
+      <button class="copy-btn" onclick="copyAll()">复制全部</button>
+      <pre id="colorCodes">HEX: <code>#007BFF</code>
+RGB: <code>rgb(0, 123, 255)</code>
+RGBA: <code>rgba(0, 123, 255, 1)</code></pre>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>常见颜色参考</h3>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;">
+      <div style="padding:8px;border-radius:6px;background:#dc3545;color:#fff;text-align:center;cursor:pointer;" onclick="setColor('#dc3545')">#dc3545</div>
+      <div style="padding:8px;border-radius:6px;background:#ffc107;color:#333;text-align:center;cursor:pointer;" onclick="setColor('#ffc107')">#ffc107</div>
+      <div style="padding:8px;border-radius:6px;background:#28a745;color:#fff;text-align:center;cursor:pointer;" onclick="setColor('#28a745')">#28a745</div>
+      <div style="padding:8px;border-radius:6px;background:#007bff;color:#fff;text-align:center;cursor:pointer;" onclick="setColor('#007bff')">#007bff</div>
+    </div>
+  </div>
+
+  <div class="footer">100% 免费 · 数据不上传服务器 · 仅浏览器本地处理</div>
+
+  <script>
+    function hexToRgb() {
+      const hex = document.getElementById('hexInput').value.trim();
+      if (!/^#?[0-9a-fA-F]{6}$/.test(hex)) return;
+      const clean = hex.replace('#', '');
+      const r = parseInt(clean.substring(0, 2), 16);
+      const g = parseInt(clean.substring(2, 4), 16);
+      const b = parseInt(clean.substring(4, 6), 16);
+      document.getElementById('rInput').value = r;
+      document.getElementById('gInput').value = g;
+      document.getElementById('bInput').value = b;
+      updatePreview();
+    }
+    function rgbToHex() {
+      const r = Math.max(0, Math.min(255, parseInt(document.getElementById('rInput').value) || 0));
+      const g = Math.max(0, Math.min(255, parseInt(document.getElementById('gInput').value) || 0));
+      const b = Math.max(0, Math.min(255, parseInt(document.getElementById('bInput').value) || 0));
+      const hex = '#' + [r, g, b].map(x => x.toString(16).padStart(2, '0')).join('');
+      document.getElementById('hexInput').value = hex.toUpperCase();
+      updatePreview();
+    }
+    function updateRgba() {
+      const a = parseFloat(document.getElementById('aInput').value) || 1;
+      updatePreview();
+    }
+    function updatePreview() {
+      const hex = document.getElementById('hexInput').value;
+      const r = parseInt(document.getElementById('rInput').value) || 0;
+      const g = parseInt(document.getElementById('gInput').value) || 0;
+      const b = parseInt(document.getElementById('bInput').value) || 0;
+      const a = parseFloat(document.getElementById('aInput').value) || 1;
+      document.getElementById('colorPreview').style.background = hex;
+      document.getElementById('colorPreview').textContent = hex.toUpperCase();
+      document.getElementById('colorCodes').innerHTML = `HEX: <code>${hex.toUpperCase()}</code>\nRGB: <code>rgb(${r}, ${g}, ${b})</code>\nRGBA: <code>rgba(${r}, ${g}, ${b}, ${a})</code>`;
+    }
+    function setColor(hex) {
+      document.getElementById('hexInput').value = hex;
+      hexToRgb();
+    }
+    function copyHex() { navigator.clipboard.writeText(document.getElementById('hexInput').value).then(() => alert('HEX已复制')); }
+    function copyRgb() { const r = document.getElementById('rInput').value; const g = document.getElementById('gInput').value; const b = document.getElementById('bInput').value; navigator.clipboard.writeText(`rgb(${r}, ${g}, ${b})`).then(() => alert('RGB已复制')); }
+    function copyRgba() { const r = document.getElementById('rInput').value; const g = document.getElementById('gInput').value; const b = document.getElementById('bInput').value; const a = document.getElementById('aInput').value; navigator.clipboard.writeText(`rgba(${r}, ${g}, ${b}, ${a})`).then(() => alert('RGBA已复制')); }
+    function copyAll() { const codes = document.getElementById('colorCodes').textContent; navigator.clipboard.writeText(codes).then(() => alert('已复制')); }
+    updatePreview();
+  </script>
+    <div class="ad-banner-bottom"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+</body>
+</html>

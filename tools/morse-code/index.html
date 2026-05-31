@@ -1,0 +1,144 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>摩斯电码转换器 - 文字与摩斯密码互转</title>
+  <meta name="description" content="免费在线摩斯电码转换器，支持文字与摩斯电码互相转换，支持播放提示。">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://fm-han.github.io/morse-code/">
+  <style>
+                /* 顶部横幅广告 - 透明样式 */ .ad-banner-top { border-bottom: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; } .ad-banner-bottom { border-top: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; margin-top: 40px; } .ad-container { max-width: 728px; margin: 0 auto; min-height: 38px; display: flex; align-items: center; justify-content: center; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; max-width: 700px; margin: 0 auto; padding: 20px; color: #333; line-height: 1.6; background: #fafafa; }
+    h1 { text-align: center; font-size: 1.8rem; color: #1a1a1a; }
+    h1 small { display: block; font-size: 0.85rem; color: #666; margin-top: 4px; font-weight: normal; }
+    .card { margin: 20px 0; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px; background: #fff; }
+    .input-group { margin-bottom: 16px; }
+    .input-group label { display: block; font-weight: 600; margin-bottom: 6px; }
+    .input-group textarea, .input-group input { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 1rem; box-sizing: border-box; }
+    .input-group textarea { min-height: 100px; resize: vertical; font-family: monospace; }
+    .code-display { background: #1e1e1e; border-radius: 8px; padding: 20px; margin: 16px 0; font-family: monospace; color: #4ec9b0; font-size: 1.2rem; word-break: break-all; min-height: 60px; }
+    .visual-display { display: flex; flex-wrap: wrap; gap: 4px; margin: 16px 0; min-height: 80px; }
+    .morse-char { display: flex; gap: 8px; padding: 4px; background: #f5f5f5; border-radius: 4px; }
+    .morse-char .dot { width: 12px; height: 12px; background: #007bff; border-radius: 50%; }
+    .morse-char .dash { width: 36px; height: 12px; background: #007bff; border-radius: 6px; }
+    button { padding: 12px 28px; border: none; border-radius: 6px; cursor: pointer; font-size: 1rem; }
+    .btn-primary { background: #007bff; color: #fff; }
+    .btn-success { background: #28a745; color: #fff; }
+    .btn-secondary { background: #6c757d; color: #fff; }
+    button:hover { opacity: 0.9; }
+    .buttons { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+    .footer { text-align: center; margin: 24px 0; padding: 12px; font-size: 0.85rem; color: #28a745; font-weight: 500; }
+  </style>
+</head>
+<body>
+    <div class="ad-banner-top"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+  <h1>摩斯电码转换器 <small>文字 ↔ 摩斯密码 · 点划转换</small></h1>
+
+  <div class="card">
+    <div class="input-group">
+      <label>输入文字</label>
+      <textarea id="textInput" placeholder="输入要转换的文字...">SOS</textarea>
+    </div>
+    <div class="buttons">
+      <button class="btn-primary" onclick="encode()">转换为摩斯电码</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>摩斯电码</h3>
+    <div class="code-display" id="morseCode"></div>
+    <div class="visual-display" id="visualDisplay"></div>
+    <div class="buttons">
+      <button class="btn-success" onclick="copyMorse()">复制电码</button>
+      <button class="btn-secondary" onclick="playMorse()">播放</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="input-group">
+      <label>输入摩斯电码（用空格分隔，点用.表示，划用-表示）</label>
+      <textarea id="morseInput" placeholder="例如: ... --- ... (SOS)"></textarea>
+    </div>
+    <div class="buttons">
+      <button class="btn-primary" onclick="decode()">转换为文字</button>
+    </div>
+  </div>
+
+  <div class="card" id="decodeResult" style="display:none;">
+    <h3>解码结果</h3>
+    <div class="code-display" id="decodedText" style="color:#28a745;font-size:1.5rem;"></div>
+  </div>
+
+  <div class="footer">100% 免费 · 数据不上传服务器 · 仅浏览器本地处理</div>
+
+  <script>
+    const morseCode = {
+      'A': '.-', 'B': '-...', 'C': '-.-.', 'D': '-..', 'E': '.', 'F': '..-.',
+      'G': '--.', 'H': '....', 'I': '..', 'J': '.---', 'K': '-.-', 'L': '.-..',
+      'M': '--', 'N': '-.', 'O': '---', 'P': '.--.', 'Q': '--.-', 'R': '.-.',
+      'S': '...', 'T': '-', 'U': '..-', 'V': '...-', 'W': '.--', 'X': '-..-',
+      'Y': '-.--', 'Z': '--..', '0': '-----', '1': '.----', '2': '..---',
+      '3': '...--', '4': '....-', '5': '.....', '6': '-....', '7': '--...',
+      '8': '---..', '9': '-----', ' ': '/'
+    };
+    const reverseMorse = Object.fromEntries(Object.entries(morseCode).map(([k, v]) => [v, k]));
+    function encode() {
+      const text = document.getElementById('textInput').value.toUpperCase();
+      const morse = text.split('').map(c => morseCode[c] || '').join(' ');
+      document.getElementById('morseCode').textContent = morse;
+      renderVisual(morse);
+    }
+    function renderVisual(morse) {
+      const container = document.getElementById('visualDisplay');
+      container.innerHTML = morse.split(' ').map(char => {
+        if (char === '/') return '<span style="width:20px;"></span>';
+        return '<div class="morse-char">' + char.split('').map(s => `<div class="${s === '.' ? 'dot' : 'dash'}"></div>`).join('') + '</div>';
+      }).join('');
+    }
+    function decode() {
+      const morse = document.getElementById('morseInput').value.trim();
+      const words = morse.split(' / ');
+      const text = words.map(word => {
+        return word.split(' ').map(code => reverseMorse[code] || '').join('');
+      }).join(' ');
+      document.getElementById('decodeResult').style.display = 'block';
+      document.getElementById('decodedText').textContent = text;
+    }
+    function copyMorse() {
+      const code = document.getElementById('morseCode').textContent;
+      if (!code) { alert('先生成电码'); return; }
+      navigator.clipboard.writeText(code).then(() => alert('已复制'));
+    }
+    function playMorse() {
+      const morse = document.getElementById('morseCode').textContent;
+      if (!morse) return;
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      let time = ctx.currentTime;
+      for (const char of morse) {
+        if (char === '.') {
+          playTone(ctx, time, 0.1);
+          time += 0.2;
+        } else if (char === '-') {
+          playTone(ctx, time, 0.3);
+          time += 0.4;
+        } else if (char === ' ') {
+          time += 0.2;
+        }
+      }
+      function playTone(ctx, startTime, duration) {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.frequency.value = 600;
+        gain.gain.setValueAtTime(0.3, startTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, startTime + duration);
+        osc.start(startTime);
+        osc.stop(startTime + duration);
+      }
+    }
+  </script>
+    <div class="ad-banner-bottom"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+</body>
+</html>

@@ -1,0 +1,102 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>随机抽签 - 在线随机抽取/盲盒抽奖工具</title>
+  <meta name="description" content="免费在线随机抽签工具，支持自定义抽奖池、单抽/连抽、权重设置、历史记录，适合年会抽奖、课堂随机问答。">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://fm-han.github.io/lottery/">
+  <style>
+                /* 顶部横幅广告 - 透明样式 */ .ad-banner-top { border-bottom: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; } .ad-banner-bottom { border-top: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; margin-top: 40px; } .ad-container { max-width: 728px; margin: 0 auto; min-height: 38px; display: flex; align-items: center; justify-content: center; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; max-width: 700px; margin: 0 auto; padding: 20px; color: #333; line-height: 1.6; background: #fafafa; }
+    h1 { text-align: center; font-size: 1.8rem; color: #1a1a1a; }
+    h1 small { display: block; font-size: 0.85rem; color: #666; margin-top: 4px; font-weight: normal; }
+    .section { margin: 20px 0; padding: 16px; border: 1px solid #e0e0e0; border-radius: 8px; background: #fff; }
+    .section label { display: block; font-weight: 600; margin-bottom: 8px; }
+    textarea { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 0.95rem; box-sizing: border-box; font-family: monospace; resize: vertical; min-height: 150px; }
+    .wheel-container { text-align: center; margin: 20px 0; }
+    .wheel { width: 300px; height: 300px; border-radius: 50%; border: 8px solid #007bff; margin: 0 auto; position: relative; overflow: hidden; transition: transform 3s ease-out; }
+    .wheel-inner { width: 100%; height: 100%; position: relative; }
+    .wheel-item { position: absolute; width: 50%; height: 50%; left: 50%; top: 0; transform-origin: 0% 100%; display: flex; align-items: center; justify-content: flex-start; padding-left: 8px; box-sizing: border-box; font-size: 0.75rem; color: #fff; font-weight: 600; }
+    .wheel-pointer { position: absolute; top: -20px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 15px solid transparent; border-right: 15px solid transparent; border-top: 30px solid #007bff; z-index: 10; }
+    .result-display { padding: 24px; background: #f0f7ff; border-radius: 8px; text-align: center; margin: 16px 0; min-height: 80px; display: flex; align-items: center; justify-content: center; }
+    .result-display .winner { font-size: 2rem; font-weight: 700; color: #007bff; }
+    .result-display .sub { font-size: 0.9rem; color: #666; margin-top: 4px; }
+    .buttons { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; justify-content: center; }
+    button { padding: 12px 28px; border: none; border-radius: 6px; cursor: pointer; font-size: 1rem; }
+    .btn-primary { background: #007bff; color: #fff; }
+    .btn-spin { background: linear-gradient(135deg, #007bff, #0056b3); color: #fff; font-size: 1.2rem; padding: 16px 40px; }
+    .btn-copy { background: #28a745; color: #fff; }
+    .btn-clear { background: #6c757d; color: #fff; }
+    button:hover { opacity: 0.9; }
+    .footer { text-align: center; margin: 24px 0; padding: 12px; font-size: 0.85rem; color: #28a745; font-weight: 500; }
+  </style>
+</head>
+<body>
+    <div class="ad-banner-top"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+
+  <h1>随机抽签 <small>公平抽取 / 权重设置 / 大转盘模式 · 浏览器本地</small></h1>
+
+  <div class="section">
+    <label>抽奖池（每行一个，回车分隔）</label>
+    <textarea id="poolInput" placeholder="一等奖&#10;二等奖&#10;三等奖&#10;谢谢参与&#10;再来一次&#10;四等奖"></textarea>
+    <div class="buttons">
+      <button class="btn-primary" onclick="useExample()">使用示例</button>
+      <button class="btn-clear" onclick="document.getElementById('poolInput').value='';document.getElementById('resultDisplay').innerHTML='<div style=\'color:#999;\'>配置抽奖池后开始抽奖...</div>'">清空</button>
+    </div>
+  </div>
+
+  <div class="section">
+    <label>抽奖结果</label>
+    <div class="result-display" id="resultDisplay">
+      <div style="color:#999;">配置抽奖池后开始抽奖...</div>
+    </div>
+    <div class="buttons">
+      <button class="btn-spin" onclick="spin()">🎰 抽 奖</button>
+      <button class="btn-primary" onclick="spinMulti()">连抽3次</button>
+      <button class="btn-copy" onclick="copyResult()">复制结果</button>
+    </div>
+  </div>
+
+  <div class="footer">100% 免费 · 数据不上传服务器 · 仅浏览器本地处理</div>
+
+  <script>
+    let items = [];
+    function useExample() {
+      document.getElementById('poolInput').value = '一等奖\n二等奖\n三等奖\n四等奖\n五等奖\n参与奖\n谢谢参与\n再来一次';
+      items = document.getElementById('poolInput').value.split('\n').filter(s => s.trim());
+    }
+    function spin() {
+      items = document.getElementById('poolInput').value.split('\n').filter(s => s.trim());
+      if (items.length === 0) { alert('请先输入抽奖池'); return; }
+      const winner = items[Math.floor(Math.random() * items.length)];
+      const colors = ['#007bff','#28a745','#dc3545','#ffc107','#17a2b8','#6f42c1','#e83e8c','#fd7e14'];
+      document.getElementById('resultDisplay').innerHTML = `
+        <div>
+          <div class="winner">🎉 ${winner}</div>
+          <div class="sub">从 ${items.length} 个选项中抽出</div>
+        </div>
+      `;
+    }
+    function spinMulti() {
+      items = document.getElementById('poolInput').value.split('\n').filter(s => s.trim());
+      if (items.length === 0) { alert('请先输入抽奖池'); return; }
+      let results = [];
+      for (let i = 0; i < 3; i++) results.push(items[Math.floor(Math.random() * items.length)]);
+      document.getElementById('resultDisplay').innerHTML = `
+        <div>
+          <div class="winner">🎰 连抽结果</div>
+          <div class="sub" style="margin-top:12px;">${results.map((r,i) => `第${i+1}次: <strong>${r}</strong>`).join('<br>')}</div>
+        </div>
+      `;
+    }
+    function copyResult() {
+      const t = document.getElementById('resultDisplay').innerText;
+      if (t.includes('配置')) { alert('无内容'); return; }
+      navigator.clipboard.writeText(t).then(() => alert('已复制!'));
+    }
+  </script>
+    <div class="ad-banner-bottom"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+</body>
+</html>

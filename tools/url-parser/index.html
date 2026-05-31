@@ -1,0 +1,118 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>URL解析器 - 在线URL参数提取与编辑工具</title>
+  <meta name="description" content="免费在线URL解析器，快速提取协议、域名、路径、参数，高亮显示JSON格式参数，支持参数编辑和URL重组。">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://fm-han.github.io/url-parser/">
+  <style>
+                /* 顶部横幅广告 - 透明样式 */ .ad-banner-top { border-bottom: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; } .ad-banner-bottom { border-top: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; margin-top: 40px; } .ad-container { max-width: 728px; margin: 0 auto; min-height: 38px; display: flex; align-items: center; justify-content: center; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; color: #333; line-height: 1.6; background: #fafafa; }
+    h1 { text-align: center; font-size: 1.8rem; color: #1a1a1a; }
+    h1 small { display: block; font-size: 0.85rem; color: #666; margin-top: 4px; font-weight: normal; }
+    .section { margin: 20px 0; padding: 16px; border: 1px solid #e0e0e0; border-radius: 8px; background: #fff; }
+    .section label { display: block; font-weight: 600; margin-bottom: 8px; }
+    textarea, input[type="text"] { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 1rem; box-sizing: border-box; font-family: monospace; }
+    textarea { resize: vertical; min-height: 80px; }
+    .result-item { padding: 10px 14px; background: #f8f9fa; border-radius: 6px; margin-bottom: 8px; display: flex; gap: 12px; }
+    .result-item .key { font-weight: 600; color: #007bff; min-width: 100px; }
+    .result-item .val { font-family: monospace; word-break: break-all; flex: 1; }
+    .params-grid { display: grid; grid-template-columns: 1fr 1fr auto; gap: 8px; margin-bottom: 8px; }
+    .params-grid input { padding: 8px 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 0.9rem; }
+    .buttons { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+    button { padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-size: 0.95rem; }
+    .btn-primary { background: #007bff; color: #fff; }
+    .btn-copy { background: #28a745; color: #fff; }
+    .btn-clear { background: #6c757d; color: #fff; }
+    .btn-remove { background: #dc3545; color: #fff; padding: 8px 12px; }
+    button:hover { opacity: 0.9; }
+    .footer { text-align: center; margin: 24px 0; padding: 12px; font-size: 0.85rem; color: #28a745; font-weight: 500; }
+    .rebuilt-url { padding: 12px; background: #e8f4ff; border-radius: 6px; font-family: monospace; font-size: 0.9rem; word-break: break-all; margin-top: 8px; }
+  </style>
+</head>
+<body>
+    <div class="ad-banner-top"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+
+  <h1>URL解析器 <small>协议 / 域名 / 参数 / 重组URL · 浏览器本地</small></h1>
+
+  <div class="section">
+    <label>输入 URL</label>
+    <input type="text" id="urlInput" value="https://example.com/api/search?q=关键词&page=1&lang=zh" placeholder="输入或粘贴URL，如: https://example.com/path?key=value">
+    <div class="buttons">
+      <button class="btn-primary" onclick="parseUrl()">解析URL</button>
+      <button class="btn-copy" onclick="copyRebuilt()">复制重组URL</button>
+      <button class="btn-clear" onclick="document.getElementById('urlInput').value='';document.getElementById('results').innerHTML='';document.getElementById('paramsContainer').innerHTML='';document.getElementById('rebuiltUrl').textContent=''">清空</button>
+    </div>
+  </div>
+
+  <div class="section">
+    <label>URL 组成部分</label>
+    <div id="results">
+      <div class="result-item"><span class="key">协议</span><span class="val" id="rProtocol">-</span></div>
+      <div class="result-item"><span class="key">域名</span><span class="val" id="rHost">-</span></div>
+      <div class="result-item"><span class="key">端口</span><span class="val" id="rPort">-</span></div>
+      <div class="result-item"><span class="key">路径</span><span class="val" id="rPath">-</span></div>
+      <div class="result-item"><span class="key">锚点</span><span class="val" id="rHash">-</span></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <label>查询参数 <button class="btn-primary" onclick="addParam()" style="padding:4px 12px;font-size:0.85rem;margin-left:8px;">+ 添加</button></label>
+    <div id="paramsContainer" class="params-grid" style="font-weight:600;font-size:0.85rem;color:#666;padding-bottom:0;">
+      <span>参数名</span><span>参数值</span><span>操作</span>
+    </div>
+    <div id="rebuiltUrl" class="rebuilt-url" style="display:none;"></div>
+  </div>
+
+  <div class="footer">100% 免费 · 数据不上传服务器 · 仅浏览器本地处理</div>
+
+  <script>
+    let params = [];
+    function parseUrl() {
+      const url = document.getElementById('urlInput').value.trim();
+      if (!url) { alert('请输入URL'); return; }
+      try {
+        const u = new URL(url);
+        document.getElementById('rProtocol').textContent = u.protocol;
+        document.getElementById('rHost').textContent = u.hostname;
+        document.getElementById('rPort').textContent = u.port || '(默认)';
+        document.getElementById('rPath').textContent = u.pathname;
+        document.getElementById('rHash').textContent = u.hash || '(无)';
+        params = [];
+        u.searchParams.forEach((v, k) => params.push({key: k, value: decodeURIComponent(v)}));
+        renderParams();
+        rebuildUrl();
+      } catch(e) { alert('URL格式不正确: ' + e.message); }
+    }
+    function renderParams() {
+      const container = document.getElementById('paramsContainer');
+      container.innerHTML = '<span style="font-weight:600;font-size:0.85rem;color:#666;grid-column:1/-1;padding-bottom:4px;">参数编辑</span>';
+      params.forEach((p, i) => {
+        container.innerHTML += `<input type="text" placeholder="参数名" value="${p.key}" onchange="params[${i}].key=this.value;rebuildUrl()">
+        <input type="text" placeholder="参数值" value="${p.value}" onchange="params[${i}].value=this.value;rebuildUrl()">
+        <button class="btn-remove" onclick="params.splice(${i},1);renderParams();rebuildUrl()">×</button>`;
+      });
+    }
+    function addParam() { params.push({key:'',value:''}); renderParams(); }
+    function rebuildUrl() {
+      const url = document.getElementById('urlInput').value.trim();
+      if (!url) return;
+      try {
+        const u = new URL(url);
+        u.search = '';
+        params.filter(p => p.key).forEach(p => u.searchParams.append(p.key, p.value));
+        document.getElementById('rebuiltUrl').textContent = u.toString();
+        document.getElementById('rebuiltUrl').style.display = 'block';
+      } catch(e) {}
+    }
+    function copyRebuilt() {
+      const t = document.getElementById('rebuiltUrl').textContent;
+      if (!t) { alert('无内容'); return; }
+      navigator.clipboard.writeText(t).then(() => alert('已复制!'));
+    }
+  </script>
+    <div class="ad-banner-bottom"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+</body>
+</html>

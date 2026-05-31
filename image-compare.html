@@ -1,0 +1,168 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>图片对比器 - 免费在线工具</title>
+<style>
+                /* 顶部横幅广告 - 透明样式 */ .ad-banner-top { border-bottom: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; } .ad-banner-bottom { border-top: 1px solid #e0e0e0; padding: 6px 20px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; margin-top: 40px; } .ad-container { max-width: 728px; margin: 0 auto; min-height: 38px; display: flex; align-items: center; justify-content: center; }
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; background:#fafafa; color:#333; min-height:100vh; }
+.header { background:#fff; border-bottom:1px solid #e0e0e0; padding:16px 24px; display:flex; align-items:center; justify-content:space-between; }
+.header h1 { font-size:1.25rem; font-weight:600; }
+.back-link { color:#007bff; text-decoration:none; font-size:0.9rem; }
+.back-link:hover { text-decoration:underline; }
+.container { max-width:1200px; margin:32px auto; padding:0 16px; }
+.card { background:#fff; border:1px solid #e0e0e0; border-radius:8px; padding:24px; margin-bottom:20px; }
+.card h2 { font-size:1.25rem; font-weight:600; margin-bottom:16px; color:#333; }
+.card p { color:#666; font-size:0.95rem; margin-bottom:16px; line-height:1.6; }
+.btn-primary { background:#007bff; color:#fff; border:none; padding:8px 20px; border-radius:4px; cursor:pointer; font-size:0.95rem; }
+.btn-primary:hover { background:#0056b3; }
+.btn-danger { background:#dc3545; color:#fff; border:none; padding:8px 20px; border-radius:4px; cursor:pointer; font-size:0.95rem; }
+.btn-danger:hover { background:#c82333; }
+label { display:block; font-size:0.9rem; color:#555; margin-bottom:6px; font-weight:500; }
+input[type="file"] { border:1px solid #ddd; border-radius:4px; padding:6px 12px; width:100%; box-sizing:border-box; font-size:0.95rem; }
+.compare-area { display:flex; gap:16px; margin-top:16px; flex-wrap:wrap; }
+.compare-box { flex:1; min-width:280px; text-align:center; }
+.compare-box h3 { font-size:1rem; font-weight:500; margin-bottom:8px; color:#555; }
+.compare-box img { max-width:100%; border:1px solid #e0e0e0; border-radius:4px; }
+.info { font-size:0.85rem; color:#888; margin-top:8px; }
+.slider-container { margin-top:16px; text-align:center; }
+.slider-container input[type="range"] { width:80%; }
+.diff-overlay { position:relative; display:inline-block; overflow:hidden; }
+.diff-overlay img { display:block; }
+.diff-overlay .overlay { position:absolute; top:0; left:0; height:100%; overflow:hidden; }
+.tabs { display:flex; border-bottom:1px solid #e0e0e0; margin-bottom:16px; }
+.tab { padding:8px 16px; cursor:pointer; border-bottom:2px solid transparent; font-size:0.95rem; color:#666; }
+.tab.active { border-bottom-color:#007bff; color:#007bff; font-weight:500; }
+</style>
+</head>
+<body>
+    <div class="ad-banner-top"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+<div class="header">
+  <h1>图片对比器</h1>
+  <a href="https://fm-han.github.io" class="back-link">← 返回工具站</a>
+</div>
+<div class="container">
+  <div class="card">
+    <h2>图片对比器</h2>
+    <p>上传两张图片，支持并排对比、滑块对比和差值高亮模式。</p>
+    <div style="display:flex; gap:16px; flex-wrap:wrap;">
+      <div style="flex:1; min-width:200px;">
+        <label>图片 1</label>
+        <input type="file" id="img1Input" accept="image/*" style="margin-top:6px;">
+      </div>
+      <div style="flex:1; min-width:200px;">
+        <label>图片 2</label>
+        <input type="file" id="img2Input" accept="image/*" style="margin-top:6px;">
+      </div>
+    </div>
+    <div style="margin-top:16px;">
+      <button class="btn-primary" onclick="loadImages()">加载对比</button>
+      <button class="btn-danger" onclick="resetAll()" style="margin-left:8px;">重置</button>
+    </div>
+  </div>
+  <div class="card" id="compareCard" style="display:none;">
+    <div class="tabs">
+      <div class="tab active" onclick="switchTab('side')">并排对比</div>
+      <div class="tab" onclick="switchTab('slider')">滑块对比</div>
+      <div class="tab" onclick="switchTab('diff')">差值高亮</div>
+    </div>
+    <div id="sideView" class="compare-area">
+      <div class="compare-box"><h3>图片 1</h3><img id="img1Display"><div class="info" id="img1Info"></div></div>
+      <div class="compare-box"><h3>图片 2</h3><img id="img2Display"><div class="info" id="img2Info"></div></div>
+    </div>
+    <div id="sliderView" style="display:none; margin-top:16px;">
+      <div class="slider-container">
+        <div class="diff-overlay" id="sliderOverlay">
+          <img id="sliderImg2">
+          <div class="overlay" id="sliderMask"><img id="sliderImg1"></div>
+        </div>
+        <br>
+        <input type="range" min="0" max="100" value="50" id="sliderRange" oninput="updateSlider()">
+        <div class="info">拖动滑块对比两张图片</div>
+      </div>
+    </div>
+    <div id="diffView" style="display:none; margin-top:16px; text-align:center;">
+      <canvas id="diffCanvas"></canvas>
+      <div class="info">红色区域表示两张图片的差异部分</div>
+    </div>
+  </div>
+</div>
+<script>
+let img1 = null, img2 = null;
+const img1Input = document.getElementById('img1Input');
+const img2Input = document.getElementById('img2Input');
+
+img1Input.addEventListener('change', function() { if(this.files[0]) img1=this.files[0]; });
+img2Input.addEventListener('change', function() { if(this.files[0]) img2=this.files[0]; });
+
+function loadImages() {
+  if (!img1 || !img2) { alert('请上传两张图片'); return; }
+  const url1 = URL.createObjectURL(img1);
+  const url2 = URL.createObjectURL(img2);
+  document.getElementById('img1Display').src = url1;
+  document.getElementById('img2Display').src = url2;
+  document.getElementById('sliderImg1').src = url1;
+  document.getElementById('sliderImg2').src = url2;
+  document.getElementById('img1Display').onload = function() {
+    document.getElementById('img1Info').textContent = this.naturalWidth + '×' + this.naturalHeight + ' | ' + (img1.size/1024).toFixed(1) + 'KB';
+  };
+  document.getElementById('img2Display').onload = function() {
+    document.getElementById('img2Info').textContent = this.naturalWidth + '×' + this.naturalHeight + ' | ' + (img2.size/1024).toFixed(1) + 'KB';
+  };
+  document.getElementById('compareCard').style.display = 'block';
+  setTimeout(computeDiff, 500);
+}
+
+function switchTab(mode) {
+  document.querySelectorAll('.tab').forEach((t,i) => t.classList.remove('active'));
+  event.target.classList.add('active');
+  document.getElementById('sideView').style.display = mode==='side'?'flex':'none';
+  document.getElementById('sliderView').style.display = mode==='slider'?'block':'none';
+  document.getElementById('diffView').style.display = mode==='diff'?'block':'none';
+  if (mode === 'slider') updateSlider();
+  if (mode === 'diff') setTimeout(computeDiff, 200);
+}
+
+function updateSlider() {
+  const val = document.getElementById('sliderRange').value;
+  document.getElementById('sliderMask').style.width = val + '%';
+}
+
+async function computeDiff() {
+  if (!img1 || !img2) return;
+  const [b1, b2] = await Promise.all([img1.arrayBuffer(), img2.arrayBuffer()]);
+  const [i1, i2] = await Promise.all([createImageBitmap(new Blob([b1])), createImageBitmap(new Blob([b2]))]);
+  const w = Math.min(i1.width, i2.width);
+  const h = Math.min(i1.height, i2.height);
+  const c = document.getElementById('diffCanvas');
+  c.width = w; c.height = h;
+  const ctx = c.getContext('2d');
+  ctx.drawImage(i1, 0, 0, w, h);
+  const d1 = ctx.getImageData(0, 0, w, h);
+  ctx.drawImage(i2, 0, 0, w, h);
+  const d2 = ctx.getImageData(0, 0, w, h);
+  const out = ctx.createImageData(w, h);
+  for (let i = 0; i < d1.data.length; i += 4) {
+    const dr = Math.abs(d1.data[i]-d2.data[i]);
+    const dg = Math.abs(d1.data[i+1]-d2.data[i+1]);
+    const db = Math.abs(d1.data[i+2]-d2.data[i+2]);
+    if (dr+dg+db > 30) {
+      out.data[i]=255; out.data[i+1]=0; out.data[i+2]=0; out.data[i+3]=200;
+    } else {
+      out.data[i]=d1.data[i]; out.data[i+1]=d1.data[i+1]; out.data[i+2]=d1.data[i+2]; out.data[i+3]=255;
+    }
+  }
+  ctx.putImageData(out, 0, 0);
+}
+
+function resetAll() {
+  img1=null; img2=null;
+  img1Input.value=''; img2Input.value='';
+  document.getElementById('compareCard').style.display='none';
+}
+</script>
+    <div class="ad-banner-bottom"><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXX" data-ad-slot="XXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
+</body>
+</html>
