@@ -35,8 +35,10 @@
 </main>
 <footer><div class="footer-content"><a href="privacy.html">隐私政策</a><a href="terms.html">使用条款</a><a href="contact.html">联系我们</a></div><div class="footer-copyright">&copy; 2024 FM工具箱 | 100款免费在线工具</div></footer>
 <script>
-document.getElementById("toolContent").innerHTML='<div style="padding:20px;color:#666;font-size:15px;">时区转换 —— 功能正在完善中，欢迎通过 <a href="contact.html">联系我们</a> 提交需求。</div><div class="tool-label" style="margin-top:20px;">输入内容</div><textarea class="tool-textarea" id="in" placeholder="输入内容..."></textarea><div class="tool-row" style="margin-top:8px;"><button class="tool-btn" onclick="go()">执行</button></div><div class="tool-result" id="r"></div>';
-function go(){var r=document.getElementById("r");r.style.display="block";r.innerText="输入内容：\n"+document.getElementById("in").value+"\n\n（本工具功能正在开发中，敬请期待）";}
+const c=document.getElementById('toolContent');
+const zones=[{n:'北京时间',z:'Asia/Shanghai'},{n:'东京',z:'Asia/Tokyo'},{n:'纽约',z:'America/New_York'},{n:'伦敦',z:'Europe/London'},{n:'悉尼',z:'Australia/Sydney'},{n:'洛杉矶',z:'America/Los_Angeles'}];
+c.innerHTML='<div class="tool-label">选择时间</div><input type="datetime-local" id="dt" style="padding:8px;border:1px solid #e0e0e0;border-radius:6px;font-size:14px;"><div class="tool-row" style="margin-top:8px;"><label>从：</label><select id="fz" style="padding:6px;">'+zones.map((z,i)=>'<option value="'+z.z+'">'+z.n+'</option>').join('')+'</select><label style="margin-left:12px;">到：</label><select id="tz" style="padding:6px;">'+zones.map((z,i)=>'<option value="'+z.z+'"'+(i===3?' selected':'')+'>'+z.n+'</option>').join('')+'</select><button class="tool-btn" onclick="conv()" style="margin-left:8px;">转换</button></div><div class="tool-result" id="r" style="display:none;margin-top:8px;"></div>';
+function conv(){const v=document.getElementById('dt').value;if(!v){alert('请选择时间');return;}const fz=document.getElementById('fz').value;const tz=document.getElementById('tz').value;const d=new Date(v);const utc=d.getTime()+d.getTimezoneOffset()*60000;const src=new Date(d.toLocaleString('en-US',{timeZone:fz}));const srcOff=src.getTime()-d.getTime();const tgt=new Date(utc+srcOff);const tgtStr=tgt.toLocaleString('zh-CN',{timeZone:tz,hour12:false});const r=document.getElementById('r');r.style.display='block';r.innerText='转换结果: '+tgtStr;}
 </script>
 </body>
 </html>

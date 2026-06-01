@@ -35,8 +35,9 @@
 </main>
 <footer><div class="footer-content"><a href="privacy.html">隐私政策</a><a href="terms.html">使用条款</a><a href="contact.html">联系我们</a></div><div class="footer-copyright">&copy; 2024 FM工具箱 | 100款免费在线工具</div></footer>
 <script>
-document.getElementById("toolContent").innerHTML='<div style="padding:20px;color:#666;font-size:15px;">进制转换 —— 功能正在完善中，欢迎通过 <a href="contact.html">联系我们</a> 提交需求。</div><div class="tool-label" style="margin-top:20px;">输入内容</div><textarea class="tool-textarea" id="in" placeholder="输入内容..."></textarea><div class="tool-row" style="margin-top:8px;"><button class="tool-btn" onclick="go()">执行</button></div><div class="tool-result" id="r"></div>';
-function go(){var r=document.getElementById("r");r.style.display="block";r.innerText="输入内容：\n"+document.getElementById("in").value+"\n\n（本工具功能正在开发中，敬请期待）";}
+const c=document.getElementById('toolContent');
+c.innerHTML='<div class="tool-label">输入数值</div><input type="text" id="tin" placeholder="输入数字" style="width:200px;padding:8px;border:1px solid #e0e0e0;border-radius:6px;"><div class="tool-row" style="margin-top:8px;"><label>从：</label><select id="fb" style="padding:6px;"><option value="10">十进制</option><option value="2">二进制</option><option value="8">八进制</option><option value="16">十六进制</option></select><label style="margin-left:12px;">到：</label><select id="tb" style="padding:6px;"><option value="2">二进制</option><option value="8">八进制</option><option value="10">十进制</option><option value="16" selected>十六进制</option></select><button class="tool-btn" onclick="conv()" style="margin-left:8px;">转换</button></div><div class="tool-result" id="r" style="display:none;margin-top:8px;"></div>';
+function conv(){const v=document.getElementById('tin').value.trim();const fb=+document.getElementById('fb').value;const tb=+document.getElementById('tb').value;const r=document.getElementById('r');try{const dec=parseInt(v,fb);if(isNaN(dec)){r.style.display='block';r.innerText='无效的数字';return;}r.style.display='block';r.innerText=dec.toString(tb).toUpperCase();}catch(e){r.style.display='block';r.innerText='转换失败：'+e.message;}}
 </script>
 </body>
 </html>

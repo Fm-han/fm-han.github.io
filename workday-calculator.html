@@ -35,8 +35,9 @@
 </main>
 <footer><div class="footer-content"><a href="privacy.html">隐私政策</a><a href="terms.html">使用条款</a><a href="contact.html">联系我们</a></div><div class="footer-copyright">&copy; 2024 FM工具箱 | 100款免费在线工具</div></footer>
 <script>
-document.getElementById("toolContent").innerHTML='<div style="padding:20px;color:#666;font-size:15px;">计算工作日 —— 功能正在完善中，欢迎通过 <a href="contact.html">联系我们</a> 提交需求。</div><div class="tool-label" style="margin-top:20px;">输入内容</div><textarea class="tool-textarea" id="in" placeholder="输入内容..."></textarea><div class="tool-row" style="margin-top:8px;"><button class="tool-btn" onclick="go()">执行</button></div><div class="tool-result" id="r"></div>';
-function go(){var r=document.getElementById("r");r.style.display="block";r.innerText="输入内容：\n"+document.getElementById("in").value+"\n\n（本工具功能正在开发中，敬请期待）";}
+const c=document.getElementById('toolContent');
+c.innerHTML='<div class="tool-label">开始日期</div><input type="date" id="s" style="padding:8px;border:1px solid #e0e0e0;border-radius:6px;"><div class="tool-label" style="margin-top:12px;">结束日期</div><input type="date" id="e" style="padding:8px;border:1px solid #e0e0e0;border-radius:6px;"><div class="tool-row" style="margin-top:8px;"><button class="tool-btn" onclick="calc()">计算工作日</button></div><div class="tool-result" id="r" style="display:none;margin-top:8px;"></div>';
+function calc(){const s=new Date(document.getElementById('s').value);const e=new Date(document.getElementById('e').value);if(isNaN(s)||isNaN(e)){alert('请选择日期');return;}let days=0;const cur=new Date(s);while(cur<=e){const wd=cur.getDay();if(wd!==0&&wd!==6)days++;cur.setDate(cur.getDate()+1);}const r=document.getElementById('r');r.style.display='block';r.innerText='工作日: '+days+' 天\n总天数: '+((e-s)/86400000+1)+' 天';}
 </script>
 </body>
 </html>

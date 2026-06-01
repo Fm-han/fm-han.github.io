@@ -35,8 +35,11 @@
 </main>
 <footer><div class="footer-content"><a href="privacy.html">隐私政策</a><a href="terms.html">使用条款</a><a href="contact.html">联系我们</a></div><div class="footer-copyright">&copy; 2024 FM工具箱 | 100款免费在线工具</div></footer>
 <script>
-document.getElementById("toolContent").innerHTML='<div style="padding:20px;color:#666;font-size:15px;">解码JWT令牌 —— 功能正在完善中，欢迎通过 <a href="contact.html">联系我们</a> 提交需求。</div><div class="tool-label" style="margin-top:20px;">输入内容</div><textarea class="tool-textarea" id="in" placeholder="输入内容..."></textarea><div class="tool-row" style="margin-top:8px;"><button class="tool-btn" onclick="go()">执行</button></div><div class="tool-result" id="r"></div>';
-function go(){var r=document.getElementById("r");r.style.display="block";r.innerText="输入内容：\n"+document.getElementById("in").value+"\n\n（本工具功能正在开发中，敬请期待）";}
+const c=document.getElementById('toolContent');
+c.innerHTML='<div class="tool-label">输入 JWT Token</div><textarea class="tool-textarea" id="tin" placeholder="eyJhbGciOiJIUzI1NiIs..."></textarea><div class="tool-row" style="margin-top:8px;"><button class="tool-btn" onclick="decode()">解码</button><button class="tool-btn secondary" onclick="copyR()">复制</button></div><div class="tool-result" id="r" style="display:none;margin-top:8px;"></div>';
+function b64Decode(s){s+='=='.slice(0,(4-s.length%4)%4);return decodeURIComponent(escape(atob(s.replace(/-/g,'+').replace(/_/g,'/'))));}
+function decode(){const v=document.getElementById('tin').value.trim();const r=document.getElementById('r');if(!v){alert('请输入JWT');return;}const parts=v.split('.');if(parts.length!==3){r.style.display='block';r.innerText='格式错误：JWT应有3部分';return;}try{const header=JSON.stringify(JSON.parse(b64Decode(parts[0])),null,2);const payload=JSON.stringify(JSON.parse(b64Decode(parts[1])),null,2);r.style.display='block';r.innerText='HEADER:\n'+header+'\n\nPAYLOAD:\n'+payload;}catch(e){r.style.display='block';r.innerText='解码失败: '+e.message;}}
+function copyR(){navigator.clipboard.writeText(document.getElementById('r').innerText).then(()=>alert('已复制'));}
 </script>
 </body>
 </html>

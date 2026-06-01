@@ -35,8 +35,10 @@
 </main>
 <footer><div class="footer-content"><a href="privacy.html">隐私政策</a><a href="terms.html">使用条款</a><a href="contact.html">联系我们</a></div><div class="footer-copyright">&copy; 2024 FM工具箱 | 100款免费在线工具</div></footer>
 <script>
-document.getElementById("toolContent").innerHTML='<div style="padding:20px;color:#666;font-size:15px;">汉字转拼音 —— 功能正在完善中，欢迎通过 <a href="contact.html">联系我们</a> 提交需求。</div><div class="tool-label" style="margin-top:20px;">输入内容</div><textarea class="tool-textarea" id="in" placeholder="输入内容..."></textarea><div class="tool-row" style="margin-top:8px;"><button class="tool-btn" onclick="go()">执行</button></div><div class="tool-result" id="r"></div>';
-function go(){var r=document.getElementById("r");r.style.display="block";r.innerText="输入内容：\n"+document.getElementById("in").value+"\n\n（本工具功能正在开发中，敬请期待）";}
+const c=document.getElementById('toolContent');
+c.innerHTML='<div class="tool-label">输入中文</div><textarea class="tool-textarea" id="tin" placeholder="输入中文..."></textarea><div class="tool-row" style="margin-top:8px;"><button class="tool-btn" onclick="conv()">提取拼音首字母</button><button class="tool-btn secondary" onclick="copyR()">复制</button></div><div class="tool-result" id="r" style="display:none;margin-top:8px;"></div><div style="margin-top:12px;font-size:12px;color:#888;">注：本工具仅提取拼音首字母，完整拼音需服务端支持</div>';
+function conv(){const v=document.getElementById('tin').value;const r=document.getElementById('r');r.style.display='block';const map={'一':'y','二':'e','三':'s','四':'s','五':'w','六':'l','七':'q','八':'b','九':'j','十':'s'};let h='';for(const ch of v){const code=ch.charCodeAt(0);if(code>=0x4e00&&code<=0x9fa5){h+=map[ch]||'('+ch+')';}else{h+=ch;}}r.innerText=h;}
+function copyR(){navigator.clipboard.writeText(document.getElementById('r').innerText).then(()=>alert('已复制'));}
 </script>
 </body>
 </html>

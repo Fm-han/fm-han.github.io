@@ -35,8 +35,10 @@
 </main>
 <footer><div class="footer-content"><a href="privacy.html">隐私政策</a><a href="terms.html">使用条款</a><a href="contact.html">联系我们</a></div><div class="footer-copyright">&copy; 2024 FM工具箱 | 100款免费在线工具</div></footer>
 <script>
-document.getElementById("toolContent").innerHTML='<div style="padding:20px;color:#666;font-size:15px;">查询MIME类型 —— 功能正在完善中，欢迎通过 <a href="contact.html">联系我们</a> 提交需求。</div><div class="tool-label" style="margin-top:20px;">输入内容</div><textarea class="tool-textarea" id="in" placeholder="输入内容..."></textarea><div class="tool-row" style="margin-top:8px;"><button class="tool-btn" onclick="go()">执行</button></div><div class="tool-result" id="r"></div>';
-function go(){var r=document.getElementById("r");r.style.display="block";r.innerText="输入内容：\n"+document.getElementById("in").value+"\n\n（本工具功能正在开发中，敬请期待）";}
+const c=document.getElementById('toolContent');
+const mimes={'.html':'text/html','.htm':'text/html','.css':'text/css','.js':'application/javascript','.json':'application/json','.png':'image/png','.jpg':'image/jpeg','.jpeg':'image/jpeg','.gif':'image/gif','.svg':'image/svg+xml','.pdf':'application/pdf','.zip':'application/zip','.txt':'text/plain','.xml':'application/xml','.mp3':'audio/mpeg','.mp4':'video/mp4','.woff':'font/woff','.woff2':'font/woff2'};
+c.innerHTML='<div class="tool-label">输入文件扩展名</div><input type="text" id="tin" placeholder="例如：.png 或 png" style="width:200px;padding:8px;border:1px solid #e0e0e0;border-radius:6px;"><button class="tool-btn" onclick="lookup()" style="margin-left:8px;">查询</button><div class="tool-result" id="r" style="display:none;margin-top:8px;"></div><div style="margin-top:16px;font-size:13px;color:#888;">常用类型: '+Object.keys(mimes).slice(0,10).join(', ')+'...</div>';
+function lookup(){const v=document.getElementById('tin').value.trim().toLowerCase();const ext=v.startsWith('.')?v:'.'+v;const r=document.getElementById('r');r.style.display='block';r.innerText=mimes[ext]||'未知类型（未收录）';}
 </script>
 </body>
 </html>

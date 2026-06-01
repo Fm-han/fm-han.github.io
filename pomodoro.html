@@ -35,8 +35,14 @@
 </main>
 <footer><div class="footer-content"><a href="privacy.html">隐私政策</a><a href="terms.html">使用条款</a><a href="contact.html">联系我们</a></div><div class="footer-copyright">&copy; 2024 FM工具箱 | 100款免费在线工具</div></footer>
 <script>
-document.getElementById("toolContent").innerHTML='<div style="padding:20px;color:#666;font-size:15px;">专注计时器 —— 功能正在完善中，欢迎通过 <a href="contact.html">联系我们</a> 提交需求。</div><div class="tool-label" style="margin-top:20px;">输入内容</div><textarea class="tool-textarea" id="in" placeholder="输入内容..."></textarea><div class="tool-row" style="margin-top:8px;"><button class="tool-btn" onclick="go()">执行</button></div><div class="tool-result" id="r"></div>';
-function go(){var r=document.getElementById("r");r.style.display="block";r.innerText="输入内容：\n"+document.getElementById("in").value+"\n\n（本工具功能正在开发中，敬请期待）";}
+const c=document.getElementById('toolContent');
+c.innerHTML='<div id="r" style="font-size:64px;text-align:center;margin:20px 0;color:#4285f4;font-weight:bold;">25:00</div><div class="tool-row" style="justify-content:center;"><button class="tool-btn" onclick="start()">开始</button><button class="tool-btn secondary" onclick="pause()">暂停</button><button class="tool-btn secondary" onclick="reset()">重置</button></div><div style="text-align:center;margin-top:12px;font-size:14px;color:#888;">工作25分钟 → 休息5分钟</div>';
+let sec=1500,iv=null,running=false;
+function fmt(s){const m=Math.floor(s/60);return String(m).padStart(2,'0')+':'+String(s%60).padStart(2,'0');}
+function tick(){sec--;document.getElementById('r').innerText=fmt(sec);if(sec<=0){clearInterval(iv);running=false;document.getElementById('r').innerText='时间到！';alert('番茄钟结束！');}}
+function start(){if(running)return;running=true;iv=setInterval(tick,1000);}
+function pause(){if(!running)return;running=false;clearInterval(iv);}
+function reset(){pause();sec=1500;document.getElementById('r').innerText='25:00';}
 </script>
 </body>
 </html>

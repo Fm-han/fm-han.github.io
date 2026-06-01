@@ -35,8 +35,11 @@
 </main>
 <footer><div class="footer-content"><a href="privacy.html">隐私政策</a><a href="terms.html">使用条款</a><a href="contact.html">联系我们</a></div><div class="footer-copyright">&copy; 2024 FM工具箱 | 100款免费在线工具</div></footer>
 <script>
-document.getElementById("toolContent").innerHTML='<div style="padding:20px;color:#666;font-size:15px;">Unix时间戳 —— 功能正在完善中，欢迎通过 <a href="contact.html">联系我们</a> 提交需求。</div><div class="tool-label" style="margin-top:20px;">输入内容</div><textarea class="tool-textarea" id="in" placeholder="输入内容..."></textarea><div class="tool-row" style="margin-top:8px;"><button class="tool-btn" onclick="go()">执行</button></div><div class="tool-result" id="r"></div>';
-function go(){var r=document.getElementById("r");r.style.display="block";r.innerText="输入内容：\n"+document.getElementById("in").value+"\n\n（本工具功能正在开发中，敬请期待）";}
+const c=document.getElementById('toolContent');
+c.innerHTML='<div class="tool-label">当前时间戳（秒）</div><div style="font-size:28px;font-weight:bold;color:#4285f4;" id="tsSec"></div><div class="tool-label" style="margin-top:12px;">当前时间戳（毫秒）</div><div style="font-size:28px;font-weight:bold;color:#4285f4;" id="tsMs"></div><div class="tool-label" style="margin-top:16px;">时间戳转日期</div><input type="text" id="tin" placeholder="输入时间戳（秒或毫秒）" style="width:200px;padding:8px;border:1px solid #e0e0e0;border-radius:6px;font-size:14px;"><button class="tool-btn" onclick="conv()" style="margin-left:8px;">转换</button><div class="tool-result" id="r" style="display:none;margin-top:8px;"></div>';
+function update(){const now=Date.now();document.getElementById('tsSec').innerText=Math.floor(now/1000);document.getElementById('tsMs').innerText=now;}
+update();setInterval(update,1000);
+function conv(){const v=document.getElementById('tin').value.trim();const r=document.getElementById('r');let ts=+v;if(v.length<=10)ts*=1000;const d=new Date(ts);r.style.display='block';r.innerText=d.toLocaleString('zh-CN',{hour12:false})+'\n'+d.toISOString();}
 </script>
 </body>
 </html>

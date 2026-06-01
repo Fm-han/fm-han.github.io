@@ -35,8 +35,10 @@
 </main>
 <footer><div class="footer-content"><a href="privacy.html">隐私政策</a><a href="terms.html">使用条款</a><a href="contact.html">联系我们</a></div><div class="footer-copyright">&copy; 2024 FM工具箱 | 100款免费在线工具</div></footer>
 <script>
-document.getElementById("toolContent").innerHTML='<div style="padding:20px;color:#666;font-size:15px;">统计字符字数 —— 功能正在完善中，欢迎通过 <a href="contact.html">联系我们</a> 提交需求。</div><div class="tool-label" style="margin-top:20px;">输入内容</div><textarea class="tool-textarea" id="in" placeholder="输入内容..."></textarea><div class="tool-row" style="margin-top:8px;"><button class="tool-btn" onclick="go()">执行</button></div><div class="tool-result" id="r"></div>';
-function go(){var r=document.getElementById("r");r.style.display="block";r.innerText="输入内容：\n"+document.getElementById("in").value+"\n\n（本工具功能正在开发中，敬请期待）";}
+const c=document.getElementById('toolContent');
+c.innerHTML='<div class="tool-label">输入文本</div><textarea class="tool-textarea" id="tin" placeholder="粘贴文本..."></textarea><div class="tool-row" style="margin-top:8px;"><button class="tool-btn" onclick="count()">统计</button><button class="tool-btn secondary" onclick="c()">清空</button></div><div class="tool-result" id="r" style="display:none;margin-top:8px;"></div>';
+function count(){const v=document.getElementById('tin').value;const r=document.getElementById('r');r.style.display='block';const chars=v.length;const cn=v.match(/[\u4e00-\u9fa5]/g)||[];const words=v.trim().split(/\s+/).filter(s=>s).length;r.innerText='字符总数: '+chars+'\n中文字数: '+cn.length+'\n单词数: '+words+'\n行数: '+v.split('\n').length;}
+function c(){document.getElementById('tin').value='';document.getElementById('r').style.display='none';}
 </script>
 </body>
 </html>

@@ -35,8 +35,9 @@
 </main>
 <footer><div class="footer-content"><a href="privacy.html">隐私政策</a><a href="terms.html">使用条款</a><a href="contact.html">联系我们</a></div><div class="footer-copyright">&copy; 2024 FM工具箱 | 100款免费在线工具</div></footer>
 <script>
-document.getElementById("toolContent").innerHTML='<div style="padding:20px;color:#666;font-size:15px;">测试正则表达式 —— 功能正在完善中，欢迎通过 <a href="contact.html">联系我们</a> 提交需求。</div><div class="tool-label" style="margin-top:20px;">输入内容</div><textarea class="tool-textarea" id="in" placeholder="输入内容..."></textarea><div class="tool-row" style="margin-top:8px;"><button class="tool-btn" onclick="go()">执行</button></div><div class="tool-result" id="r"></div>';
-function go(){var r=document.getElementById("r");r.style.display="block";r.innerText="输入内容：\n"+document.getElementById("in").value+"\n\n（本工具功能正在开发中，敬请期待）";}
+const c=document.getElementById('toolContent');
+c.innerHTML='<div class="tool-label">正则表达式</div><input type="text" id="re" placeholder="例如: [a-z]+" style="width:100%;padding:8px;border:1px solid #e0e0e0;border-radius:6px;font-family:monospace;font-size:14px;"><div class="tool-label" style="margin-top:12px;">测试文本</div><textarea class="tool-textarea" id="tin" placeholder="输入测试文本..."></textarea><div class="tool-row" style="margin-top:8px;"><label><input type="checkbox" id="gi" checked> 全局匹配</label><label><input type="checkbox" id="ci"> 忽略大小写</label><button class="tool-btn" onclick="test()" style="margin-left:12px;">测试</button></div><div class="tool-result" id="r" style="display:none;margin-top:8px;"></div>';
+function test(){const p=document.getElementById('re').value;const t=document.getElementById('tin').value;const r=document.getElementById('r');if(!p||!t){alert('请输入正则和文本');return;}try{let flags='';if(document.getElementById('gi').checked)flags+='g';if(document.getElementById('ci').checked)flags+='i';const re=new RegExp(p,flags);const m=t.match(re);r.style.display='block';if(m&&m.length){r.innerHTML='匹配 '+m.length+' 个结果:';m.forEach((x,i)=>r.innerHTML+='\n'+(i+1)+'. '+x);}else{r.innerText='无匹配结果';}}catch(e){r.style.display='block';r.innerText='正则错误: '+e.message;}}
 </script>
 </body>
 </html>
