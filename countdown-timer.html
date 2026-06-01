@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="设置倒计时 - FM工具箱在线工具">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://fm-han-github-io.pages.dev/countdown-timer.html">
+<title>倒计时 - FM工具箱</title>
+<link rel="stylesheet" href="style.css">
+<style>
+.tool-container{max-width:900px;margin:20px auto;padding:0 20px;}
+.tool-header{text-align:center;margin:30px 0;}
+.tool-header h1{font-size:28px;color:#333;margin-bottom:8px;}
+.tool-header p{color:#666;font-size:15px;}
+.tool-card{background:#fff;border-radius:12px;padding:24px;margin:20px 0;box-shadow:0 2px 8px rgba(0,0,0,0.08);}
+.tool-textarea{width:100%;min-height:160px;border:1px solid #e0e0e0;border-radius:8px;padding:12px;font-size:14px;font-family:monospace;resize:vertical;box-sizing:border-box;}
+.tool-input{border:1px solid #e0e0e0;border-radius:8px;padding:10px 12px;font-size:14px;}
+.tool-btn{background:#4285f4;color:#fff;border:none;padding:10px 24px;border-radius:8px;font-size:15px;cursor:pointer;margin:8px 8px 8px 0;}
+.tool-btn:hover{background:#3367d6;}
+.tool-btn.secondary{background:#f0f0f0;color:#333;}
+.tool-btn.secondary:hover{background:#e0e0e0;}
+.tool-result{background:#f8f9fa;border-radius:8px;padding:16px;margin-top:16px;white-space:pre-wrap;font-family:monospace;font-size:13px;max-height:400px;overflow-y:auto;display:none;}
+.tool-row{display:flex;gap:12px;flex-wrap:wrap;align-items:center;}
+.tool-label{font-weight:600;color:#555;margin:12px 0 6px;font-size:14px;}
+</style>
+</head>
+<body>
+<div class="ad-banner-top"><div class="ad-container"><!-- 顶部广告 --></div></div>
+<header><div class="header-content"><a href="index.html" class="logo">FM工具箱</a><div class="header-links"><a href="index.html">全部工具</a><a href="about.html">关于</a><a href="contact.html">联系</a></div></div></header>
+<main class="tool-container">
+<div class="tool-header"><h1>⏰ 倒计时</h1><p>设置倒计时</p></div>
+<div class="tool-card" id="toolCard"><div id="toolContent"></div></div>
+<div class="ad-banner-bottom" style="margin-top:24px;"><div class="ad-container"><!-- 底部广告 --></div></div>
+</main>
+<footer><div class="footer-content"><a href="privacy.html">隐私政策</a><a href="terms.html">使用条款</a><a href="contact.html">联系我们</a></div><div class="footer-copyright">&copy; 2024 FM工具箱 | 100款免费在线工具</div></footer>
+<script>
+document.getElementById("toolContent").innerHTML='<div style="padding:20px;color:#666;font-size:15px;">设置倒计时 —— 功能正在完善中，欢迎通过 <a href="contact.html">联系我们</a> 提交需求。</div><div class="tool-label" style="margin-top:20px;">输入内容</div><textarea class="tool-textarea" id="in" placeholder="输入内容..."></textarea><div class="tool-row" style="margin-top:8px;"><button class="tool-btn" onclick="go()">执行</button></div><div class="tool-result" id="r"></div>';
+function go(){var r=document.getElementById("r");r.style.display="block";r.innerText="输入内容：\n"+document.getElementById("in").value+"\n\n（本工具功能正在开发中，敬请期待）";}
+</script>
+</body>
+</html>

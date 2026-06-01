@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="单位换算 - FM工具箱在线工具">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://fm-han-github-io.pages.dev/unit-converter.html">
+<title>单位转换 - FM工具箱</title>
+<link rel="stylesheet" href="style.css">
+<style>
+.tool-container{max-width:900px;margin:20px auto;padding:0 20px;}
+.tool-header{text-align:center;margin:30px 0;}
+.tool-header h1{font-size:28px;color:#333;margin-bottom:8px;}
+.tool-header p{color:#666;font-size:15px;}
+.tool-card{background:#fff;border-radius:12px;padding:24px;margin:20px 0;box-shadow:0 2px 8px rgba(0,0,0,0.08);}
+.tool-textarea{width:100%;min-height:160px;border:1px solid #e0e0e0;border-radius:8px;padding:12px;font-size:14px;font-family:monospace;resize:vertical;box-sizing:border-box;}
+.tool-input{border:1px solid #e0e0e0;border-radius:8px;padding:10px 12px;font-size:14px;}
+.tool-btn{background:#4285f4;color:#fff;border:none;padding:10px 24px;border-radius:8px;font-size:15px;cursor:pointer;margin:8px 8px 8px 0;}
+.tool-btn:hover{background:#3367d6;}
+.tool-btn.secondary{background:#f0f0f0;color:#333;}
+.tool-btn.secondary:hover{background:#e0e0e0;}
+.tool-result{background:#f8f9fa;border-radius:8px;padding:16px;margin-top:16px;white-space:pre-wrap;font-family:monospace;font-size:13px;max-height:400px;overflow-y:auto;display:none;}
+.tool-row{display:flex;gap:12px;flex-wrap:wrap;align-items:center;}
+.tool-label{font-weight:600;color:#555;margin:12px 0 6px;font-size:14px;}
+</style>
+</head>
+<body>
+<div class="ad-banner-top"><div class="ad-container"><!-- 顶部广告 --></div></div>
+<header><div class="header-content"><a href="index.html" class="logo">FM工具箱</a><div class="header-links"><a href="index.html">全部工具</a><a href="about.html">关于</a><a href="contact.html">联系</a></div></div></header>
+<main class="tool-container">
+<div class="tool-header"><h1>📏 单位转换</h1><p>单位换算</p></div>
+<div class="tool-card" id="toolCard"><div id="toolContent"></div></div>
+<div class="ad-banner-bottom" style="margin-top:24px;"><div class="ad-container"><!-- 底部广告 --></div></div>
+</main>
+<footer><div class="footer-content"><a href="privacy.html">隐私政策</a><a href="terms.html">使用条款</a><a href="contact.html">联系我们</a></div><div class="footer-copyright">&copy; 2024 FM工具箱 | 100款免费在线工具</div></footer>
+<script>
+var units=[{name:"长度",items:[["米(m)",1],["千米(km)",1000],["厘米(cm)",0.01],["毫米(mm)",0.001],["英寸(in)",0.0254],["英尺(ft)",0.3048],["英里(mi)",1609.344]]},{name:"重量",items:[["千克(kg)",1],["克(g)",0.001],["毫克(mg)",0.000001],["磅(lb)",0.453592],["盎司(oz)",0.0283495]]},{name:"面积",items:[["平方米(m²)",1],["平方千米(km²)",1e6],["公顷(ha)",1e4],["亩",666.667],["平方英尺(ft²)",0.092903]]},{name:"温度",items:[]}];
+document.getElementById("toolContent").innerHTML='<div class="tool-row"><label>类型：</label><select id="cat" onchange="updateUnits()"><option value="0">长度</option><option value="1">重量</option><option value="2">面积</option><option value="3">温度</option></select></div><div class="tool-row" style="margin-top:12px"><input type="number" class="tool-input" id="val" style="width:150px" value="1" oninput="go()"><select id="from" onchange="go()"></select><span style="margin:0 8px;font-size:18px">=</span><span id="result" style="font-size:20px;font-weight:bold;color:#4285f4">0</span><select id="to" onchange="go()"></select></div>';
+function updateUnits(){var cat=document.getElementById("cat").value;var u=units[cat].items;var opts="";u.forEach(function(item,i){opts+="<option value=\""+i+"\">"+item[0]+"</option>";});document.getElementById("from").innerHTML=opts;document.getElementById("to").innerHTML=opts;if(u.length>1)document.getElementById("to").selectedIndex=1;go();}
+function go(){var cat=+document.getElementById("cat").value;var val=+document.getElementById("val").value;var fi=+document.getElementById("from").value;var ti=+document.getElementById("to").value;if(cat===3){var temps=["C","F","K"];var inT=temps[fi];var outT=temps[ti];var c;if(inT==="C")c=val;else if(inT==="F")c=(val-32)*5/9;else c=val-273.15;var r;if(outT==="C")r=c;else if(outT==="F")r=c*9/5+32;else r=c+273.15;document.getElementById("result").innerText=r.toFixed(2);}else{var factor=units[cat].items[fi][1];var toFactor=units[cat].items[ti][1];var r=val*factor/toFactor;document.getElementById("result").innerText=r.toPrecision(10);}}
+updateUnits();
+
+</script>
+</body>
+</html>

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="生成随机数字 - FM工具箱在线工具">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://fm-han-github-io.pages.dev/random-number.html">
+<title>随机数 - FM工具箱</title>
+<link rel="stylesheet" href="style.css">
+<style>
+.tool-container{max-width:900px;margin:20px auto;padding:0 20px;}
+.tool-header{text-align:center;margin:30px 0;}
+.tool-header h1{font-size:28px;color:#333;margin-bottom:8px;}
+.tool-header p{color:#666;font-size:15px;}
+.tool-card{background:#fff;border-radius:12px;padding:24px;margin:20px 0;box-shadow:0 2px 8px rgba(0,0,0,0.08);}
+.tool-textarea{width:100%;min-height:160px;border:1px solid #e0e0e0;border-radius:8px;padding:12px;font-size:14px;font-family:monospace;resize:vertical;box-sizing:border-box;}
+.tool-input{border:1px solid #e0e0e0;border-radius:8px;padding:10px 12px;font-size:14px;}
+.tool-btn{background:#4285f4;color:#fff;border:none;padding:10px 24px;border-radius:8px;font-size:15px;cursor:pointer;margin:8px 8px 8px 0;}
+.tool-btn:hover{background:#3367d6;}
+.tool-btn.secondary{background:#f0f0f0;color:#333;}
+.tool-btn.secondary:hover{background:#e0e0e0;}
+.tool-result{background:#f8f9fa;border-radius:8px;padding:16px;margin-top:16px;white-space:pre-wrap;font-family:monospace;font-size:13px;max-height:400px;overflow-y:auto;display:none;}
+.tool-row{display:flex;gap:12px;flex-wrap:wrap;align-items:center;}
+.tool-label{font-weight:600;color:#555;margin:12px 0 6px;font-size:14px;}
+</style>
+</head>
+<body>
+<div class="ad-banner-top"><div class="ad-container"><!-- 顶部广告 --></div></div>
+<header><div class="header-content"><a href="index.html" class="logo">FM工具箱</a><div class="header-links"><a href="index.html">全部工具</a><a href="about.html">关于</a><a href="contact.html">联系</a></div></div></header>
+<main class="tool-container">
+<div class="tool-header"><h1>🎰 随机数</h1><p>生成随机数字</p></div>
+<div class="tool-card" id="toolCard"><div id="toolContent"></div></div>
+<div class="ad-banner-bottom" style="margin-top:24px;"><div class="ad-container"><!-- 底部广告 --></div></div>
+</main>
+<footer><div class="footer-content"><a href="privacy.html">隐私政策</a><a href="terms.html">使用条款</a><a href="contact.html">联系我们</a></div><div class="footer-copyright">&copy; 2024 FM工具箱 | 100款免费在线工具</div></footer>
+<script>
+document.getElementById("toolContent").innerHTML='<div class="tool-row"><label>最小值：</label><input type="number" class="tool-input" id="mn" value="1" style="width:100px"><label>最大值：</label><input type="number" class="tool-input" id="mx" value="100" style="width:100px"><label>数量：</label><input type="number" class="tool-input" id="cnt" value="1" style="width:80px"><button class="tool-btn" onclick="go()">生成</button></div><div class="tool-result" id="r" style="font-size:32px;text-align:center;"></div>';
+function go(){var mn=+document.getElementById("mn").value;var mx=+document.getElementById("mx").value;var cnt=+document.getElementById("cnt").value||1;var arr=[];for(var i=0;i<cnt;i++){arr.push(Math.floor(Math.random()*(mx-mn+1))+mn);}document.getElementById("r").style.display="block";document.getElementById("r").innerText=arr.join(", ");}
+
+</script>
+</body>
+</html>
